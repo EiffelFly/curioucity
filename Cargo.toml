@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+  "packages/server",
+  "packages/discord-bot"
+]
