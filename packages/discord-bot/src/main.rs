@@ -16,9 +16,13 @@ impl EventHandler for Handler {
         if let Interaction::ApplicationCommand(command) = interaction {
             println!("Received command interaction: {:#?}", command);
 
+            let channel_id = command.channel_id;
+
             let content = match command.data.name.as_str() {
                 "curious-help" => commands::curious_help::run(&command.data.options),
-                "curious-save" => commands::curious_save::run(&command.data.options),
+                "curious-save" => {
+                    commands::curious_save::run(&command.data.options, channel_id).await
+                }
                 _ => "not implemented :(".to_string(),
             };
 
