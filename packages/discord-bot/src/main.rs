@@ -1,45 +1,61 @@
+mod commands;
+
 use std::env;
 
 use serenity::async_trait;
-use serenity::model::{channel::Message, gateway::Ready};
+use serenity::model::application::interaction::{Interaction, InteractionResponseType};
+use serenity::model::gateway::Ready;
+use serenity::model::id::GuildId;
 use serenity::prelude::*;
-
-const HELP_MESSAGE: &str = "
-Hello there, Human!
-
-You have summoned me. Let's see about getting you what you need.
-
-❓ Need technical help?
-➡️ Post in the <#1023393389313527888> channel and other humans will assist you.
-
-❓ Looking for the Code of Conduct?
-➡️ Here it is: <https://opensource.facebook.com/code-of-conduct>
-
-❓ Something wrong?
-➡️ You can flag an admin with @admin
-
-I hope that resolves your issue!
-— HelpBot 🤖
-";
-
-const HELP_COMMAND: &str = "!curious";
 
 struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
-    async fn message(&self, ctx: Context, msg: Message) {
-        if msg.content == HELP_COMMAND {
-            println!("hi, it's working");
+    async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
+        if let Interaction::ApplicationCommand(command) = interaction {
+            println!("Received command interaction: {:#?}", command);
 
-            if let Err(why) = msg.channel_id.say(&ctx.http, HELP_MESSAGE).await {
-                println!("Error sending message: {:?}", why);
+            let content = match command.data.name.as_str() {
+                "curious-help" => commands::curious_help::run(&command.data.options),
+                "curious-save" => commands::curious_save::run(&command.data.options),
+                _ => "not implemented :(".to_string(),
+            };
+
+            if let Err(why) = command
+                .create_interaction_response(&ctx.http, |response| {
+                    response
+                        .kind(InteractionResponseType::ChannelMessageWithSource)
+                        .interaction_response_data(|message| message.content(content))
+                })
+                .await
+            {
+                println!("Cannot respond to slash command: {}", why);
             }
         }
     }
 
-    async fn ready(&self, _: Context, ready: Ready) {
+    async fn ready(&self, ctx: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
+
+        let guild_id = GuildId(
+            env::var("GUILD_ID")
+                .expect("Expected GUILD_ID in environment")
+                .parse()
+                .expect("GUILD_ID must be an integer"),
+        );
+
+        let commands = GuildId::set_application_commands(&guild_id, &ctx.http, |commands| {
+            commands
+                .create_application_command(|command| commands::curious_help::register(command))
+                .create_application_command(|command| commands::curious_save::register(command))
+        })
+        .await;
+
+        println!(
+            "I now have the following guild slash commands: {:#?}",
+            commands
+        );
     }
 }
 
