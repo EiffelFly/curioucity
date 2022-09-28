@@ -23,6 +23,7 @@ impl EventHandler for Handler {
                 "curious-save" => {
                     commands::curious_save::run(&command.data.options, channel_id).await
                 }
+                "curious-list-active-thread" => commands::curious_list_active_thread::run().await,
                 _ => "not implemented :(".to_string(),
             };
 
@@ -53,6 +54,9 @@ impl EventHandler for Handler {
             commands
                 .create_application_command(|command| commands::curious_help::register(command))
                 .create_application_command(|command| commands::curious_save::register(command))
+                .create_application_command(|command| {
+                    commands::curious_list_active_thread::register(command)
+                })
         })
         .await;
 
@@ -68,9 +72,7 @@ async fn main() {
     // Configure the client with your Discord bot token in the environment.
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
 
-    let intents = GatewayIntents::GUILD_MESSAGES
-        | GatewayIntents::DIRECT_MESSAGES
-        | GatewayIntents::MESSAGE_CONTENT;
+    let intents = GatewayIntents::GUILD_MESSAGES | GatewayIntents::DIRECT_MESSAGES;
 
     // Build our client.
     let mut client = Client::builder(token, intents)
