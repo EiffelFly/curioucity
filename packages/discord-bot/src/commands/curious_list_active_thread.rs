@@ -16,12 +16,28 @@ pub async fn run() -> String {
             .parse()
             .expect("GUILD_ID must be an integer"),
     );
-    let thread = guild_id.get_active_threads(http).await;
+    let threads = guild_id.get_active_threads(http).await;
 
-    match thread {
-        Ok(e) => println!("Threads: {:#?}", e),
-        Err(err) => println!("Errors: {:#?}", err),
+    match threads {
+        Ok(e) => {
+            let mut response = String::new();
+            response.push_str(
+                "✨ Here are the current active threads!
+            ",
+            );
+
+            for thread in e.threads {
+                let channel_id = thread.id;
+                response.push_str("- <#");
+                response.push_str(&channel_id.to_string());
+                response.push_str(">");
+                response.push_str(
+                    "
+                ",
+                );
+            }
+            return response.to_string();
+        }
+        Err(_) => return "Opps! Something went wrong".to_string(),
     }
-
-    "Hey, I'm alive!".to_string()
 }
