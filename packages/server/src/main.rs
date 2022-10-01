@@ -33,8 +33,10 @@ async fn fallback(uri: axum::http::Uri) -> impl axum::response::IntoResponse {
     )
 }
 
-async fn create_discord_thread(Json(payload): Json<CreateDiscordThread>) -> impl IntoResponse {
-    println!("Create thread payload: {:#?}", payload);
+async fn create_discord_thread(
+    axum::extract::Json(data): axum::extract::Json<serde_json::Value>,
+) -> impl IntoResponse {
+    println!("Create thread payload: {:?}", data);
     (StatusCode::CREATED, "")
 }
 
