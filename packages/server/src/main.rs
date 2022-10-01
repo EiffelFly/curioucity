@@ -13,8 +13,14 @@ async fn main() {
         .route("/", axum::routing::get(hello))
         .route("/discord/thread", post(create_discord_thread));
 
+    let port = std::env::var("PORT")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(8010);
+
     // run our app with hyper
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8010));
+    println!("Http Server started on 127.0.0.1:{:?}", port);
+    let addr = SocketAddr::from(([127, 0, 0, 1], port));
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .with_graceful_shutdown(helper::graceful_shutdown::shutdown_signal())

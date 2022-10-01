@@ -10,12 +10,13 @@
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "docker-compose-up": "cross-env DOCKER_BUILDKIT=1 docker-compose -f ./docker-compose.yml up --build"
   },
   "devDependencies": {
-    "eslint-config-custom": "workspace:*",
     "prettier": "latest",
-    "turbo": "latest"
+    "turbo": "latest",
+    "cross-env": "^7.0.3"
   },
   "engines": {
     "node": ">=14.0.0"

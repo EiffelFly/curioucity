@@ -1,0 +1,6 @@
+# Docker related
+.dockerignore
+Dockerfile
+docker-compose.*.yml
+docker-compose.yml
+docker

@@ -1,0 +1,10 @@
+version: '3.9'
+
+services:
+  server:
+    container_name: curioucity-server
+    ports: 
+      - "8010:8010"
+    build:
+      context: ./packages/server
+      dockerfile: Dockerfile
