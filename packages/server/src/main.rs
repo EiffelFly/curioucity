@@ -19,8 +19,8 @@ async fn main() {
         .unwrap_or(8010);
 
     // run our app with hyper
-    println!("Http Server started on 127.0.0.1:{:?}", port);
-    let addr = SocketAddr::from(([127, 0, 0, 1], port));
+    println!("Http Server started on 0.0.0.0:{:?}", port);
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .with_graceful_shutdown(helper::graceful_shutdown::shutdown_signal())
