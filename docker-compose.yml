@@ -13,3 +13,11 @@ services:
     env_file:
       - .env
       - .env.local
+  discord:
+    container_name: ${DISCORD_BOT_NAME}
+    build:
+      context: ./packages/discord-bot
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+      - .env.local
