@@ -8,7 +8,7 @@ pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicatio
 }
 
 pub async fn run() -> String {
-    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
+    let token = env::var("DISCORD_BOT_TOKEN").expect("Expected a token in the environment");
     let http = HttpBuilder::new(token).ratelimiter_disabled(true).build();
     let guild_id = GuildId(
         env::var("GUILD_ID")
