@@ -1,12 +1,13 @@
 use std::env;
 
 use serenity::builder::CreateApplicationCommand;
-use serenity::http::HttpBuilder;
+use serenity::futures::future::BoxFuture;
+use serenity::http::{Http, HttpBuilder};
 use serenity::model::channel::ChannelType;
 use serenity::model::prelude::command::{CommandOptionType, CommandType};
 use serenity::model::prelude::interaction::application_command::CommandDataOption;
 use serenity::model::prelude::{ChannelId, Message, MessageId};
-use serenity::Error;
+use serenity::FutureExt;
 
 pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {
     command
@@ -18,11 +19,7 @@ pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicatio
         .create_option(|option| {
             option
                 .name("first-message-id")
-                .description(
-                    "This is the first message's id in the current thread. This \
-                will greatly improve the accuracy of curious-bot, we highly \
-                recommend user to input this id.",
-                )
+                .description("This is the first message's id in the current thread.")
                 .kind(CommandOptionType::String)
                 .required(false)
         })
@@ -59,6 +56,7 @@ pub async fn run(options: &[CommandDataOption], channel_id: ChannelId) -> String
     match kind {
         ChannelType::NewsThread => {
             return save_thread_message(
+                http,
                 channel_id,
                 last_message_id,
                 message_count,
@@ -68,6 +66,7 @@ pub async fn run(options: &[CommandDataOption], channel_id: ChannelId) -> String
         }
         ChannelType::PrivateThread => {
             return save_thread_message(
+                http,
                 channel_id,
                 last_message_id,
                 message_count,
@@ -77,6 +76,7 @@ pub async fn run(options: &[CommandDataOption], channel_id: ChannelId) -> String
         }
         ChannelType::PublicThread => {
             return save_thread_message(
+                http,
                 channel_id,
                 last_message_id,
                 message_count,
@@ -91,7 +91,8 @@ pub async fn run(options: &[CommandDataOption], channel_id: ChannelId) -> String
 }
 
 async fn save_thread_message(
-    _channel_id: ChannelId,
+    http: Http,
+    channel_id: ChannelId,
     last_message_id_option: Option<MessageId>,
     message_count_option: Option<u8>,
     first_message_id_option: Option<&CommandDataOption>,
@@ -102,7 +103,7 @@ async fn save_thread_message(
                 .to_string();
         }
         None => {
-            let _last_message_id = match last_message_id_option {
+            let last_message_id = match last_message_id_option {
                 Some(id) => id,
                 None => {
                     println!("Error when retrieve last_message_id of the channel");
@@ -112,7 +113,7 @@ async fn save_thread_message(
                 }
             };
 
-            let _message_count = match message_count_option {
+            let message_count = match message_count_option {
                 Some(count) => count,
                 None => {
                     println!(
@@ -126,7 +127,24 @@ async fn save_thread_message(
                 }
             };
 
-            return "✨ We are processing your data, seat tight, it will be a fast journey"
+            let mut messages = Vec::new();
+
+            get_thread_messages_with_counts(
+                http,
+                channel_id,
+                last_message_id,
+                message_count,
+                &mut messages,
+            )
+            .await;
+
+            println!("Messages: {:?}", messages);
+
+            return "✨ We are processing your data, seat tight, it will be a fast \
+            journey. But as a honest bot I need to inform you that due to the limit \
+            of Discord API, we could only get around 255 messages without the help \
+            from you. If you need a much more accurate result, please input the \
+            first-message-id."
                 .to_string();
         }
     }
@@ -134,19 +152,41 @@ async fn save_thread_message(
 
 /// We want to get all the messages in the thread.
 
-async fn _get_thread_messages_with_counts(
+fn get_thread_messages_with_counts(
+    http: Http,
     channel_id: ChannelId,
     last_message_id: MessageId,
-) -> Result<Vec<Message>, Error> {
-    let token = env::var("DISCORD_BOT_TOKEN").expect("Expected a token in the environment");
-    let http = HttpBuilder::new(token).ratelimiter_disabled(true).build();
-    let messages_res = channel_id
-        .messages(&http, |retriever| {
-            retriever.before(last_message_id).limit(3)
-        })
-        .await;
+    message_count: u8,
+    messages: &mut Vec<Message>,
+) -> BoxFuture<'_, ()> {
+    async move {
+        let mut messages_res = match channel_id
+            .messages(&http, |retriever| {
+                retriever.before(last_message_id).limit(3)
+            })
+            .await
+        {
+            Ok(messages) => messages,
+            Err(_error) => {
+                print!("Something went wrong when try to get the messages");
+                return ();
+            }
+        };
 
-    return messages_res;
+        messages.append(messages_res.as_mut());
+
+        if messages.len() < message_count.into() {
+            get_thread_messages_with_counts(
+                http,
+                channel_id,
+                last_message_id,
+                message_count,
+                messages,
+            )
+            .await;
+        }
+    }
+    .boxed()
 }
 
 // async fn get_thread_messages_with_first_message_id() -> Result<Vec<Message>, Error> {}
