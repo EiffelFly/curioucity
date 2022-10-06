@@ -27,7 +27,7 @@ pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicatio
 
 pub async fn run(options: &[CommandDataOption], channel_id: ChannelId) -> String {
     let token = env::var("DISCORD_BOT_TOKEN").expect("Expected a token in the environment");
-    let http = HttpBuilder::new(token).ratelimiter_disabled(true).build();
+    let http = HttpBuilder::new(token).build();
 
     let channel = match http.get_channel(*channel_id.as_u64()).await {
         Ok(channel) => channel,
@@ -50,39 +50,17 @@ pub async fn run(options: &[CommandDataOption], channel_id: ChannelId) -> String
     };
 
     let kind = guild_channel.kind;
-    let last_message_id = guild_channel.last_message_id;
     let message_count = guild_channel.message_count;
     let first_message_id = options.get(0);
     match kind {
         ChannelType::NewsThread => {
-            return save_thread_message(
-                http,
-                channel_id,
-                last_message_id,
-                message_count,
-                first_message_id,
-            )
-            .await
+            return save_thread_message(http, channel_id, message_count, first_message_id).await
         }
         ChannelType::PrivateThread => {
-            return save_thread_message(
-                http,
-                channel_id,
-                last_message_id,
-                message_count,
-                first_message_id,
-            )
-            .await
+            return save_thread_message(http, channel_id, message_count, first_message_id).await
         }
         ChannelType::PublicThread => {
-            return save_thread_message(
-                http,
-                channel_id,
-                last_message_id,
-                message_count,
-                first_message_id,
-            )
-            .await
+            return save_thread_message(http, channel_id, message_count, first_message_id).await
         }
         _ => {
             return "Opps! You are not in a thread".to_string();
@@ -93,7 +71,6 @@ pub async fn run(options: &[CommandDataOption], channel_id: ChannelId) -> String
 async fn save_thread_message(
     http: Http,
     channel_id: ChannelId,
-    last_message_id_option: Option<MessageId>,
     message_count_option: Option<u8>,
     first_message_id_option: Option<&CommandDataOption>,
 ) -> String {
@@ -103,16 +80,6 @@ async fn save_thread_message(
                 .to_string();
         }
         None => {
-            let last_message_id = match last_message_id_option {
-                Some(id) => id,
-                None => {
-                    println!("Error when retrieve last_message_id of the channel");
-                    return "Opps! Something went wrong, Error when retrieve \
-                    last_message_id of the channel"
-                        .to_string();
-                }
-            };
-
             let message_count = match message_count_option {
                 Some(count) => count,
                 None => {
@@ -129,16 +96,26 @@ async fn save_thread_message(
 
             let mut messages = Vec::new();
 
-            get_thread_messages_with_counts(
+            // At the very first time we don't pass in last_message_id
+            // Because without last_message_id we will operate the request
+            // without retriever.before() strategy. In this way discord will
+            // give us the most recent messages.
+
+            let status = match get_thread_messages_with_counts(
                 http,
                 channel_id,
-                last_message_id,
+                None,
                 message_count,
                 &mut messages,
             )
-            .await;
+            .await
+            {
+                Ok(_) => "Success".to_string(),
+                Err(_) => "Failed".to_string(),
+            };
 
-            println!("Messages: {:?}", messages);
+            println!("Status: {:?}", status);
+            //println!("Messages: {:?}", messages);
 
             return "✨ We are processing your data, seat tight, it will be a fast \
             journey. But as a honest bot I need to inform you that due to the limit \
@@ -155,36 +132,50 @@ async fn save_thread_message(
 fn get_thread_messages_with_counts(
     http: Http,
     channel_id: ChannelId,
-    last_message_id: MessageId,
+    last_message_id: Option<MessageId>,
     message_count: u8,
     messages: &mut Vec<Message>,
-) -> BoxFuture<'_, ()> {
+) -> BoxFuture<'_, Result<String, String>> {
     async move {
         let mut messages_res = match channel_id
-            .messages(&http, |retriever| {
-                retriever.before(last_message_id).limit(3)
+            .messages(&http, |retriever| match last_message_id {
+                Some(id) => retriever.before(id).limit(5),
+                None => retriever.limit(5),
             })
             .await
         {
             Ok(messages) => messages,
-            Err(_error) => {
-                print!("Something went wrong when try to get the messages");
-                return ();
+            Err(error) => {
+                println!("Can't get the messages: {:#?} \n", error);
+                return Err("Can't get the messages:".to_string());
+            }
+        };
+
+        let new_last_message_id = match messages_res.last() {
+            Some(message) => message.id,
+            None => {
+                print!(
+                    "Can't retrieve the new last message id, this might be the \
+                    end of the messages"
+                );
+                return Ok("Succeed".to_string());
             }
         };
 
         messages.append(messages_res.as_mut());
 
         if messages.len() < message_count.into() {
-            get_thread_messages_with_counts(
+            return get_thread_messages_with_counts(
                 http,
                 channel_id,
-                last_message_id,
+                Some(new_last_message_id),
                 message_count,
                 messages,
             )
             .await;
         }
+
+        Ok("Succeed".to_string())
     }
     .boxed()
 }
