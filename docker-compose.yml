@@ -2,31 +2,33 @@ version: '3.9'
 
 services:
   backend:
-    container_name: ${BACKEND_HOSTNAME}
+    container_name: ${BACKEND_HOST}
     ports: 
-      - "${BACKEND_PORT}:8080"
+      - ${BACKEND_PORT}:8080
     build:
       context: ./packages/server
       dockerfile: Dockerfile
     environment:
-      PORT: 8080
-    env_file:
-      - .env
-      - .env.local
+      BACKEND_PORT: ${BACKEND_PORT}
+
   discord:
-    container_name: ${DISCORD_BOT_NAME}
+    container_name: ${DISCORD_BOT_HOST}
     build:
       context: ./packages/discord-bot
       dockerfile: Dockerfile
-    env_file:
-      - .env
-      - .env.local
-  database:
-    container_name: ${DATABASE_NAME}
-    image: edgedb/edgedb
     environment:
-      EDGEDB_SERVER_SECURITY: insecure_dev_mode
-    volumes:
-      - "./dbschema:/dbschema"
-    ports:
-      - "5656:5656"
+      BACKEND_PORT: ${BACKEND_PORT}
+      BACKEND_HOST: ${BACKEND_HOST}
+      GUILD_ID: ${GUILD_ID}
+    env_file:
+      - .env.local
+
+  # database:
+  #   container_name: ${DATABASE_HOST}
+  #   image: edgedb/edgedb
+  #   environment:
+  #     EDGEDB_SERVER_SECURITY: insecure_dev_mode
+  #   volumes:
+  #     - "./dbschema:/dbschema"
+  #   ports:
+  #     - ${DATABASE_PORT}:5656

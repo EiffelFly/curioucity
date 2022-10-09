@@ -26,5 +26,10 @@ RUN cargo build --release
 # Serve
 FROM debian:buster-slim
 COPY --from=builder /discord-bot/target/release/discord-bot .
+
+# Reqwest needs libssl in linux
+RUN apt-get update; apt-get upgrade -y
+RUN apt-get install -y libssl-dev pkg-config
+
 USER 1000
 CMD ["./discord-bot"]
