@@ -11,9 +11,10 @@ async fn main() {
     let app = Router::new()
         .fallback(fallback.into_service())
         .route("/", axum::routing::get(hello))
+        .route("/ping", axum::routing::get(pong))
         .route("/discord/thread", post(create_discord_thread));
 
-    let port = std::env::var("PORT")
+    let port = std::env::var("BACKEND_PORT")
         .ok()
         .and_then(|s| s.parse().ok())
         .unwrap_or(8010);
@@ -30,6 +31,10 @@ async fn main() {
 
 async fn hello() -> String {
     "Hello, World!".into()
+}
+
+async fn pong() -> String {
+    "Pong".into()
 }
 
 async fn fallback(uri: axum::http::Uri) -> impl axum::response::IntoResponse {

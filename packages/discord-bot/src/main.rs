@@ -20,6 +20,7 @@ impl EventHandler for Handler {
 
             let content = match command.data.name.as_str() {
                 "curious-help" => commands::curious_help::run(&command.data.options),
+                "curious-ping" => commands::curious_ping::run(&command.data.options).await,
                 "curious-save" => {
                     commands::curious_save::run(&command.data.options, channel_id).await
                 }
@@ -50,20 +51,16 @@ impl EventHandler for Handler {
                 .expect("GUILD_ID must be an integer"),
         );
 
-        let commands = GuildId::set_application_commands(&guild_id, &ctx.http, |commands| {
+        let _commands = GuildId::set_application_commands(&guild_id, &ctx.http, |commands| {
             commands
                 .create_application_command(|command| commands::curious_help::register(command))
+                .create_application_command(|command| commands::curious_ping::register(command))
                 .create_application_command(|command| commands::curious_save::register(command))
                 .create_application_command(|command| {
                     commands::curious_list_active_thread::register(command)
                 })
         })
         .await;
-
-        println!(
-            "I now have the following guild slash commands: {:#?}",
-            commands
-        );
     }
 }
 
