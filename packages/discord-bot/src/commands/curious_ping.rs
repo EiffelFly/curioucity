@@ -14,7 +14,7 @@ pub async fn run(_options: &[CommandDataOption]) -> String {
 
     let resp = client
         .get(format!(
-            "http://{host}:{port}",
+            "http://{host}:{port}/ping",
             host = backend_host,
             port = backend_port
         ))

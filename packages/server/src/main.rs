@@ -1,6 +1,7 @@
 mod helper;
 
 use axum::handler::Handler;
+use axum::response::Response;
 use axum::{http::StatusCode, response::IntoResponse, routing::post, Router};
 use serde::Deserialize;
 use std::net::SocketAddr;
@@ -33,8 +34,41 @@ async fn hello() -> String {
     "Hello, World!".into()
 }
 
-async fn pong() -> String {
-    "Pong".into()
+struct AppError(anyhow::Error);
+
+// This enables using `?` on functions that return `Result<_, anyhow::Error>` to turn them into
+// `Result<_, AppError>`. That way you don't need to do that manually.
+impl<E> From<E> for AppError
+where
+    E: Into<anyhow::Error>,
+{
+    fn from(err: E) -> Self {
+        Self(err.into())
+    }
+}
+// Tell axum how to convert `AppError` into a response.
+impl IntoResponse for AppError {
+    fn into_response(self) -> Response {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("Something went wrong: {}", self.0),
+        )
+            .into_response()
+    }
+}
+
+async fn pong() -> Result<(), AppError> {
+    test_db().await?;
+    Ok(())
+}
+
+async fn test_db() -> Result<(), anyhow::Error> {
+    let conn = edgedb_tokio::create_client().await?;
+    let val = conn
+        .query_required_single::<i64, _>("SELECT 7*8", &())
+        .await?;
+    println!("7*8 is: {}", val);
+    Ok(())
 }
 
 async fn fallback(uri: axum::http::Uri) -> impl axum::response::IntoResponse {

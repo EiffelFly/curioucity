@@ -10,6 +10,9 @@ services:
       dockerfile: Dockerfile
     environment:
       BACKEND_PORT: ${BACKEND_PORT}
+      EDGEDB_HOST: ${DATABASE_HOST}
+      EDGEDB_PORT: ${DATABASE_PORT}
+      EDGEDB_CLIENT_TLS_SECURITY: insecure
 
   discord:
     container_name: ${DISCORD_BOT_HOST}
@@ -23,12 +26,12 @@ services:
     env_file:
       - .env.local
 
-  # database:
-  #   container_name: ${DATABASE_HOST}
-  #   image: edgedb/edgedb
-  #   environment:
-  #     EDGEDB_SERVER_SECURITY: insecure_dev_mode
-  #   volumes:
-  #     - "./dbschema:/dbschema"
-  #   ports:
-  #     - ${DATABASE_PORT}:5656
+  database:
+    container_name: ${DATABASE_HOST}
+    image: edgedb/edgedb
+    environment:
+      EDGEDB_SERVER_SECURITY: insecure_dev_mode
+    volumes:
+      - "./dbschema:/dbschema"
+    ports:
+      - ${DATABASE_PORT}:5656
