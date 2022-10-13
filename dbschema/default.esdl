@@ -1,6 +1,8 @@
 module default {
   type DiscordGuild {
-    required property guild_id -> int64;
+    required property guild_id -> int64 {
+      constraint exclusive;
+    };
     required property name -> str;
     property icon -> str;
     multi link threads -> DiscordThread;
@@ -8,7 +10,9 @@ module default {
   }
 
   type DiscordThread {
-    required property thread_channel_id -> int64;
+    required property thread_channel_id -> int64 {
+      constraint exclusive;
+    };
     property full_messages_json -> json;
     multi link messages -> DiscordMessage {
       constraint exclusive;
@@ -20,7 +24,9 @@ module default {
   }
 
   type DiscordMessage {
-    required property message_id -> int64;
+    required property message_id -> int64 {
+      constraint exclusive;
+    };
     property content -> str;
     property create_at -> datetime;
     property markdown_content -> str;
