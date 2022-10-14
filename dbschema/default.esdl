@@ -27,6 +27,7 @@ module default {
     required property message_id -> int64 {
       constraint exclusive;
     };
+    required property order_in_thread -> int64;
     property content -> str;
     property create_at -> datetime;
     property markdown_content -> str;
