@@ -10,7 +10,7 @@ module default {
   }
 
   type DiscordThread {
-    required property thread_channel_id -> int64 {
+    required property thread_id -> int64 {
       constraint exclusive;
     };
     property full_messages_json -> json;
