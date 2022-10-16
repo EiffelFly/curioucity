@@ -35,6 +35,8 @@ module default {
   }
 
   type Tag {
-    required property name -> str;
+    required property name -> str {
+      constraint exclusive;
+    };
   }
 }
