@@ -2,7 +2,8 @@ use std::collections::HashMap;
 
 use super::curioucity::Tag;
 
-#[derive(edgedb_derive::Queryable)]
+#[derive(edgedb_derive::Queryable, serde::Deserialize, Debug)]
+#[edgedb(json)]
 pub struct DiscordGuild {
     pub guild_id: i64,
     pub name: String,
@@ -11,7 +12,7 @@ pub struct DiscordGuild {
     pub tags: Vec<Tag>,
 }
 
-#[derive(edgedb_derive::Queryable)]
+#[derive(edgedb_derive::Queryable, serde::Deserialize, Debug)]
 pub struct DiscordThread {
     pub thread_id: i64,
     #[edgedb(json)]
@@ -22,7 +23,7 @@ pub struct DiscordThread {
     pub messages: Vec<DiscordMessage>,
 }
 
-#[derive(edgedb_derive::Queryable)]
+#[derive(edgedb_derive::Queryable, serde::Deserialize, Debug)]
 pub struct DiscordMessage {
     pub message_id: i64,
     pub content: String,
