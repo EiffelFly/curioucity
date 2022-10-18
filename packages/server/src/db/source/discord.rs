@@ -1,15 +1,15 @@
 use std::collections::HashMap;
 
-use super::curioucity::Tag;
+use super::curioucity::{Tag, Url};
 
 #[derive(edgedb_derive::Queryable, serde::Deserialize, Debug)]
-#[edgedb(json)]
 pub struct DiscordGuild {
     pub guild_id: i64,
     pub name: String,
     pub icon: String,
     pub threads: Vec<DiscordThread>,
     pub tags: Vec<Tag>,
+    pub url: Url,
 }
 
 #[derive(edgedb_derive::Queryable, serde::Deserialize, Debug)]
@@ -21,6 +21,7 @@ pub struct DiscordThread {
     pub markdown_content: String,
     pub tags: Vec<Tag>,
     pub messages: Vec<DiscordMessage>,
+    pub url: Url,
 }
 
 #[derive(edgedb_derive::Queryable, serde::Deserialize, Debug)]
@@ -30,4 +31,5 @@ pub struct DiscordMessage {
     pub create_at: String,
     pub markdown_content: String,
     pub tags: Vec<Tag>,
+    pub url: Url,
 }

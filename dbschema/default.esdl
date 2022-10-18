@@ -7,6 +7,9 @@ module default {
     property icon -> str;
     multi link threads -> DiscordThread;
     multi link tags -> Tag;
+    link url -> Url {
+      constraint exclusive;
+    }
   }
 
   type DiscordThread {
@@ -21,6 +24,9 @@ module default {
     property create_at -> datetime;
     property markdown_content -> str;
     multi link tags -> Tag;
+    link url -> Url {
+      constraint exclusive;
+    }
   }
 
   type DiscordMessage {
@@ -32,11 +38,23 @@ module default {
     property create_at -> datetime;
     property markdown_content -> str;
     multi link tags -> Tag;
+    link url -> Url {
+      constraint exclusive;
+    }
   }
 
   type Tag {
     required property name -> str {
       constraint exclusive;
     };
+  }
+
+  type Url {
+    required property url -> str {
+      constraint exclusive;
+    }
+    multi link references -> Url {
+      property create_at -> datetime;
+    }
   }
 }
