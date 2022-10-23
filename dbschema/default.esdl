@@ -49,10 +49,14 @@ module default {
     };
   }
 
+  scalar type ResourceType extending enum<DiscordGuild, DiscordThread, DiscordMessage>;
+
   type Url {
     required property url -> str {
       constraint exclusive;
     }
+    required property resource_type -> ResourceType;
+    link resource := .<url;
     multi link references -> Url {
       property create_at -> datetime;
     }

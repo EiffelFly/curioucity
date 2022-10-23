@@ -1,9 +1,7 @@
-CREATE MIGRATION m1jgmqhuzr634rnjocqthacnbminfdh3vba3ccx7sxdf4ij3qmkcjq
-    ONTO m17f5q5dvzwvetpnjnjn2k75zob7pb4653fxbyvm2fuwy64xvhdmpq
+CREATE MIGRATION m1s7ynu4odlu2iftaufaa7g6yinvsfonbnlamtotbukn77nkkobozq
+    ONTO m1lbs4mm7rrws6wq725g2owyv4x45rxs2xdc4go4jbqupal5egusyq
 {
-  ALTER TYPE default::Tag {
-      ALTER PROPERTY name {
-          CREATE CONSTRAINT std::exclusive;
-      };
+  ALTER TYPE default::Url {
+      CREATE LINK resource := (.<url);
   };
 };
