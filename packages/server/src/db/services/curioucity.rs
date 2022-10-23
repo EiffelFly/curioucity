@@ -1,9 +1,10 @@
 pub mod curioucity {
-    use crate::db::source::curioucity::{Tag, Url};
+    use crate::db::source::curioucity::{get_resource_type, ResourceType, Tag, Url};
     use edgedb_tokio::Client;
 
     pub struct InsertOrSelectUrlPayload {
         url: String,
+        resource_type: ResourceType,
     }
 
     pub async fn insert_or_select_url(
@@ -13,15 +14,21 @@ pub mod curioucity {
         let query = "select (
 			insert Url {
 				url := <str>$0
+                resource_type := <str>$1
 			}
 			unless conflict on .url
       	) {
 			url,
-			references
+			references,
+            resource_type,
+            resource
 	  	}";
 
         let url = client
-            .query_single::<Url, (&str,)>(&query, &(&payload.url,))
+            .query_single::<Url, (&str, &str)>(
+                &query,
+                &(&payload.url, &get_resource_type(&payload.resource_type)),
+            )
             .await?;
 
         Ok(url)
