@@ -11,7 +11,8 @@
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "docker-compose-up": "cross-env DOCKER_BUILDKIT=1 docker-compose -f ./docker-compose.yml up --build"
+    "docker-compose-up": "cross-env DOCKER_BUILDKIT=1 docker-compose -f ./docker-compose.yml up -d --build",
+    "integration-test": "k6 run ./integration-test/api/rest.js"
   },
   "devDependencies": {
     "prettier": "latest",
