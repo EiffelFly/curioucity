@@ -1,60 +1,49 @@
 pub mod curioucity {
-    use crate::db::source::curioucity::{get_resource_type, ResourceType, Tag, Url};
-    use edgedb_tokio::Client;
 
-    pub struct InsertOrSelectUrlPayload {
-        url: String,
-        resource_type: ResourceType,
+    use crate::db::source::curioucity::{get_resource_type, ResourceType, Url};
+    use anyhow::bail;
+    use edgedb_tokio::Client;
+    use serde::{Deserialize, Serialize};
+
+    #[derive(Deserialize, Serialize)]
+    pub struct CreateUrlPayload {
+        pub url: String,
+        pub resource_type: ResourceType,
     }
 
-    pub async fn insert_or_select_url(
+    pub async fn create_url(
         client: Client,
-        payload: &InsertOrSelectUrlPayload,
-    ) -> Result<Option<Url>, anyhow::Error> {
+        payload: &CreateUrlPayload,
+    ) -> Result<Url, anyhow::Error> {
         let query = "select (
-			insert Url {
-				url := <str>$0
+            insert Url {
+                url := <str>$0,
                 resource_type := <str>$1
-			}
-			unless conflict on .url
-      	) {
-			url,
-			references,
+            }
+        ) {
+            id,
+            url,
+            references,
             resource_type,
             resource
-	  	}";
+        };";
 
-        let url = client
-            .query_single::<Url, (&str, &str)>(
+        let response = client
+            .query_json(
                 &query,
                 &(&payload.url, &get_resource_type(&payload.resource_type)),
             )
-            .await?;
+            .await;
 
-        Ok(url)
-    }
-
-    pub struct InsertOrSelectTagPayload {
-        name: String,
-    }
-
-    pub async fn insert_or_select_tag(
-        client: Client,
-        payload: &InsertOrSelectTagPayload,
-    ) -> Result<Option<Tag>, anyhow::Error> {
-        let query = "select (
-			insert Tag {
-				name := <str>$0
-			}
-			unless conflict on .name
-      	) {
-			name,
-	  	}";
-
-        let tag = client
-            .query_single::<Tag, (&str,)>(&query, &(&payload.name,))
-            .await?;
-
-        Ok(tag)
+        match response {
+            Ok(json) => {
+                let result = serde_json::from_str::<Vec<Url>>(json.as_ref()).unwrap();
+                Ok(result.into_iter().nth(0).unwrap())
+            }
+            Err(error) => {
+                println!("Error: {:?}", error);
+                bail!("{}", error);
+            }
+        }
     }
 }
