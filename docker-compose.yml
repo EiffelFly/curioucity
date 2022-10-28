@@ -13,6 +13,7 @@ services:
       EDGEDB_HOST: ${DATABASE_HOST}
       EDGEDB_PORT: ${DATABASE_PORT}
       EDGEDB_CLIENT_TLS_SECURITY: insecure
+      RUST_BACKTRACE: 1
 
   discord:
     container_name: ${DISCORD_BOT_HOST}
