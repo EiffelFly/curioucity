@@ -49,7 +49,7 @@ module default {
     };
   }
 
-  scalar type ResourceType extending enum<DiscordGuild, DiscordThread, DiscordMessage, BlogPost>;
+  scalar type ResourceType extending enum<DiscordGuild, DiscordThread, DiscordMessage, Website>;
 
   type Url {
     required property url -> str {

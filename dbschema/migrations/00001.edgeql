@@ -1,4 +1,4 @@
-CREATE MIGRATION m1lbs4mm7rrws6wq725g2owyv4x45rxs2xdc4go4jbqupal5egusyq
+CREATE MIGRATION m1umrfz4i63he4dwm7h63yzh322u6n5vclvk2q55oaqqcg6bru4cnq
     ONTO initial
 {
   CREATE TYPE default::Tag {
@@ -6,7 +6,27 @@ CREATE MIGRATION m1lbs4mm7rrws6wq725g2owyv4x45rxs2xdc4go4jbqupal5egusyq
           CREATE CONSTRAINT std::exclusive;
       };
   };
-  CREATE SCALAR TYPE default::ResourceType EXTENDING enum<DiscordGuild, DiscordThread, DiscordMessage>;
+  CREATE TYPE default::DiscordGuild {
+      CREATE MULTI LINK tags -> default::Tag;
+      CREATE REQUIRED PROPERTY guild_id -> std::int64 {
+          CREATE CONSTRAINT std::exclusive;
+      };
+      CREATE PROPERTY icon -> std::str;
+      CREATE REQUIRED PROPERTY name -> std::str;
+  };
+  CREATE TYPE default::DiscordThread {
+      CREATE MULTI LINK tags -> default::Tag;
+      CREATE PROPERTY create_at -> std::datetime;
+      CREATE PROPERTY full_messages_json -> std::json;
+      CREATE PROPERTY markdown_content -> std::str;
+      CREATE REQUIRED PROPERTY thread_id -> std::int64 {
+          CREATE CONSTRAINT std::exclusive;
+      };
+  };
+  ALTER TYPE default::DiscordGuild {
+      CREATE MULTI LINK threads -> default::DiscordThread;
+  };
+  CREATE SCALAR TYPE default::ResourceType EXTENDING enum<DiscordGuild, DiscordThread, DiscordMessage, Website>;
   CREATE TYPE default::Url {
       CREATE MULTI LINK references -> default::Url {
           CREATE PROPERTY create_at -> std::datetime;
@@ -16,11 +36,16 @@ CREATE MIGRATION m1lbs4mm7rrws6wq725g2owyv4x45rxs2xdc4go4jbqupal5egusyq
           CREATE CONSTRAINT std::exclusive;
       };
   };
-  CREATE TYPE default::DiscordMessage {
-      CREATE MULTI LINK tags -> default::Tag;
+  ALTER TYPE default::DiscordGuild {
       CREATE LINK url -> default::Url {
           CREATE CONSTRAINT std::exclusive;
       };
+  };
+  CREATE TYPE default::DiscordMessage {
+      CREATE LINK url -> default::Url {
+          CREATE CONSTRAINT std::exclusive;
+      };
+      CREATE MULTI LINK tags -> default::Tag;
       CREATE PROPERTY content -> std::str;
       CREATE PROPERTY create_at -> std::datetime;
       CREATE PROPERTY markdown_content -> std::str;
@@ -29,32 +54,16 @@ CREATE MIGRATION m1lbs4mm7rrws6wq725g2owyv4x45rxs2xdc4go4jbqupal5egusyq
       };
       CREATE REQUIRED PROPERTY order_in_thread -> std::int64;
   };
-  CREATE TYPE default::DiscordThread {
+  ALTER TYPE default::DiscordThread {
+      CREATE LINK url -> default::Url {
+          CREATE CONSTRAINT std::exclusive;
+      };
       CREATE MULTI LINK messages -> default::DiscordMessage {
           CREATE CONSTRAINT std::exclusive;
           CREATE PROPERTY order -> std::int64;
       };
-      CREATE MULTI LINK tags -> default::Tag;
-      CREATE LINK url -> default::Url {
-          CREATE CONSTRAINT std::exclusive;
-      };
-      CREATE PROPERTY create_at -> std::datetime;
-      CREATE PROPERTY full_messages_json -> std::json;
-      CREATE PROPERTY markdown_content -> std::str;
-      CREATE REQUIRED PROPERTY thread_id -> std::int64 {
-          CREATE CONSTRAINT std::exclusive;
-      };
   };
-  CREATE TYPE default::DiscordGuild {
-      CREATE MULTI LINK tags -> default::Tag;
-      CREATE MULTI LINK threads -> default::DiscordThread;
-      CREATE LINK url -> default::Url {
-          CREATE CONSTRAINT std::exclusive;
-      };
-      CREATE REQUIRED PROPERTY guild_id -> std::int64 {
-          CREATE CONSTRAINT std::exclusive;
-      };
-      CREATE PROPERTY icon -> std::str;
-      CREATE REQUIRED PROPERTY name -> std::str;
+  ALTER TYPE default::Url {
+      CREATE LINK resource := (.<url);
   };
 };
