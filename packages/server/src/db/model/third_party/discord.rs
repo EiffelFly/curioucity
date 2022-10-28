@@ -1,18 +1,20 @@
+use edgedb_derive::Queryable;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use super::curioucity::{Tag, Url};
+use crate::db::model::curioucity::Tag;
 
-#[derive(edgedb_derive::Queryable, serde::Deserialize, Debug)]
+#[derive(Queryable, Serialize, Deserialize, Debug)]
 pub struct DiscordGuild {
     pub guild_id: i64,
     pub name: String,
     pub icon: String,
     pub threads: Vec<DiscordThread>,
     pub tags: Vec<Tag>,
-    pub url: Url,
+    pub url: String,
 }
 
-#[derive(edgedb_derive::Queryable, serde::Deserialize, Debug)]
+#[derive(Queryable, Serialize, Deserialize, Debug)]
 pub struct DiscordThread {
     pub thread_id: i64,
     #[edgedb(json)]
@@ -21,15 +23,15 @@ pub struct DiscordThread {
     pub markdown_content: String,
     pub tags: Vec<Tag>,
     pub messages: Vec<DiscordMessage>,
-    pub url: Url,
+    pub url: String,
 }
 
-#[derive(edgedb_derive::Queryable, serde::Deserialize, Debug)]
+#[derive(Queryable, Serialize, Deserialize, Debug)]
 pub struct DiscordMessage {
     pub message_id: i64,
     pub content: String,
     pub create_at: String,
     pub markdown_content: String,
     pub tags: Vec<Tag>,
-    pub url: Url,
+    pub url: String,
 }
