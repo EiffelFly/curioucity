@@ -1,0 +1,33 @@
+syntax = "proto3";
+package third_party.v1alpha;
+
+import "curioucity/v1alpha/tag.proto";
+import "curioucity/v1alpha/url.proto";
+
+message DiscordGuild {
+  int64 guild_id = 1;
+  string name = 2;
+  string icon = 3;
+  repeated DiscordThread threads = 4;
+  repeated curioucity.v1alpha.Tag tags = 5;
+  curioucity.v1alpha.Url url = 6;
+}
+
+message DiscordThread {
+  int64 thread_id = 1;
+  map<string, string> full_messages_json = 2;
+  string markdown_content = 3;
+  repeated curioucity.v1alpha.Tag tags = 4;
+  repeated DiscordMessage messages = 5;
+  curioucity.v1alpha.Url url = 6;
+  string create_at = 7;
+}
+
+message DiscordMessage {
+  int64 message_id = 1;
+  string content = 2;
+  string markdown_content = 3;
+  repeated curioucity.v1alpha.Tag tags = 4;
+  curioucity.v1alpha.Url url = 5;
+  string create_at = 6;
+}

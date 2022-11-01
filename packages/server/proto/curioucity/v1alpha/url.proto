@@ -1,0 +1,11 @@
+syntax = "proto3";
+package curioucity.v1alpha;
+
+import "curioucity/v1alpha/general.proto";
+
+message Url {
+  string id = 1;
+  string url = 2;
+  repeated Url references = 3;
+  curioucity.v1alpha.ResourceType resource_type = 4;
+}
