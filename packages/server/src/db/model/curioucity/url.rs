@@ -4,7 +4,7 @@ use edgedb_protocol::model::Uuid;
 use edgedb_tokio::Client;
 use serde::{Deserialize, Serialize};
 
-use crate::db::model::curioucity::general::{ResourceType, ResourceUnion};
+use crate::db::model::curioucity::general::ResourceType;
 
 #[derive(Queryable, Serialize, Deserialize, Debug)]
 pub struct Url {
@@ -12,7 +12,6 @@ pub struct Url {
     pub url: String,
     pub references: Vec<Url>,
     pub resource_type: ResourceType,
-    pub resource: Option<ResourceUnion>,
 }
 
 #[derive(Deserialize, Serialize)]

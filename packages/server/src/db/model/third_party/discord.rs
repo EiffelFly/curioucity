@@ -2,7 +2,7 @@ use edgedb_derive::Queryable;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::db::model::curioucity::Tag;
+use crate::db::model::curioucity::{Tag, Url};
 
 #[derive(Queryable, Serialize, Deserialize, Debug)]
 pub struct DiscordGuild {
@@ -11,7 +11,7 @@ pub struct DiscordGuild {
     pub icon: String,
     pub threads: Vec<DiscordThread>,
     pub tags: Vec<Tag>,
-    pub url: String,
+    pub url: Url,
 }
 
 #[derive(Queryable, Serialize, Deserialize, Debug)]
@@ -23,7 +23,7 @@ pub struct DiscordThread {
     pub markdown_content: String,
     pub tags: Vec<Tag>,
     pub messages: Vec<DiscordMessage>,
-    pub url: String,
+    pub url: Url,
 }
 
 #[derive(Queryable, Serialize, Deserialize, Debug)]

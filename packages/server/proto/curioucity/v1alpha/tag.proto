@@ -1,0 +1,6 @@
+syntax = "proto3";
+package curioucity.v1alpha;
+
+message Tag {
+  string name = 1;
+}

@@ -1,0 +1,10 @@
+syntax = "proto3";
+package curioucity.v1alpha;
+
+enum ResourceType {
+  RESOURCE_TYPE_UNSPECIFIED = 0;
+  RESOURCE_TYPE_WEBSITE = 1;
+  RESOURCE_TYPE_DISCORDGUILD = 2;
+  RESOURCE_TYPE_DISCORDTHREAD = 3;
+  RESOURCE_TYPE_DISCORDMESSAGE = 4;
+}
