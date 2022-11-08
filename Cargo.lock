@@ -1178,6 +1178,44 @@ dependencies = [
 ]
 
 [[package]]
+name = "protoc-gen-prost"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "29afab9b4e0ab835efe16c2b37af0a1037651d0012a8b42a3d8baa6a66131ec6"
+dependencies = [
+ "once_cell",
+ "prost",
+ "prost-build",
+ "prost-types",
+ "regex",
+]
+
+[[package]]
+name = "protoc-gen-prost"
+version = "0.2.0"
+source = "git+https://github.com/neoeinstein/protoc-gen-prost?branch=main#16cdb54fefa5c5ab5a10a8e67ac686dfaeeb7df9"
+dependencies = [
+ "once_cell",
+ "prost",
+ "prost-build",
+ "prost-types",
+ "regex",
+]
+
+[[package]]
+name = "protoc-gen-prost-crate"
+version = "0.3.0"
+source = "git+https://github.com/neoeinstein/protoc-gen-prost?branch=main#16cdb54fefa5c5ab5a10a8e67ac686dfaeeb7df9"
+dependencies = [
+ "once_cell",
+ "prost",
+ "prost-build",
+ "prost-types",
+ "protoc-gen-prost 0.2.0 (git+https://github.com/neoeinstein/protoc-gen-prost?branch=main)",
+ "regex",
+]
+
+[[package]]
 name = "quick-error"
 version = "1.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1565,6 +1603,8 @@ dependencies = [
  "pbjson",
  "pbjson-types",
  "prost",
+ "protoc-gen-prost 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "protoc-gen-prost-crate",
  "serde",
  "serde_json",
  "tokio",

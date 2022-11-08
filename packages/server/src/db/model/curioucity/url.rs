@@ -4,20 +4,28 @@ use edgedb_protocol::model::Uuid;
 use edgedb_tokio::Client;
 use serde::{Deserialize, Serialize};
 
-use crate::db::model::curioucity::general::ResourceType;
+use crate::db::model::curioucity as db_curioucity;
+use crate::gen::curioucity::v1alpha as pb_curioucity;
+
+#[derive(Queryable, Serialize, Deserialize, Debug)]
+pub struct SingularUrl {
+    pub id: Uuid,
+    pub url: String,
+    pub resource_type: db_curioucity::ResourceType,
+}
 
 #[derive(Queryable, Serialize, Deserialize, Debug)]
 pub struct Url {
     pub id: Uuid,
     pub url: String,
-    pub references: Vec<Url>,
-    pub resource_type: ResourceType,
+    pub references: Vec<SingularUrl>,
+    pub resource_type: db_curioucity::ResourceType,
 }
 
 #[derive(Deserialize, Serialize)]
 pub struct CreateUrlPayload {
     pub url: String,
-    pub resource_type: ResourceType,
+    pub resource_type: db_curioucity::ResourceType,
 }
 
 impl Url {
@@ -30,13 +38,17 @@ impl Url {
         ) {
             id,
             url,
-            references,
+            references: {
+                id,
+                url,
+                resource_type
+            },
             resource_type,
             resource
         };";
 
         let response = client
-            .query_json(&query, &(&payload.url, &payload.resource_type.get_str()))
+            .query_json(&query, &(&payload.url, &payload.resource_type.as_str()))
             .await;
 
         match response {
@@ -49,5 +61,25 @@ impl Url {
                 bail!("{}", error)
             }
         }
+    }
+
+    pub fn as_pb_type(&self) -> pb_curioucity::Url {
+        let mut new_refs: Vec<pb_curioucity::SingularUrl> = Vec::new();
+
+        for i in &self.references {
+            let singular_url = pb_curioucity::SingularUrl {
+                id: i.id.to_string(),
+                url: i.url.clone(),
+                resource_type: i.resource_type.as_pb_num(),
+            };
+            new_refs.push(singular_url);
+        }
+
+        return pb_curioucity::Url {
+            id: self.id.to_string(),
+            url: self.url.clone(),
+            references: new_refs,
+            resource_type: self.resource_type.as_pb_num(),
+        };
     }
 }
