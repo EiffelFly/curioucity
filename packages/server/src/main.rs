@@ -1,5 +1,7 @@
 mod db;
-mod gen;
+mod pb_gen {
+    include!("gen/mod.rs");
+}
 mod helper;
 mod proto_ext;
 mod rest_handler;

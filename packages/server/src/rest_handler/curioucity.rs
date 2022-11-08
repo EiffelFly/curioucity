@@ -1,8 +1,8 @@
 use axum::{http::StatusCode, response::IntoResponse, Json};
 
 use crate::db::model::curioucity as db_curioucity;
-use crate::gen::curioucity::v1alpha as pb_curioucity;
 use crate::helper::error::CurioucityError;
+use crate::pb_gen::curioucity::v1alpha as pb_curioucity;
 
 pub async fn create_url_handler(
     Json(data): Json<pb_curioucity::CreateUrlRequest>,
