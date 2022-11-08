@@ -1,10 +1,12 @@
 mod db;
-mod handler;
+mod gen;
 mod helper;
+mod proto_ext;
+mod rest_handler;
 
 use axum::handler::Handler;
 use axum::Router;
-use handler::curioucity::post_url_handler;
+use rest_handler::curioucity::create_url_handler;
 use std::net::SocketAddr;
 
 #[tokio::main]
@@ -13,7 +15,7 @@ async fn main() {
     let app = Router::new()
         .fallback(fallback.into_service())
         .route("/", axum::routing::get(hello))
-        .route("/url", axum::routing::post(post_url_handler));
+        .route("/url", axum::routing::post(create_url_handler));
 
     let port = std::env::var("BACKEND_PORT")
         .ok()

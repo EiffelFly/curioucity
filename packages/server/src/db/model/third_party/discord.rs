@@ -33,5 +33,5 @@ pub struct DiscordMessage {
     pub create_at: String,
     pub markdown_content: String,
     pub tags: Vec<Tag>,
-    pub url: String,
+    pub url: Url,
 }

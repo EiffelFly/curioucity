@@ -3,9 +3,24 @@ package curioucity.v1alpha;
 
 import "curioucity/v1alpha/general.proto";
 
+message SingularUrl {
+  string id = 1;
+  string url = 2;
+  curioucity.v1alpha.ResourceType resource_type = 3;
+}
+
 message Url {
   string id = 1;
   string url = 2;
-  repeated Url references = 3;
+  repeated SingularUrl references = 3;
   curioucity.v1alpha.ResourceType resource_type = 4;
+}
+
+message CreateUrlRequest {
+  string url = 1;
+  curioucity.v1alpha.ResourceType resource_type = 2;
+}
+
+message CreateUrlResponse {
+  Url url = 1;
 }

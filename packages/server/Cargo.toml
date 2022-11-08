@@ -19,3 +19,5 @@ tonic = { version = "0.8", features = ["gzip"] }
 prost = "0.11.0"
 pbjson = "0.4"
 pbjson-types = "0.4"
+protoc-gen-prost = "0.2.0"
+protoc-gen-prost-crate = {git = "https://github.com/neoeinstein/protoc-gen-prost", branch = "main"}

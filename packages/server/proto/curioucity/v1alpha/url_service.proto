@@ -1,0 +1,8 @@
+syntax = "proto3";
+package curioucity.v1alpha;
+
+import "curioucity/v1alpha/url.proto";
+
+service UrlService {
+  rpc CreateUrl(curioucity.v1alpha.CreateUrlRequest) returns (curioucity.v1alpha.CreateUrlResponse);
+}
