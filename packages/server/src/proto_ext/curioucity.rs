@@ -1,7 +1,7 @@
 use anyhow::bail;
 
 use crate::db::model::curioucity as db_curioucity;
-use crate::gen::curioucity::v1alpha as pb_curioucity;
+use crate::pb_gen::curioucity::v1alpha as pb_curioucity;
 
 impl pb_curioucity::ResourceType {
     pub fn as_db_type(num: i32) -> Result<db_curioucity::ResourceType, anyhow::Error> {

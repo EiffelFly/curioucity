@@ -1,7 +1,7 @@
 use edgedb_derive::Queryable;
 use serde::{Deserialize, Serialize};
 
-use crate::gen::curioucity::v1alpha as pb_curioucity;
+use crate::pb_gen::curioucity::v1alpha as pb_curioucity;
 
 use crate::db::model::third_party::{
     discord::{DiscordGuild, DiscordMessage, DiscordThread},

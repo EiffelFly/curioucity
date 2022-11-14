@@ -1,12 +1,12 @@
 use axum::{http::StatusCode, response::IntoResponse, Json};
 
 use crate::db::model::curioucity as db_curioucity;
-use crate::gen::curioucity::v1alpha as pb_curioucity;
-use crate::helper::error::CurioucityError;
+use crate::helper::error::CurioucityAxumError;
+use crate::pb_gen::curioucity::v1alpha as pb_curioucity;
 
 pub async fn create_url_handler(
     Json(data): Json<pb_curioucity::CreateUrlRequest>,
-) -> Result<impl IntoResponse, CurioucityError> {
+) -> Result<impl IntoResponse, CurioucityAxumError> {
     let client = edgedb_tokio::create_client().await?;
 
     let payload = db_curioucity::CreateUrlPayload {
