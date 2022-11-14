@@ -5,7 +5,7 @@ use edgedb_tokio::Client;
 use serde::{Deserialize, Serialize};
 
 use crate::db::model::curioucity as db_curioucity;
-use crate::gen::curioucity::v1alpha as pb_curioucity;
+use crate::pb_gen::curioucity::v1alpha as pb_curioucity;
 
 #[derive(Queryable, Serialize, Deserialize, Debug)]
 pub struct SingularUrl {
