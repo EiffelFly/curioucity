@@ -28,6 +28,11 @@ pub struct CreateUrlPayload {
     pub resource_type: db_curioucity::ResourceType,
 }
 
+#[derive(Deserialize, Serialize)]
+pub struct DeleteUrlPayload {
+    pub url: String,
+}
+
 impl Url {
     pub async fn create(client: Client, payload: &CreateUrlPayload) -> Result<Self, anyhow::Error> {
         let query = "select (
@@ -56,6 +61,20 @@ impl Url {
                 let result = serde_json::from_str::<Vec<Url>>(json.as_ref()).unwrap();
                 Ok(result.into_iter().nth(0).unwrap())
             }
+            Err(error) => {
+                println!("Error: {:?}", error);
+                bail!("{}", error)
+            }
+        }
+    }
+
+    pub async fn delete(client: Client, payload: &DeleteUrlPayload) -> Result<(), anyhow::Error> {
+        let query = "delete Url filter .url := <str>$0";
+
+        let response = client.query_json(&query, &(&payload.url,)).await;
+
+        match response {
+            Ok(_) => Ok(()),
             Err(error) => {
                 println!("Error: {:?}", error);
                 bail!("{}", error)
