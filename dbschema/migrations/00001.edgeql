@@ -1,4 +1,4 @@
-CREATE MIGRATION m1umrfz4i63he4dwm7h63yzh322u6n5vclvk2q55oaqqcg6bru4cnq
+CREATE MIGRATION m17o5iffpypp3efqpfheise6qym3uxo2qlfpjzy7hwn3x5i3mubgha
     ONTO initial
 {
   CREATE TYPE default::Tag {
@@ -29,6 +29,7 @@ CREATE MIGRATION m1umrfz4i63he4dwm7h63yzh322u6n5vclvk2q55oaqqcg6bru4cnq
   CREATE SCALAR TYPE default::ResourceType EXTENDING enum<DiscordGuild, DiscordThread, DiscordMessage, Website>;
   CREATE TYPE default::Url {
       CREATE MULTI LINK references -> default::Url {
+          ON TARGET DELETE ALLOW;
           CREATE PROPERTY create_at -> std::datetime;
       };
       CREATE REQUIRED PROPERTY resource_type -> default::ResourceType;

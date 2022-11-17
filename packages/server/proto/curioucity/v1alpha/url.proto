@@ -24,3 +24,9 @@ message CreateUrlRequest {
 message CreateUrlResponse {
   Url url = 1;
 }
+
+message DeleteUrlRequest {
+  string url = 1;
+}
+
+message DeleteUrlResponse {}

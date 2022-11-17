@@ -22,3 +22,15 @@ pub async fn create_url_handler(
 
     Ok((StatusCode::CREATED, Json(resp)))
 }
+
+pub async fn delete_url_handler(
+    Json(data): Json<pb_curioucity::DeleteUrlRequest>,
+) -> Result<impl IntoResponse, CurioucityAxumError> {
+    let client = edgedb_tokio::create_client().await?;
+
+    let payload = db_curioucity::DeleteUrlPayload { url: data.url };
+
+    db_curioucity::Url::delete(client, &payload).await?;
+
+    Ok((StatusCode::NO_CONTENT, ()))
+}

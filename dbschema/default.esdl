@@ -59,6 +59,7 @@ module default {
     link resource := .<url;
     multi link references -> Url {
       property create_at -> datetime;
+      on target delete allow;
     }
   }
 }
