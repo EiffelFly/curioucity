@@ -3,7 +3,7 @@ import { check } from "k6";
 import { API_HOST } from "./rest.js";
 
 export const createUrl = () => {
-  const url = "https://summerbud.org/id/13";
+  const url = "https://summerbud.org/id/21";
 
   let createUrlpayload = {
     url: url,
@@ -23,19 +23,19 @@ export const createUrl = () => {
     }
   );
 
-  // let deleteUrlPayload = {
-  //   url,
-  // };
+  let deleteUrlPayload = {
+    url,
+  };
 
-  // check(
-  //   http.request(
-  //     "DELETE",
-  //     `${API_HOST}/url`,
-  //     JSON.stringify(deleteUrlPayload),
-  //     { headers }
-  //   ),
-  //   {
-  //     "DELETE /url response status": (r) => console.log(r),
-  //   }
-  // );
+  check(
+    http.request(
+      "DELETE",
+      `${API_HOST}/url`,
+      JSON.stringify(deleteUrlPayload),
+      { headers }
+    ),
+    {
+      "DELETE /url response status": (r) => r.status === 204,
+    }
+  );
 };
