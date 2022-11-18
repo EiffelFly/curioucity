@@ -4,3 +4,6 @@ Dockerfile
 docker-compose.*.yml
 docker-compose.yml
 docker
+
+# test output
+integration-test-result.json

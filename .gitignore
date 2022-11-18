@@ -37,3 +37,6 @@ target
 
 ## protobuf
 **/gen
+
+## test
+integration-test-result.json
