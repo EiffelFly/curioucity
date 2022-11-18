@@ -69,7 +69,7 @@ impl Url {
     }
 
     pub async fn delete(client: Client, payload: &DeleteUrlPayload) -> Result<(), anyhow::Error> {
-        let query = "delete Url filter .url := <str>$0";
+        let query = "delete Url filter .url = <str>$0";
 
         let response = client.query_json(&query, &(&payload.url,)).await;
 
