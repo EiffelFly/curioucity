@@ -12,7 +12,7 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "docker-compose-up": "cross-env DOCKER_BUILDKIT=1 docker-compose -f ./docker-compose.yml up --build",
-    "integration-test": "k6 run ./tests/api/rest.js",
+    "integration-test": "k6 run ./tests/api/rest.js --out json=integration-test-result.json",
     "stop": "docker-compose stop"
   },
   "devDependencies": {
