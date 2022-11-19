@@ -30,3 +30,11 @@ message DeleteUrlRequest {
 }
 
 message DeleteUrlResponse {}
+
+message GetUrlRequest {
+  string url = 1;
+}
+
+message GetUrlResponse {
+  Url url = 1;
+}
