@@ -14,7 +14,7 @@ use grpc_handler::curioucity::UrlServiceImpl;
 use http::{header::CONTENT_TYPE, Request};
 use hyper::Body;
 use pb_gen::curioucity::v1alpha as pb_curioucity;
-use rest_handler::curioucity::{create_url_handler, delete_url_handler};
+use rest_handler::curioucity::{create_url_handler, delete_url_handler, get_url_handler};
 use tonic::transport::Server;
 use tower::{steer::Steer, BoxError, ServiceExt};
 use tracing_subscriber;
@@ -28,6 +28,7 @@ async fn main() {
         .route("/", axum::routing::get(hello))
         .route("/url", axum::routing::post(create_url_handler))
         .route("/url", axum::routing::delete(delete_url_handler))
+        .route("/url", axum::routing::get(get_url_handler))
         .fallback(fallback)
         .into_service()
         .map_response(|r| r.map(axum::body::boxed))

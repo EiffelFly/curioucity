@@ -34,3 +34,19 @@ pub async fn delete_url_handler(
 
     Ok((StatusCode::NO_CONTENT, ()))
 }
+
+pub async fn get_url_handler(
+    Json(data): Json<pb_curioucity::GetUrlRequest>,
+) -> Result<impl IntoResponse, CurioucityAxumError> {
+    let client = edgedb_tokio::create_client().await?;
+
+    let payload = db_curioucity::GetUrlPayload { url: data.url };
+
+    let url = db_curioucity::Url::get(client, &payload).await?;
+
+    let resp = pb_curioucity::GetUrlResponse {
+        url: Some(url.as_pb_type()),
+    };
+
+    Ok((StatusCode::OK, Json(resp)))
+}
