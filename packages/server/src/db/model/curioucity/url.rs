@@ -33,6 +33,11 @@ pub struct DeleteUrlPayload {
     pub url: String,
 }
 
+#[derive(Deserialize, Serialize)]
+pub struct GetUrlPayload {
+    pub url: String,
+}
+
 impl Url {
     pub async fn create(client: Client, payload: &CreateUrlPayload) -> Result<Self, anyhow::Error> {
         let query = "select (
@@ -70,6 +75,20 @@ impl Url {
 
     pub async fn delete(client: Client, payload: &DeleteUrlPayload) -> Result<(), anyhow::Error> {
         let query = "delete Url filter .url = <str>$0";
+
+        let response = client.query_json(&query, &(&payload.url,)).await;
+
+        match response {
+            Ok(_) => Ok(()),
+            Err(error) => {
+                println!("Error: {:?}", error);
+                bail!("{}", error)
+            }
+        }
+    }
+
+    pub async fn get(client: Client, payload: &GetUrlPayload) -> Result<(), anyhow::Error> {
+        let query = "select Url filter .url = <str>$0";
 
         let response = client.query_json(&query, &(&payload.url,)).await;
 
