@@ -17,6 +17,14 @@ impl pb_curioucity::url_service_server::UrlService for UrlServiceImpl {
         Ok(Response::new(resp))
     }
 
+    async fn get_url(
+        &self,
+        req: Request<pb_curioucity::GetUrlRequest>,
+    ) -> Result<Response<pb_curioucity::GetUrlResponse>, Status> {
+        let resp = get_url_helper(req.get_ref()).await?;
+        Ok(Response::new(resp))
+    }
+
     async fn delete_url(
         &self,
         req: Request<pb_curioucity::DeleteUrlRequest>,
@@ -56,6 +64,24 @@ pub async fn delete_url_helper(
     db_curioucity::Url::delete(client, &payload).await?;
 
     let resp = pb_curioucity::DeleteUrlResponse {};
+
+    Ok(resp)
+}
+
+pub async fn get_url_helper(
+    req: &pb_curioucity::GetUrlRequest,
+) -> Result<pb_curioucity::GetUrlResponse, CurioucityTonicError> {
+    let client = edgedb_tokio::create_client().await?;
+
+    let payload = db_curioucity::GetUrlPayload {
+        url: req.url.clone(),
+    };
+
+    let url = db_curioucity::Url::get(client, &payload).await?;
+
+    let resp = pb_curioucity::GetUrlResponse {
+        url: Some(url.as_pb_type()),
+    };
 
     Ok(resp)
 }
