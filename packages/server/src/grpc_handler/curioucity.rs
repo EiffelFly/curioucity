@@ -1,7 +1,7 @@
 use tonic::{Request, Response, Status};
+use tracing_subscriber::fmt::format;
 
 use crate::db::model::curioucity as db_curioucity;
-use crate::helper::error::CurioucityTonicError;
 use crate::pb_gen::curioucity::v1alpha as pb_curioucity;
 
 #[derive(Default)]
@@ -16,9 +16,10 @@ impl pb_curioucity::url_service_server::UrlService for UrlServiceImpl {
         let client = match edgedb_tokio::create_client().await {
             Ok(client) => client,
             Err(error) => {
-                return Err(Status::internal(
-                    "Something went wrong when create database client".to_string(),
-                ))
+                return Err(Status::internal(format!(
+                    "Something went wrong when access database: {}",
+                    error
+                )))
             }
         };
 
@@ -29,9 +30,10 @@ impl pb_curioucity::url_service_server::UrlService for UrlServiceImpl {
             resource_type: match pb_curioucity::ResourceType::as_db_type(req_ref.resource_type) {
                 Ok(resource_type) => resource_type,
                 Err(error) => {
-                    return Err(Status::internal(
-                        "Something went wrong when transform resource_type".to_string(),
-                    ))
+                    return Err(Status::internal(format!(
+                        "Something went wrong when transform resource_type: {}",
+                        error
+                    )))
                 }
             },
         };
@@ -39,9 +41,10 @@ impl pb_curioucity::url_service_server::UrlService for UrlServiceImpl {
         let url = match db_curioucity::Url::create(client, &payload).await {
             Ok(url) => url,
             Err(error) => {
-                return Err(Status::internal(
-                    "Something went wrong when create url".to_string(),
-                ))
+                return Err(Status::internal(format!(
+                    "Something went wrong when create url: {}",
+                    error
+                )))
             }
         };
 
@@ -59,9 +62,10 @@ impl pb_curioucity::url_service_server::UrlService for UrlServiceImpl {
         let client = match edgedb_tokio::create_client().await {
             Ok(client) => client,
             Err(error) => {
-                return Err(Status::internal(
-                    "Something went wrong when create database client".to_string(),
-                ))
+                return Err(Status::internal(format!(
+                    "Something went wrong when access database: {}",
+                    error
+                )))
             }
         };
 
@@ -75,9 +79,10 @@ impl pb_curioucity::url_service_server::UrlService for UrlServiceImpl {
                 None => return Err(Status::not_found("".to_string())),
             },
             Err(error) => {
-                return Err(Status::internal(
-                    "Something went wrong when get url from database".to_string(),
-                ))
+                return Err(Status::internal(format!(
+                    "Something went wrong when get url: {}",
+                    error
+                )))
             }
         };
 
@@ -95,9 +100,10 @@ impl pb_curioucity::url_service_server::UrlService for UrlServiceImpl {
         let client = match edgedb_tokio::create_client().await {
             Ok(client) => client,
             Err(error) => {
-                return Err(Status::internal(
-                    "Something went wrong when create database client".to_string(),
-                ))
+                return Err(Status::internal(format!(
+                    "Something went wrong when access database: {}",
+                    error
+                )))
             }
         };
 
@@ -111,9 +117,10 @@ impl pb_curioucity::url_service_server::UrlService for UrlServiceImpl {
                 return Ok(Response::new(resp));
             }
             Err(error) => {
-                return Err(Status::internal(
-                    "Something went wrong when delete url".to_string(),
-                ))
+                return Err(Status::internal(format!(
+                    "Something went wrong when delete url: {}",
+                    error
+                )))
             }
         }
     }
