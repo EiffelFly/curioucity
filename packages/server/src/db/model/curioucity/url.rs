@@ -87,7 +87,10 @@ impl Url {
         }
     }
 
-    pub async fn get(client: Client, payload: &GetUrlPayload) -> Result<Self, anyhow::Error> {
+    pub async fn get(
+        client: Client,
+        payload: &GetUrlPayload,
+    ) -> Result<Option<Self>, anyhow::Error> {
         let query = "select Url filter .url = <str>$0";
 
         let response = client.query_json(&query, &(&payload.url,)).await;
@@ -97,7 +100,12 @@ impl Url {
         match response {
             Ok(json) => {
                 let result = serde_json::from_str::<Vec<Url>>(json.as_ref()).unwrap();
-                Ok(result.into_iter().nth(0).unwrap())
+
+                if result.is_empty() {
+                    Ok(Some(result.into_iter().nth(0).unwrap()))
+                } else {
+                    Ok(None)
+                }
             }
             Err(error) => {
                 println!("Error: {:?}", error);
