@@ -5,7 +5,7 @@ import { API_HOST } from "./rest.js";
 export const createUrl = () => {
   const url = "https://summerbud.org/id/21";
 
-  let createUrlpayload = {
+  let createUrlPayload = {
     url: url,
     resourceType: "RESOURCE_TYPE_WEBSITE",
   };
@@ -15,7 +15,7 @@ export const createUrl = () => {
   };
 
   check(
-    http.request("POST", `${API_HOST}/url`, JSON.stringify(createUrlpayload), {
+    http.request("POST", `${API_HOST}/url`, JSON.stringify(createUrlPayload), {
       headers,
     }),
     {
@@ -36,6 +36,27 @@ export const createUrl = () => {
     ),
     {
       "DELETE /url response status": (r) => r.status === 204,
+    }
+  );
+};
+
+export const getUrl = () => {
+  const notExistUrl = "https://summerbud.org/id/21afr23";
+
+  let getUrlPayload = {
+    url: notExistUrl,
+  };
+
+  let headers = {
+    "Content-Type": "application/json",
+  };
+
+  check(
+    http.request("GET", `${API_HOST}/url`, JSON.stringify(getUrlPayload), {
+      headers,
+    }),
+    {
+      "GET /url not exist response status": (r) => r.status === 404,
     }
   );
 };
