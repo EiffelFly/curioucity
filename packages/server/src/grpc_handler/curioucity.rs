@@ -1,8 +1,6 @@
-use tonic::{Request, Response, Status};
-use tracing_subscriber::fmt::format;
-
 use crate::db::model::curioucity as db_curioucity;
 use crate::pb_gen::curioucity::v1alpha as pb_curioucity;
+use tonic::{Request, Response, Status};
 
 #[derive(Default)]
 pub struct UrlServiceImpl {}

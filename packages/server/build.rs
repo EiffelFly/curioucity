@@ -12,5 +12,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         exit(status.code().unwrap_or(-1))
     }
 
+    print!("Successfully generate protobuf");
+
     Ok(())
 }

@@ -91,20 +91,29 @@ impl Url {
         client: Client,
         payload: &GetUrlPayload,
     ) -> Result<Option<Self>, anyhow::Error> {
-        let query = "select Url filter .url = <str>$0";
+        let query = "select Url {
+            id, 
+            url,
+            references: {
+                id,
+                url,
+                resource_type
+            },
+            resource_type,
+            resource
+        } filter .url = <str>$0";
 
         let response = client.query_json(&query, &(&payload.url,)).await;
-
-        println!("response {:?}", response);
 
         match response {
             Ok(json) => {
                 let result = serde_json::from_str::<Vec<Url>>(json.as_ref()).unwrap();
 
                 if result.is_empty() {
-                    Ok(Some(result.into_iter().nth(0).unwrap()))
-                } else {
                     Ok(None)
+                } else {
+                    let url = result.into_iter().nth(0).unwrap();
+                    Ok(Some(url))
                 }
             }
             Err(error) => {

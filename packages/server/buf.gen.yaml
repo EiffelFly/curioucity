@@ -1,22 +1,24 @@
 version: v1
 plugins:
-  - remote: buf.build/prost/plugins/prost:v0.2.0-2
+  - name: prost
     out: src/gen
     opt:
       - compile_well_known_types
       - extern_path=.google.protobuf=::pbjson_types
       - file_descriptor_set
       - retain_enum_prefix
-  - remote: buf.build/prost/plugins/serde:v0.2.0-2
+  - name: prost-serde
     out: src/gen
     opt:
       - retain_enum_prefix
-  - remote: buf.build/prost/plugins/tonic:v0.2.0-2
+      - preserve_proto_field_names
+  - name: tonic
     out: src/gen
     opt:
       - compile_well_known_types
       - extern_path=.google.protobuf=::pbjson_types
-  - remote: buf.build/prost/plugins/crate:v0.3.0-2
+  - name: prost-crate
     out: src/gen
+    strategy: all
     opt:
       - no_features
