@@ -6,7 +6,9 @@ module default {
     required property name -> str;
     property icon -> str;
     multi link threads -> DiscordThread;
-    multi link tags -> Tag;
+    multi link tags -> Tag {
+      on target delete allow;
+    };
     link url -> Url {
       constraint exclusive;
     }
@@ -23,7 +25,9 @@ module default {
     };
     property create_at -> datetime;
     property markdown_content -> str;
-    multi link tags -> Tag;
+    multi link tags -> Tag {
+      on target delete allow;
+    };
     link url -> Url {
       constraint exclusive;
     }
@@ -37,7 +41,9 @@ module default {
     property content -> str;
     property create_at -> datetime;
     property markdown_content -> str;
-    multi link tags -> Tag;
+    multi link tags -> Tag {
+      on target delete allow;
+    };
     link url -> Url {
       constraint exclusive;
     }
@@ -47,6 +53,7 @@ module default {
     required property name -> str {
       constraint exclusive;
     };
+    multi link resources := .<tags
   }
 
   scalar type ResourceType extending enum<DiscordGuild, DiscordThread, DiscordMessage, Website>;
