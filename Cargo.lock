@@ -1134,6 +1134,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "pbjson-build"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bdbb7b706f2afc610f3853550cdbbf6372fd324824a087806bd4480ea4996e24"
+dependencies = [
+ "heck",
+ "itertools",
+ "prost",
+ "prost-types",
+]
+
+[[package]]
 name = "pbjson-types"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1142,7 +1154,7 @@ dependencies = [
  "bytes",
  "chrono",
  "pbjson",
- "pbjson-build",
+ "pbjson-build 0.4.0",
  "prost",
  "prost-build",
  "serde",
@@ -1220,6 +1232,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "eb9f9e6e233e5c4a35559a617bf40a4ec447db2e84c20b55a6f83167b7e57872"
 
 [[package]]
+name = "prettyplease"
+version = "0.1.21"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c142c0e46b57171fe0c528bee8c5b7569e80f0c17e377cd0e30ea57dbc11bb51"
+dependencies = [
+ "proc-macro2",
+ "syn",
+]
+
+[[package]]
 name = "proc-macro2"
 version = "1.0.46"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1283,21 +1305,9 @@ dependencies = [
 
 [[package]]
 name = "protoc-gen-prost"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "29afab9b4e0ab835efe16c2b37af0a1037651d0012a8b42a3d8baa6a66131ec6"
-dependencies = [
- "once_cell",
- "prost",
- "prost-build",
- "prost-types",
- "regex",
-]
-
-[[package]]
-name = "protoc-gen-prost"
-version = "0.2.0"
-source = "git+https://github.com/neoeinstein/protoc-gen-prost?branch=main#16cdb54fefa5c5ab5a10a8e67ac686dfaeeb7df9"
+checksum = "7b8bb34a371e2d605272113dad6213daae5e3e5158abe65570e19349884b9d00"
 dependencies = [
  "once_cell",
  "prost",
@@ -1308,15 +1318,47 @@ dependencies = [
 
 [[package]]
 name = "protoc-gen-prost-crate"
-version = "0.3.0"
-source = "git+https://github.com/neoeinstein/protoc-gen-prost?branch=main#16cdb54fefa5c5ab5a10a8e67ac686dfaeeb7df9"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "043ee98bf0393fea59763a8b866399a10d0f05059a62cb1d6ba567af7f4e36ef"
 dependencies = [
  "once_cell",
  "prost",
  "prost-build",
  "prost-types",
- "protoc-gen-prost 0.2.0 (git+https://github.com/neoeinstein/protoc-gen-prost?branch=main)",
+ "protoc-gen-prost",
  "regex",
+]
+
+[[package]]
+name = "protoc-gen-prost-serde"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c230e434f478b5ddd7e2217948eff8965f4e5f0073ccf543794dcbab0a38f6ab"
+dependencies = [
+ "pbjson-build 0.5.1",
+ "prost",
+ "prost-build",
+ "prost-types",
+ "protoc-gen-prost",
+ "regex",
+]
+
+[[package]]
+name = "protoc-gen-tonic"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4a7c042eb85ca1a9624e700363821388a42c554728e6c777b57ea074d027faa9"
+dependencies = [
+ "heck",
+ "prettyplease",
+ "prost",
+ "prost-build",
+ "prost-types",
+ "protoc-gen-prost",
+ "regex",
+ "syn",
+ "tonic-build",
 ]
 
 [[package]]
@@ -1728,8 +1770,10 @@ dependencies = [
  "pbjson",
  "pbjson-types",
  "prost",
- "protoc-gen-prost 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "protoc-gen-prost",
  "protoc-gen-prost-crate",
+ "protoc-gen-prost-serde",
+ "protoc-gen-tonic",
  "serde",
  "serde_json",
  "tokio",
@@ -2149,6 +2193,19 @@ dependencies = [
  "tower-service",
  "tracing",
  "tracing-futures",
+]
+
+[[package]]
+name = "tonic-build"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "48c6fd7c2581e36d63388a9e04c350c21beb7a8b059580b2e93993c526899ddc"
+dependencies = [
+ "prettyplease",
+ "proc-macro2",
+ "prost-build",
+ "quote",
+ "syn",
 ]
 
 [[package]]

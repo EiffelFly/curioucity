@@ -6,4 +6,5 @@ import "curioucity/v1alpha/url.proto";
 service UrlService {
   rpc CreateUrl(curioucity.v1alpha.CreateUrlRequest) returns (curioucity.v1alpha.CreateUrlResponse);
   rpc DeleteUrl(curioucity.v1alpha.DeleteUrlRequest) returns (curioucity.v1alpha.DeleteUrlResponse);
+  rpc GetUrl(curioucity.v1alpha.GetUrlRequest) returns (curioucity.v1alpha.GetUrlResponse);
 }
