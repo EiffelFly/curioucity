@@ -1,0 +1,10 @@
+syntax = "proto3";
+package curioucity.v1alpha;
+
+import "curioucity/v1alpha/tag.proto";
+
+service TagService {
+  rpc CreateTag(curioucity.v1alpha.CreateTagRequest) returns (curioucity.v1alpha.CreateTagResponse);
+  rpc DeleteTag(curioucity.v1alpha.DeleteTagRequest) returns (curioucity.v1alpha.DeleteTagResponse);
+  rpc GetTag(curioucity.v1alpha.GetTagRequest) returns (curioucity.v1alpha.GetTagResponse);
+}

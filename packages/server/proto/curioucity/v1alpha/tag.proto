@@ -1,6 +1,30 @@
 syntax = "proto3";
 package curioucity.v1alpha;
+import "google/protobuf/struct.proto";
 
 message Tag {
   string name = 1;
+  google.protobuf.Struct resources = 2;
+}
+
+message CreateTagRequest {
+  string name = 1;
+}
+
+message CreateTagResponse {
+  Tag tag = 1;
+}
+
+message DeleteTagRequest {
+  string name = 1;
+}
+
+message DeleteTagResponse {}
+
+message GetTagRequest {
+  string name = 1; 
+}
+
+message GetTagResponse {
+  Tag tag = 1;
 }
