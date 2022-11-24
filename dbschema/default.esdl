@@ -1,5 +1,8 @@
 module default {
   type DiscordGuild {
+    required property kind -> str {
+      constraint one_of("DiscordGuild");
+    };
     required property guild_id -> int64 {
       constraint exclusive;
     };
@@ -11,10 +14,13 @@ module default {
     };
     link url -> Url {
       constraint exclusive;
-    }
+    };
   }
 
   type DiscordThread {
+    required property kind -> str {
+      constraint one_of("DiscordThread");
+    };
     required property thread_id -> int64 {
       constraint exclusive;
     };
@@ -30,10 +36,13 @@ module default {
     };
     link url -> Url {
       constraint exclusive;
-    }
+    };
   }
 
   type DiscordMessage {
+    required property kind -> str {
+      constraint one_of("DiscordMessage");
+    };
     required property message_id -> int64 {
       constraint exclusive;
     };
@@ -46,7 +55,7 @@ module default {
     };
     link url -> Url {
       constraint exclusive;
-    }
+    };
   }
 
   type Tag {

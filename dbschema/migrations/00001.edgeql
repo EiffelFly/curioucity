@@ -1,4 +1,4 @@
-CREATE MIGRATION m1b5qsnv2etukvjsovq3ircnru46jsmd4qwwlba4azj2j53csa4qea
+CREATE MIGRATION m1unmvxcvlicwrkqi2yc5zwtsw5yszbdvuolhmuc2mjbnqikdcvwuq
     ONTO initial
 {
   CREATE TYPE default::DiscordGuild {
@@ -6,6 +6,9 @@ CREATE MIGRATION m1b5qsnv2etukvjsovq3ircnru46jsmd4qwwlba4azj2j53csa4qea
           CREATE CONSTRAINT std::exclusive;
       };
       CREATE PROPERTY icon -> std::str;
+      CREATE REQUIRED PROPERTY kind -> std::str {
+          CREATE CONSTRAINT std::one_of('DiscordGuild');
+      };
       CREATE REQUIRED PROPERTY name -> std::str;
   };
   CREATE TYPE default::Tag {
@@ -24,6 +27,9 @@ CREATE MIGRATION m1b5qsnv2etukvjsovq3ircnru46jsmd4qwwlba4azj2j53csa4qea
       };
       CREATE PROPERTY content -> std::str;
       CREATE PROPERTY create_at -> std::datetime;
+      CREATE REQUIRED PROPERTY kind -> std::str {
+          CREATE CONSTRAINT std::one_of('DiscordMessage');
+      };
       CREATE PROPERTY markdown_content -> std::str;
       CREATE REQUIRED PROPERTY message_id -> std::int64 {
           CREATE CONSTRAINT std::exclusive;
@@ -40,6 +46,9 @@ CREATE MIGRATION m1b5qsnv2etukvjsovq3ircnru46jsmd4qwwlba4azj2j53csa4qea
       };
       CREATE PROPERTY create_at -> std::datetime;
       CREATE PROPERTY full_messages_json -> std::json;
+      CREATE REQUIRED PROPERTY kind -> std::str {
+          CREATE CONSTRAINT std::one_of('DiscordThread');
+      };
       CREATE PROPERTY markdown_content -> std::str;
       CREATE REQUIRED PROPERTY thread_id -> std::int64 {
           CREATE CONSTRAINT std::exclusive;
