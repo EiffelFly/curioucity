@@ -1,7 +1,11 @@
 syntax = "proto3";
 package third_party.v1alpha;
+import "curioucity/v1alpha/url.proto";
+import "curioucity/v1alpha/tag.proto";
 
 message Website {
   string id = 1;
   string content = 2;
+  curioucity.v1alpha.Url url = 3;
+  repeated curioucity.v1alpha.Tag tags = 5;
 }
