@@ -1,0 +1,27 @@
+syntax = "proto3";
+package curioucity.v1alpha;
+
+import "third_party/v1alpha/discord.proto";
+import "third_party/v1alpha/website.proto";
+import "curioucity/v1alpha/url.proto";
+
+message ResourceUnion {
+  oneof resource {
+    third_party.v1alpha.DiscordGuild discord_guild = 1;
+    third_party.v1alpha.DiscordThread discord_thread = 2;
+    third_party.v1alpha.DiscordMessage discord_message = 3;
+    third_party.v1alpha.Website website = 4;
+  }
+} 
+
+message FullTag {
+  string name = 1;
+  repeated curioucity.v1alpha.ResourceUnion resources = 2;
+}
+
+message FullUrl {
+  string id = 1;
+  string url = 2;
+  repeated curioucity.v1alpha.SingularUrl references = 3;
+  repeated ResourceUnion resources = 4;
+}

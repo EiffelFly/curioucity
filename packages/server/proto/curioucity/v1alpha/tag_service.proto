@@ -1,10 +1,31 @@
 syntax = "proto3";
 package curioucity.v1alpha;
-
-import "curioucity/v1alpha/tag.proto";
+import "curioucity/v1alpha/union.proto";
 
 service TagService {
-  rpc CreateTag(curioucity.v1alpha.CreateTagRequest) returns (curioucity.v1alpha.CreateTagResponse);
-  rpc DeleteTag(curioucity.v1alpha.DeleteTagRequest) returns (curioucity.v1alpha.DeleteTagResponse);
-  rpc GetTag(curioucity.v1alpha.GetTagRequest) returns (curioucity.v1alpha.GetTagResponse);
+  rpc CreateTag(CreateTagRequest) returns (CreateTagResponse);
+  rpc DeleteTag(DeleteTagRequest) returns (DeleteTagResponse);
+  rpc GetTag(GetTagRequest) returns (GetTagResponse);
+}
+
+message CreateTagRequest {
+  string name = 1;
+}
+
+message CreateTagResponse {
+  curioucity.v1alpha.FullTag tag = 1;
+}
+
+message DeleteTagRequest {
+  string name = 1;
+}
+
+message DeleteTagResponse {}
+
+message GetTagRequest {
+  string name = 1; 
+}
+
+message GetTagResponse {
+  curioucity.v1alpha.FullTag tag = 1;
 }
