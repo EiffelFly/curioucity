@@ -130,7 +130,7 @@ impl Url {
             let singular_url = pb_curioucity::SingularUrl {
                 id: i.id.to_string(),
                 url: i.url.clone(),
-                resource_type: i.resource_type.as_pb_num(),
+                resource_type: i32::from(i.resource_type),
             };
             new_refs.push(singular_url);
         }
@@ -139,7 +139,29 @@ impl Url {
             id: self.id.to_string(),
             url: self.url.clone(),
             references: new_refs,
-            resource_type: self.resource_type.as_pb_num(),
+            resource_type: i32::from(self.resource_type),
+        };
+    }
+}
+
+impl From<Url> for pb_curioucity::Url {
+    fn from(value: Url) -> Self {
+        let mut new_refs: Vec<pb_curioucity::SingularUrl> = Vec::new();
+
+        for i in &value.references {
+            let singular_url = pb_curioucity::SingularUrl {
+                id: i.id.to_string(),
+                url: i.url.clone(),
+                resource_type: i32::from(i.resource_type),
+            };
+            new_refs.push(singular_url);
+        }
+
+        return pb_curioucity::Url {
+            id: value.id.to_string(),
+            url: value.url.clone(),
+            references: new_refs,
+            resource_type: i32::from(value.resource_type),
         };
     }
 }
