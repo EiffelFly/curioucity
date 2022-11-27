@@ -35,12 +35,7 @@ impl ResourceType {
     }
 
     pub fn as_pb_type(&self) -> pb_curioucity::ResourceType {
-        match self {
-            ResourceType::Website => pb_curioucity::ResourceType::ResourceTypeWebsite,
-            ResourceType::DiscordGuild => pb_curioucity::ResourceType::ResourceTypeDiscordguild,
-            ResourceType::DiscordThread => pb_curioucity::ResourceType::ResourceTypeDiscordthread,
-            ResourceType::DiscordMessage => pb_curioucity::ResourceType::ResourceTypeDiscordmessage,
-        }
+        transform_resource_type_to_pb(self)
     }
 
     pub fn as_pb_num(&self) -> i32 {
@@ -50,6 +45,21 @@ impl ResourceType {
             ResourceType::DiscordThread => 3,
             ResourceType::DiscordMessage => 4,
         }
+    }
+}
+
+impl From<ResourceType> for pb_curioucity::ResourceType {
+    fn from(value: ResourceType) -> pb_curioucity::ResourceType {
+        transform_resource_type_to_pb(&value)
+    }
+}
+
+fn transform_resource_type_to_pb(value: &ResourceType) -> pb_curioucity::ResourceType {
+    match value {
+        ResourceType::Website => pb_curioucity::ResourceType::ResourceTypeWebsite,
+        ResourceType::DiscordGuild => pb_curioucity::ResourceType::ResourceTypeDiscordguild,
+        ResourceType::DiscordThread => pb_curioucity::ResourceType::ResourceTypeDiscordthread,
+        ResourceType::DiscordMessage => pb_curioucity::ResourceType::ResourceTypeDiscordmessage,
     }
 }
 

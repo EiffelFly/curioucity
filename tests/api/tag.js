@@ -22,8 +22,9 @@ export const createTag = () => {
         r.status === 201,
       "createTag - POST /tag - response body should have id": (r) =>
         typeof r.json().tag.id !== undefined || r.json().tag.id !== null,
-      "createTag - POST /tag - response body should have correct name": (r) =>
-        r.json().tag.name === tagName,
+      "createTag - POST /tag - response body should have correct tag name": (
+        r
+      ) => r.json().tag.name === tagName,
     }
   );
 

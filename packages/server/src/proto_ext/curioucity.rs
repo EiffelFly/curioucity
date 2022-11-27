@@ -31,3 +31,14 @@ impl pb_curioucity::ResourceType {
         *self as i32
     }
 }
+
+impl From<db_curioucity::ResourceType> for i32 {
+    fn from(value: db_curioucity::ResourceType) -> i32 {
+        match value {
+            db_curioucity::ResourceType::Website => 1,
+            db_curioucity::ResourceType::DiscordGuild => 2,
+            db_curioucity::ResourceType::DiscordThread => 3,
+            db_curioucity::ResourceType::DiscordMessage => 4,
+        }
+    }
+}

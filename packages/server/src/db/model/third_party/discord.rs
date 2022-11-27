@@ -30,23 +30,23 @@ impl DiscordGuild {
 }
 
 fn transform_discord_guild_to_pb(value: &DiscordGuild) -> pb_third_party::DiscordGuild {
-    let pb_tags: Vec<pb_curioucity::Tag> = Vec::new();
+    let mut pb_tags: Vec<pb_curioucity::Tag> = Vec::new();
 
-    for i in value.tags {
+    for i in &value.tags {
         pb_tags.push(i.as_pb_type());
     }
 
-    let pb_threads: Vec<pb_third_party::DiscordThread> = Vec::new();
+    let mut pb_threads: Vec<pb_third_party::DiscordThread> = Vec::new();
 
-    for i in value.threads {
+    for i in &value.threads {
         pb_threads.push(i.as_pb_type());
     }
 
     pb_third_party::DiscordGuild {
-        id: value.id,
+        id: value.id.clone(),
         guild_id: value.guild_id,
-        name: value.name,
-        icon: value.icon,
+        name: value.name.clone(),
+        icon: value.icon.clone(),
         threads: pb_threads,
         tags: pb_tags,
         url: Some(value.url.as_pb_type()),
@@ -79,24 +79,24 @@ impl DiscordThread {
 }
 
 fn transform_discord_thread_to_pb(value: &DiscordThread) -> pb_third_party::DiscordThread {
-    let pb_tags: Vec<pb_curioucity::Tag> = Vec::new();
+    let mut pb_tags: Vec<pb_curioucity::Tag> = Vec::new();
 
-    for i in value.tags {
+    for i in &value.tags {
         pb_tags.push(i.as_pb_type());
     }
 
-    let pb_messages: Vec<pb_third_party::DiscordMessage> = Vec::new();
+    let mut pb_messages: Vec<pb_third_party::DiscordMessage> = Vec::new();
 
-    for i in value.messages {
+    for i in &value.messages {
         pb_messages.push(i.as_pb_type());
     }
 
     pb_third_party::DiscordThread {
-        id: value.id,
-        thread_id: value.thread_id,
-        full_messages_json: value.full_messages_json,
-        create_at: value.create_at,
-        markdown_content: value.markdown_content,
+        id: value.id.clone(),
+        thread_id: value.thread_id.clone(),
+        full_messages_json: value.full_messages_json.clone(),
+        create_at: value.create_at.clone(),
+        markdown_content: value.markdown_content.clone(),
         tags: pb_tags,
         messages: pb_messages,
         url: Some(value.url.as_pb_type()),
@@ -127,18 +127,18 @@ impl DiscordMessage {
 }
 
 fn transform_discord_message_to_pb(value: &DiscordMessage) -> pb_third_party::DiscordMessage {
-    let pb_tags: Vec<pb_curioucity::Tag> = Vec::new();
+    let mut pb_tags: Vec<pb_curioucity::Tag> = Vec::new();
 
-    for i in value.tags {
+    for i in &value.tags {
         pb_tags.push(i.as_pb_type());
     }
 
     pb_third_party::DiscordMessage {
-        id: value.id,
+        id: value.id.clone(),
         message_id: value.message_id,
-        content: value.content,
-        create_at: value.create_at,
-        markdown_content: value.markdown_content,
+        content: value.content.clone(),
+        create_at: value.create_at.clone(),
+        markdown_content: value.markdown_content.clone(),
         tags: pb_tags,
         url: Some(value.url.as_pb_type()),
     }

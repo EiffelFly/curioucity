@@ -130,7 +130,7 @@ impl Url {
             let singular_url = pb_curioucity::SingularUrl {
                 id: i.id.to_string(),
                 url: i.url.clone(),
-                resource_type: i32::from(i.resource_type),
+                resource_type: i.resource_type.as_pb_num(),
             };
             new_refs.push(singular_url);
         }
@@ -139,7 +139,7 @@ impl Url {
             id: self.id.to_string(),
             url: self.url.clone(),
             references: new_refs,
-            resource_type: i32::from(self.resource_type),
+            resource_type: self.resource_type.as_pb_num(),
         };
     }
 }
@@ -152,7 +152,7 @@ impl From<Url> for pb_curioucity::Url {
             let singular_url = pb_curioucity::SingularUrl {
                 id: i.id.to_string(),
                 url: i.url.clone(),
-                resource_type: i32::from(i.resource_type),
+                resource_type: i.resource_type.as_pb_num(),
             };
             new_refs.push(singular_url);
         }
