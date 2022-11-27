@@ -1,8 +1,12 @@
+import http from "k6/http";
+import { check } from "k6";
+import { API_HOST } from "./rest.js";
+
 export const createTag = () => {
-  const name = "knowledge-management";
+  const tagName = "knowledge-management-toolkit";
 
   let createTagPayload = {
-    name,
+    name: tagName,
   };
 
   let headers = {
@@ -16,13 +20,15 @@ export const createTag = () => {
     {
       "createTag - POST /tag - response status should be 201": (r) =>
         r.status === 201,
+      "createTag - POST /tag - response body should have id": (r) =>
+        typeof r.json().tag.id !== undefined || r.json().tag.id !== null,
       "createTag - POST /tag - response body should have correct name": (r) =>
-        r.json().tag.name === tag,
+        r.json().tag.name === tagName,
     }
   );
 
   let deleteTagPayload = {
-    tag,
+    name: tagName,
   };
 
   check(
@@ -40,10 +46,10 @@ export const createTag = () => {
 };
 
 export const deleteTag = () => {
-  const name = "knowledge-management";
+  const tagName = "knowledge-management-toolkit";
 
   let createTagPayload = {
-    name,
+    name: tagName,
   };
 
   let headers = {
@@ -61,7 +67,7 @@ export const deleteTag = () => {
   );
 
   let deleteTagPayload = {
-    tag,
+    name: tagName,
   };
 
   check(
@@ -91,20 +97,20 @@ export const getTag = () => {
   };
 
   check(
-    http.request("GET", `${API_HOST}/url`, JSON.stringify(getTagPayload), {
+    http.request("GET", `${API_HOST}/tag`, JSON.stringify(getTagPayload), {
       headers,
     }),
     {
-      "getUrl - GET /url - not exist tag, response status should be 404": (r) =>
+      "getTag - GET /tag - not exist tag, response status should be 404": (r) =>
         r.status === 404,
     }
   );
 
   // Should get the newly created tag
-  const newTag = "knowledge-management";
+  const newTagName = "knowledge-management-toolkit";
 
   let createTagPayload = {
-    name: newTag,
+    name: newTagName,
   };
 
   check(
@@ -117,7 +123,7 @@ export const getTag = () => {
     }
   );
 
-  getTagPayload.url = newTag;
+  getTagPayload.name = newTagName;
 
   check(
     http.request("GET", `${API_HOST}/tag`, JSON.stringify(getTagPayload), {
@@ -127,14 +133,14 @@ export const getTag = () => {
       "getTag - GET /tag - response status should be 200": (r) =>
         r.status === 200,
       "getTag - GET /tag - response body should have id": (r) =>
-        typeof r.json().url.id !== undefined || r.json().url.id !== null,
+        typeof r.json().tag.id !== undefined || r.json().tag.id !== null,
       "getTag - GET /tag - response body should have correct tag name": (r) =>
-        r.json().tag.name === newTag,
+        r.json().tag.name === newTagName,
     }
   );
 
   let deleteTagPayload = {
-    name: newTag,
+    name: newTagName,
   };
 
   check(

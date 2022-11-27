@@ -7,7 +7,7 @@ export const createUrl = () => {
 
   let createUrlPayload = {
     url: url,
-    resourceType: "RESOURCE_TYPE_WEBSITE",
+    resource_type: "RESOURCE_TYPE_WEBSITE",
   };
 
   let headers = {
@@ -19,14 +19,14 @@ export const createUrl = () => {
       headers,
     }),
     {
-      "createUrl - POST /url - response status should be 200": (r) =>
-        r.status === 200,
+      "createUrl - POST /url - response status should be 201": (r) =>
+        r.status === 201,
       "createUrl - POST /url - response body should have id": (r) =>
         typeof r.json().url.id !== undefined || r.json().url.id !== null,
       "createUrl - POST /url - response body should have correct url": (r) =>
         r.json().url.url === url,
       "createUrl - POST /url - response body should have correct resource_type":
-        (r) => r.json().url.resourceType === createUrlPayload.resourceType,
+        (r) => r.json().url.resource_type === createUrlPayload.resource_type,
     }
   );
 
@@ -115,7 +115,7 @@ export const getUrl = () => {
 
   let createUrlPayload = {
     url: newUrl,
-    resourceType: "RESOURCE_TYPE_WEBSITE",
+    resource_type: "RESOURCE_TYPE_WEBSITE",
   };
 
   check(
@@ -143,7 +143,7 @@ export const getUrl = () => {
         r.json().url.url === newUrl,
       "getUrl - GET /url - response body should have correct resource_type": (
         r
-      ) => r.json().url.resourceType === createUrlPayload.resourceType,
+      ) => r.json().url.resource_type === createUrlPayload.resource_type,
     }
   );
 
