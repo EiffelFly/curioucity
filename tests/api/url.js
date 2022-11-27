@@ -7,7 +7,7 @@ export const createUrl = () => {
 
   let createUrlPayload = {
     url: url,
-    resourceType: "RESOURCE_TYPE_WEBSITE",
+    resource_type: "RESOURCE_TYPE_WEBSITE",
   };
 
   let headers = {
@@ -21,6 +21,12 @@ export const createUrl = () => {
     {
       "createUrl - POST /url - response status should be 201": (r) =>
         r.status === 201,
+      "createUrl - POST /url - response body should have id": (r) =>
+        typeof r.json().url.id !== undefined || r.json().url.id !== null,
+      "createUrl - POST /url - response body should have correct url": (r) =>
+        r.json().url.url === url,
+      "createUrl - POST /url - response body should have correct resource_type":
+        (r) => r.json().url.resource_type === createUrlPayload.resource_type,
     }
   );
 
@@ -37,6 +43,46 @@ export const createUrl = () => {
     ),
     {
       "createUrl - DELETE /url - response status should be 204": (r) =>
+        r.status === 204,
+    }
+  );
+};
+
+export const deleteUrl = () => {
+  const url = "https://summerbud.org/id/test";
+
+  let createUrlPayload = {
+    url: url,
+    resourceType: "RESOURCE_TYPE_WEBSITE",
+  };
+
+  let headers = {
+    "Content-Type": "application/json",
+  };
+
+  check(
+    http.request("POST", `${API_HOST}/url`, JSON.stringify(createUrlPayload), {
+      headers,
+    }),
+    {
+      "deleteUrl - POST /url - response status should be 201": (r) =>
+        r.status === 201,
+    }
+  );
+
+  let deleteUrlPayload = {
+    url,
+  };
+
+  check(
+    http.request(
+      "DELETE",
+      `${API_HOST}/url`,
+      JSON.stringify(deleteUrlPayload),
+      { headers }
+    ),
+    {
+      "deleteUrl - DELETE /url - response status should be 204": (r) =>
         r.status === 204,
     }
   );
@@ -59,7 +105,7 @@ export const getUrl = () => {
       headers,
     }),
     {
-      "getUrl - GET not exist /url - response status should be 404": (r) =>
+      "getUrl - GET /url - not exist url, response status should be 404": (r) =>
         r.status === 404,
     }
   );
@@ -69,7 +115,7 @@ export const getUrl = () => {
 
   let createUrlPayload = {
     url: newUrl,
-    resourceType: "RESOURCE_TYPE_WEBSITE",
+    resource_type: "RESOURCE_TYPE_WEBSITE",
   };
 
   check(
@@ -89,16 +135,15 @@ export const getUrl = () => {
       headers,
     }),
     {
-      "getUrl - GET n /url - response status should be 200": (r) =>
+      "getUrl - GET /url - response status should be 200": (r) =>
         r.status === 200,
-      "getUrl - GET n /url - response data should have id": (r) =>
+      "getUrl - GET /url - response body should have id": (r) =>
         typeof r.json().url.id !== undefined || r.json().url.id !== null,
-      "getUrl - GET n /url - response data should have correct url": (r) =>
+      "getUrl - GET /url - response body should have correct url": (r) =>
         r.json().url.url === newUrl,
-      "getUrl - GET n /url - response data should have correct resource_type": (
+      "getUrl - GET /url - response body should have correct resource_type": (
         r
-      ) => r.json().url.resourceType === createUrlPayload.resourceType,
-      hi: (r) => console.log(r),
+      ) => r.json().url.resource_type === createUrlPayload.resource_type,
     }
   );
 
@@ -114,7 +159,7 @@ export const getUrl = () => {
       { headers }
     ),
     {
-      "createUrl - DELETE /url - response status should be 204": (r) =>
+      "getUrl - DELETE /url - response status should be 204": (r) =>
         r.status === 204,
     }
   );

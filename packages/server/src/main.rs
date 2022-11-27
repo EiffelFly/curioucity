@@ -10,11 +10,11 @@ mod rest_handler;
 use std::net::SocketAddr;
 
 use axum::Router;
-use grpc_handler::curioucity::UrlServiceImpl;
+use grpc_handler::curioucity::{GrpcTagServiceImpl, GrpcUrlServiceImpl};
 use http::{header::CONTENT_TYPE, Request};
 use hyper::Body;
 use pb_gen::curioucity::v1alpha as pb_curioucity;
-use rest_handler::curioucity::{create_url_handler, delete_url_handler, get_url_handler};
+use rest_handler::curioucity::{create_tag, create_url, delete_tag, delete_url, get_tag, get_url};
 use tonic::transport::Server;
 use tower::{steer::Steer, BoxError, ServiceExt};
 use tracing_subscriber;
@@ -26,20 +26,26 @@ async fn main() {
     // build our application with a route
     let http = Router::new()
         .route("/", axum::routing::get(hello))
-        .route("/url", axum::routing::post(create_url_handler))
-        .route("/url", axum::routing::delete(delete_url_handler))
-        .route("/url", axum::routing::get(get_url_handler))
+        .route("/url", axum::routing::post(create_url))
+        .route("/url", axum::routing::delete(delete_url))
+        .route("/url", axum::routing::get(get_url))
+        .route("/tag", axum::routing::post(create_tag))
+        .route("/tag", axum::routing::delete(delete_tag))
+        .route("/tag", axum::routing::get(get_tag))
         .fallback(fallback)
-        .into_service()
         .map_response(|r| r.map(axum::body::boxed))
         .map_err(BoxError::from)
         .boxed_clone();
 
     let url_service =
-        pb_curioucity::url_service_server::UrlServiceServer::new(UrlServiceImpl::default());
+        pb_curioucity::url_service_server::UrlServiceServer::new(GrpcUrlServiceImpl::default());
+
+    let tag_service =
+        pb_curioucity::tag_service_server::TagServiceServer::new(GrpcTagServiceImpl::default());
 
     let grpc = Server::builder()
         .add_service(url_service)
+        .add_service(tag_service)
         .into_service()
         .map_response(|r| r.map(axum::body::boxed))
         .map_err(BoxError::from)

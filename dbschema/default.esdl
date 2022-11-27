@@ -1,18 +1,26 @@
 module default {
   type DiscordGuild {
+    required property kind -> str {
+      constraint one_of("DiscordGuild");
+    };
     required property guild_id -> int64 {
       constraint exclusive;
     };
     required property name -> str;
     property icon -> str;
     multi link threads -> DiscordThread;
-    multi link tags -> Tag;
+    multi link tags -> Tag {
+      on target delete allow;
+    };
     link url -> Url {
       constraint exclusive;
-    }
+    };
   }
 
   type DiscordThread {
+    required property kind -> str {
+      constraint one_of("DiscordThread");
+    };
     required property thread_id -> int64 {
       constraint exclusive;
     };
@@ -23,13 +31,18 @@ module default {
     };
     property create_at -> datetime;
     property markdown_content -> str;
-    multi link tags -> Tag;
+    multi link tags -> Tag {
+      on target delete allow;
+    };
     link url -> Url {
       constraint exclusive;
-    }
+    };
   }
 
   type DiscordMessage {
+    required property kind -> str {
+      constraint one_of("DiscordMessage");
+    };
     required property message_id -> int64 {
       constraint exclusive;
     };
@@ -37,16 +50,19 @@ module default {
     property content -> str;
     property create_at -> datetime;
     property markdown_content -> str;
-    multi link tags -> Tag;
+    multi link tags -> Tag {
+      on target delete allow;
+    };
     link url -> Url {
       constraint exclusive;
-    }
+    };
   }
 
   type Tag {
     required property name -> str {
       constraint exclusive;
     };
+    multi link resources := .<tags
   }
 
   scalar type ResourceType extending enum<DiscordGuild, DiscordThread, DiscordMessage, Website>;
