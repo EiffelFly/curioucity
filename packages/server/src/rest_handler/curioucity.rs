@@ -24,7 +24,7 @@ use crate::pb_gen::curioucity::v1alpha as pb_curioucity;
 // pub struct RestUrlServiceImpl {}
 
 pub async fn create_url(
-    Json(data): Json<pb_curioucity::CreateUrlRequest>,
+    payload: Json<pb_curioucity::CreateUrlRequest>,
 ) -> Result<impl IntoResponse, Response> {
     let client = match edgedb_tokio::create_client().await {
         Ok(client) => client,
@@ -37,9 +37,10 @@ pub async fn create_url(
         }
     };
 
-    let payload = db_curioucity::CreateUrlPayload {
-        url: data.url,
-        resource_type: match pb_curioucity::ResourceType::as_db_type(data.resource_type) {
+    let create_url_payload = db_curioucity::CreateUrlPayload {
+        url: payload.url.clone(),
+        resource_type: match pb_curioucity::ResourceType::as_db_type(payload.resource_type.clone())
+        {
             Ok(resource_type) => resource_type,
             Err(error) => {
                 return Err((
@@ -54,7 +55,7 @@ pub async fn create_url(
         },
     };
 
-    let url = match db_curioucity::Url::create(client, &payload).await {
+    let url = match db_curioucity::Url::create(client, &create_url_payload).await {
         Ok(url) => url,
         Err(error) => {
             return Err((
@@ -73,7 +74,7 @@ pub async fn create_url(
 }
 
 pub async fn delete_url(
-    Json(data): Json<pb_curioucity::DeleteUrlRequest>,
+    payload: Json<pb_curioucity::DeleteUrlRequest>,
 ) -> Result<impl IntoResponse, Response> {
     let client = match edgedb_tokio::create_client().await {
         Ok(client) => client,
@@ -86,9 +87,11 @@ pub async fn delete_url(
         }
     };
 
-    let payload = db_curioucity::DeleteUrlPayload { url: data.url };
+    let delete_url_paylolad = db_curioucity::DeleteUrlPayload {
+        url: payload.url.clone(),
+    };
 
-    match db_curioucity::Url::delete(client, &payload).await {
+    match db_curioucity::Url::delete(client, &delete_url_paylolad).await {
         Ok(_) => return Ok((StatusCode::NO_CONTENT, ())),
         Err(error) => {
             return Err((
@@ -138,7 +141,7 @@ pub async fn get_url(
 }
 
 pub async fn create_tag(
-    Json(data): Json<pb_curioucity::CreateTagRequest>,
+    payload: Json<pb_curioucity::CreateTagRequest>,
 ) -> Result<impl IntoResponse, Response> {
     let client = match edgedb_tokio::create_client().await {
         Ok(client) => client,
@@ -151,9 +154,11 @@ pub async fn create_tag(
         }
     };
 
-    let payload = db_curioucity::CreateTagPayload { name: data.name };
+    let create_tag_payload = db_curioucity::CreateTagPayload {
+        name: payload.name.clone(),
+    };
 
-    let tag = match db_curioucity::FullTag::create(client, &payload).await {
+    let tag = match db_curioucity::FullTag::create(client, &create_tag_payload).await {
         Ok(tag) => tag,
         Err(error) => {
             return Err((
@@ -172,7 +177,7 @@ pub async fn create_tag(
 }
 
 pub async fn delete_tag(
-    Json(data): Json<pb_curioucity::DeleteTagRequest>,
+    payload: Json<pb_curioucity::DeleteTagRequest>,
 ) -> Result<impl IntoResponse, Response> {
     let client = match edgedb_tokio::create_client().await {
         Ok(client) => client,
@@ -185,9 +190,11 @@ pub async fn delete_tag(
         }
     };
 
-    let payload = db_curioucity::DeleteTagPayload { name: data.name };
+    let delete_tag_payload = db_curioucity::DeleteTagPayload {
+        name: payload.name.clone(),
+    };
 
-    match db_curioucity::FullTag::delete(client, &payload).await {
+    match db_curioucity::FullTag::delete(client, &delete_tag_payload).await {
         Ok(_) => return Ok((StatusCode::NO_CONTENT, ())),
         Err(error) => {
             return Err((
@@ -237,7 +244,7 @@ pub async fn get_tag(
 }
 
 pub async fn list_tag(
-    Json(data): Json<pb_curioucity::ListTagRequest>,
+    payload: Option<Json<pb_curioucity::ListTagRequest>>,
 ) -> Result<impl IntoResponse, Response> {
     let client = match edgedb_tokio::create_client().await {
         Ok(client) => client,
@@ -250,10 +257,14 @@ pub async fn list_tag(
         }
     };
 
-    let page_size = match data.page_size {
-        Some(page_size) => page_size,
-        None => 10,
-    };
+    let mut page_size: i64 = 10;
+
+    if let Some(payload) = payload {
+        page_size = match payload.page_size {
+            Some(page_size) => page_size,
+            None => 10,
+        };
+    }
 
     let payload = db_curioucity::ListTagPayload { page_size };
 
