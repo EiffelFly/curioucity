@@ -55,7 +55,7 @@ pub async fn create_url(
         },
     };
 
-    let url = match db_curioucity::Url::create(client, &create_url_payload).await {
+    let url = match db_curioucity::FullUrl::create(client, &create_url_payload).await {
         Ok(url) => url,
         Err(error) => {
             return Err((
@@ -91,7 +91,7 @@ pub async fn delete_url(
         url: payload.url.clone(),
     };
 
-    match db_curioucity::Url::delete(client, &delete_url_paylolad).await {
+    match db_curioucity::FullUrl::delete(client, &delete_url_paylolad).await {
         Ok(_) => return Ok((StatusCode::NO_CONTENT, ())),
         Err(error) => {
             return Err((
@@ -119,7 +119,7 @@ pub async fn get_url(
 
     let payload = db_curioucity::GetUrlPayload { url };
 
-    let url = match db_curioucity::Url::get(client, &payload).await {
+    let url = match db_curioucity::FullUrl::get(client, &payload).await {
         Ok(url) => match url {
             Some(url) => url,
             None => return Err((StatusCode::NOT_FOUND, "".to_string()).into_response()),

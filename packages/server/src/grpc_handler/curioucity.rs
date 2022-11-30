@@ -36,7 +36,7 @@ impl pb_curioucity::url_service_server::UrlService for GrpcUrlServiceImpl {
             },
         };
 
-        let url = match db_curioucity::Url::create(client, &payload).await {
+        let url = match db_curioucity::FullUrl::create(client, &payload).await {
             Ok(url) => url,
             Err(error) => {
                 return Err(Status::internal(format!(
@@ -71,7 +71,7 @@ impl pb_curioucity::url_service_server::UrlService for GrpcUrlServiceImpl {
             url: req.get_ref().url.clone(),
         };
 
-        match db_curioucity::Url::delete(client, &payload).await {
+        match db_curioucity::FullUrl::delete(client, &payload).await {
             Ok(_) => {
                 let resp = pb_curioucity::DeleteUrlResponse {};
                 return Ok(Response::new(resp));
@@ -103,7 +103,7 @@ impl pb_curioucity::url_service_server::UrlService for GrpcUrlServiceImpl {
             url: req.get_ref().url.clone(),
         };
 
-        let url = match db_curioucity::Url::get(client, &payload).await {
+        let url = match db_curioucity::FullUrl::get(client, &payload).await {
             Ok(url) => match url {
                 Some(url) => url,
                 None => return Err(Status::not_found("".to_string())),
