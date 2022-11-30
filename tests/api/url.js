@@ -4,7 +4,7 @@ import { API_HOST } from "./rest.js";
 
 export const createUrl = () => {
   group("Url - Should create url", () => {
-    const url = "https://summerbud.org/id/21";
+    const url = "https://summerbud.org/id/234d1";
 
     let createUrlPayload = {
       url: url,
@@ -18,20 +18,20 @@ export const createUrl = () => {
     check(
       http.request(
         "POST",
-        `${API_HOST}/url`,
+        `${API_HOST}/urls`,
         JSON.stringify(createUrlPayload),
         {
           headers,
         }
       ),
       {
-        "createUrl - POST /url - response status should be 201": (r) =>
+        "createUrl - POST /urls - response status should be 201": (r) =>
           r.status === 201,
-        "createUrl - POST /url - response body should have id": (r) =>
+        "createUrl - POST /urls - response body should have id": (r) =>
           typeof r.json().url.id !== undefined || r.json().url.id !== null,
-        "createUrl - POST /url - response body should have correct url": (r) =>
+        "createUrl - POST /urls - response body should have correct url": (r) =>
           r.json().url.url === url,
-        "createUrl - POST /url - response body should have correct resource_type":
+        "createUrl - POST /urls - response body should have correct resource_type":
           (r) => r.json().url.resource_type === createUrlPayload.resource_type,
       }
     );
@@ -43,12 +43,12 @@ export const createUrl = () => {
     check(
       http.request(
         "DELETE",
-        `${API_HOST}/url`,
+        `${API_HOST}/urls`,
         JSON.stringify(deleteUrlPayload),
         { headers }
       ),
       {
-        "createUrl - DELETE /url - response status should be 204": (r) =>
+        "createUrl - DELETE /urls - response status should be 204": (r) =>
           r.status === 204,
       }
     );
@@ -71,14 +71,14 @@ export const deleteUrl = () => {
     check(
       http.request(
         "POST",
-        `${API_HOST}/url`,
+        `${API_HOST}/urls`,
         JSON.stringify(createUrlPayload),
         {
           headers,
         }
       ),
       {
-        "deleteUrl - POST /url - response status should be 201": (r) =>
+        "deleteUrl - POST /urls - response status should be 201": (r) =>
           r.status === 201,
       }
     );
@@ -90,12 +90,12 @@ export const deleteUrl = () => {
     check(
       http.request(
         "DELETE",
-        `${API_HOST}/url`,
+        `${API_HOST}/urls`,
         JSON.stringify(deleteUrlPayload),
         { headers }
       ),
       {
-        "deleteUrl - DELETE /url - response status should be 204": (r) =>
+        "deleteUrl - DELETE /urls - response status should be 204": (r) =>
           r.status === 204,
       }
     );
@@ -107,27 +107,28 @@ export const getUrl = () => {
     // Should return not found when try to get not exist url
     const notExistUrl = "https://summerbud.org/id/21afr23";
 
-    let getUrlPayload = {
-      url: notExistUrl,
-    };
-
     let headers = {
       "Content-Type": "application/json",
     };
 
     check(
-      http.request("GET", `${API_HOST}/url`, JSON.stringify(getUrlPayload), {
-        headers,
-      }),
+      http.request(
+        "GET",
+        `${API_HOST}/urls/${encodeURIComponent(notExistUrl)}`,
+        undefined,
+        {
+          headers,
+        }
+      ),
       {
-        "getUrl - GET /url - not exist url, response status should be 404": (
+        "getUrl - GET /urls - not exist url, response status should be 404": (
           r
         ) => r.status === 404,
       }
     );
 
     // Should get the newly created url
-    const newUrl = "https://summerbud.org/id/333423452";
+    const newUrl = "https://summerbud.org/id/305968";
 
     let createUrlPayload = {
       url: newUrl,
@@ -137,34 +138,36 @@ export const getUrl = () => {
     check(
       http.request(
         "POST",
-        `${API_HOST}/url`,
+        `${API_HOST}/urls`,
         JSON.stringify(createUrlPayload),
         {
           headers,
         }
       ),
       {
-        "getUrl - POST /url - response status should be 201": (r) =>
+        "getUrl - POST /urls - response status should be 201": (r) =>
           r.status === 201,
       }
     );
 
-    getUrlPayload.url = newUrl;
-
     check(
-      http.request("GET", `${API_HOST}/url`, JSON.stringify(getUrlPayload), {
-        headers,
-      }),
+      http.request(
+        "GET",
+        `${API_HOST}/urls/${encodeURIComponent(newUrl)}`,
+        undefined,
+        {
+          headers,
+        }
+      ),
       {
-        "getUrl - GET /url - response status should be 200": (r) =>
+        "getUrl - GET /urls - response status should be 200": (r) =>
           r.status === 200,
-        "getUrl - GET /url - response body should have id": (r) =>
+        "getUrl - GET /urls - response body should have id": (r) =>
           typeof r.json().url.id !== undefined || r.json().url.id !== null,
-        "getUrl - GET /url - response body should have correct url": (r) =>
+        "getUrl - GET /urls - response body should have correct url": (r) =>
           r.json().url.url === newUrl,
-        "getUrl - GET /url - response body should have correct resource_type": (
-          r
-        ) => r.json().url.resource_type === createUrlPayload.resource_type,
+        "getUrl - GET /urls - response body should have correct resource_type":
+          (r) => r.json().url.resource_type === createUrlPayload.resource_type,
       }
     );
 
@@ -175,12 +178,12 @@ export const getUrl = () => {
     check(
       http.request(
         "DELETE",
-        `${API_HOST}/url`,
+        `${API_HOST}/urls`,
         JSON.stringify(deleteUrlPayload),
         { headers }
       ),
       {
-        "getUrl - DELETE /url - response status should be 204": (r) =>
+        "getUrl - DELETE /urls - response status should be 204": (r) =>
           r.status === 204,
       }
     );
