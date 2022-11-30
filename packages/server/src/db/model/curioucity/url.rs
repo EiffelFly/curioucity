@@ -41,6 +41,10 @@ pub struct GetUrlPayload {
     pub url: String,
 }
 
+pub struct ListUrlPayload {
+    pub page_size: i64,
+}
+
 impl FullUrl {
     pub async fn create(client: Client, payload: &CreateUrlPayload) -> Result<Self, anyhow::Error> {
         let query = "select (
@@ -118,6 +122,37 @@ impl FullUrl {
                     let url = result.into_iter().nth(0).unwrap();
                     Ok(Some(url))
                 }
+            }
+            Err(error) => {
+                println!("Error: {:?}", error);
+                bail!("{}", error)
+            }
+        }
+    }
+
+    pub async fn list(
+        client: Client,
+        payload: &ListUrlPayload,
+    ) -> Result<Vec<Self>, anyhow::Error> {
+        let query = "select Url {
+            id, 
+            url,
+            references: {
+                id,
+                url,
+                resource_type
+            },
+            resource_type,
+            resource
+        } order by .url
+        limit <int64>$0";
+
+        let response = client.query_json(&query, &(&payload.page_size,)).await;
+
+        match response {
+            Ok(json) => {
+                let result = serde_json::from_str::<Vec<FullUrl>>(json.as_ref()).unwrap();
+                Ok(result)
             }
             Err(error) => {
                 println!("Error: {:?}", error);
