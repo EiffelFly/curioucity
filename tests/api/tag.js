@@ -172,3 +172,68 @@ export const getTag = () => {
     );
   });
 };
+
+export const listTag = () => {
+  group("Should list tags", () => {
+    const newTags = ["browser-engine", "note-taking"];
+
+    let headers = {
+      "Content-Type": "application/json",
+    };
+
+    check(http.request("GET", `${API_HOST}/tags`, undefined, { headers }), {
+      hi: (r) => console.log(r.json()),
+      "listTag - GET /tags - no tags exist, should response 200": (r) =>
+        r.status === 200,
+    });
+
+    for (const tag of newTags) {
+      let createTagPayload = {
+        name: tag,
+      };
+
+      check(
+        http.request(
+          "POST",
+          `${API_HOST}/tags`,
+          JSON.stringify(createTagPayload),
+          {
+            headers,
+          }
+        ),
+        {
+          "listTag - POST /tags - response status should be 201": (r) =>
+            r.status === 201,
+        }
+      );
+    }
+
+    check(http.request("GET", `${API_HOST}/tags`, undefined, { headers }), {
+      "listTag - GET /tags - have two tags, should response 200": (r) =>
+        r.status === 200,
+      "listTag - GET /tags - have two tags, should response size=2": (r) =>
+        r.json().size === "2",
+    });
+
+    for (const tag of newTags) {
+      let deleteTagPayload = {
+        name: tag,
+      };
+
+      check(
+        http.request(
+          "DELETE",
+          `${API_HOST}/tags`,
+          JSON.stringify(deleteTagPayload),
+          {
+            headers,
+          }
+        ),
+        {
+          "lsitTag - DELETE /tags - response status should be 204": (r) =>
+            r.status === 204,
+        }
+      );
+    }
+  });
+};
