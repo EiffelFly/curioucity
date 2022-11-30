@@ -1773,6 +1773,7 @@ dependencies = [
  "edgedb-derive",
  "edgedb-protocol",
  "edgedb-tokio",
+ "form_urlencoded",
  "futures",
  "http",
  "hyper",

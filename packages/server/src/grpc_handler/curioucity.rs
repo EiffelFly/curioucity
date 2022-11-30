@@ -233,4 +233,51 @@ impl pb_curioucity::tag_service_server::TagService for GrpcTagServiceImpl {
 
         Ok(Response::new(resp))
     }
+
+    async fn list_tag(
+        &self,
+        req: Request<pb_curioucity::ListTagRequest>,
+    ) -> Result<Response<pb_curioucity::ListTagResponse>, Status> {
+        let client = match edgedb_tokio::create_client().await {
+            Ok(client) => client,
+            Err(error) => {
+                return Err(Status::internal(format!(
+                    "Something went wrong when access database: {}",
+                    error
+                )))
+            }
+        };
+
+        let page_size = match req.get_ref().page_size {
+            Some(page_size) => page_size,
+            None => 10,
+        };
+
+        let payload = db_curioucity::ListTagPayload { page_size };
+
+        let tags = match db_curioucity::FullTag::list(client, &payload).await {
+            Ok(tags) => tags,
+            Err(error) => {
+                return Err(Status::internal(format!(
+                    "Something went wrong when get tag: {}",
+                    error
+                )))
+            }
+        };
+
+        let mut pb_tags: Vec<pb_curioucity::FullTag> = Vec::new();
+
+        for i in tags {
+            pb_tags.push(i.as_pb_type());
+        }
+
+        let size = pb_tags.len() as i64;
+
+        let resp = pb_curioucity::ListTagResponse {
+            tags: pb_tags,
+            size,
+        };
+
+        Ok(Response::new(resp))
+    }
 }

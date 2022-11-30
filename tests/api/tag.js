@@ -4,7 +4,7 @@ import { API_HOST } from "./rest.js";
 
 export const createTag = () => {
   group("Tag - Should create tag", () => {
-    const tagName = "knowledge-management-toolkit";
+    const tagName = "knowledge-management-toolkit-22";
 
     let createTagPayload = {
       name: tagName,
@@ -17,18 +17,18 @@ export const createTag = () => {
     check(
       http.request(
         "POST",
-        `${API_HOST}/tag`,
+        `${API_HOST}/tags`,
         JSON.stringify(createTagPayload),
         {
           headers,
         }
       ),
       {
-        "createTag - POST /tag - response status should be 201": (r) =>
+        "createTag - POST /tags - response status should be 201": (r) =>
           r.status === 201,
-        "createTag - POST /tag - response body should have id": (r) =>
+        "createTag - POST /tags - response body should have id": (r) =>
           typeof r.json().tag.id !== undefined || r.json().tag.id !== null,
-        "createTag - POST /tag - response body should have correct tag name": (
+        "createTag - POST /tags - response body should have correct tag name": (
           r
         ) => r.json().tag.name === tagName,
       }
@@ -41,12 +41,12 @@ export const createTag = () => {
     check(
       http.request(
         "DELETE",
-        `${API_HOST}/tag`,
+        `${API_HOST}/tags`,
         JSON.stringify(deleteTagPayload),
         { headers }
       ),
       {
-        "createTag - DELETE /tag - response status should be 204": (r) =>
+        "createTag - DELETE /tags - response status should be 204": (r) =>
           r.status === 204,
       }
     );
@@ -55,7 +55,7 @@ export const createTag = () => {
 
 export const deleteTag = () => {
   group("Tag - Should delete tag", () => {
-    const tagName = "knowledge-management-toolkit";
+    const tagName = "knowledge-management-toolkit-34";
 
     let createTagPayload = {
       name: tagName,
@@ -68,14 +68,14 @@ export const deleteTag = () => {
     check(
       http.request(
         "POST",
-        `${API_HOST}/tag`,
+        `${API_HOST}/tags`,
         JSON.stringify(createTagPayload),
         {
           headers,
         }
       ),
       {
-        "deleteTag - POST /tag - response status should be 201": (r) =>
+        "deleteTag - POST /tags - response status should be 201": (r) =>
           r.status === 201,
       }
     );
@@ -87,12 +87,12 @@ export const deleteTag = () => {
     check(
       http.request(
         "DELETE",
-        `${API_HOST}/tag`,
+        `${API_HOST}/tags`,
         JSON.stringify(deleteTagPayload),
         { headers }
       ),
       {
-        "deleteTag - DELETE /tag - response status should be 204": (r) =>
+        "deleteTag - DELETE /tags - response status should be 204": (r) =>
           r.status === 204,
       }
     );
@@ -104,27 +104,22 @@ export const getTag = () => {
     // Should return not found when try to get not exist tag
     const notExistTag = "web3";
 
-    let getTagPayload = {
-      name: notExistTag,
-    };
-
     let headers = {
       "Content-Type": "application/json",
     };
 
     check(
-      http.request("GET", `${API_HOST}/tag`, JSON.stringify(getTagPayload), {
+      http.request("GET", `${API_HOST}/tags/${notExistTag}`, undefined, {
         headers,
       }),
       {
-        "getTag - GET /tag - not exist tag, response status should be 404": (
-          r
-        ) => r.status === 404,
+        "getTag - GET /tags/{name} - not exist tag, response status should be 404":
+          (r) => r.status === 404,
       }
     );
 
     // Should get the newly created tag
-    const newTagName = "knowledge-management-toolkit";
+    const newTagName = "knowledge-management-toolkit-123";
 
     let createTagPayload = {
       name: newTagName,
@@ -133,31 +128,29 @@ export const getTag = () => {
     check(
       http.request(
         "POST",
-        `${API_HOST}/tag`,
+        `${API_HOST}/tags`,
         JSON.stringify(createTagPayload),
         {
           headers,
         }
       ),
       {
-        "getTag - POST /tag - response status should be 201": (r) =>
+        "getTag - POST /tags - response status should be 201": (r) =>
           r.status === 201,
       }
     );
 
-    getTagPayload.name = newTagName;
-
     check(
-      http.request("GET", `${API_HOST}/tag`, JSON.stringify(getTagPayload), {
+      http.request("GET", `${API_HOST}/tags/${newTagName}`, undefined, {
         headers,
       }),
       {
-        "getTag - GET /tag - response status should be 200": (r) =>
+        "getTag - GET /tags/{name} - response status should be 200": (r) =>
           r.status === 200,
-        "getTag - GET /tag - response body should have id": (r) =>
+        "getTag - GET /tags/{name} - response body should have id": (r) =>
           typeof r.json().tag.id !== undefined || r.json().tag.id !== null,
-        "getTag - GET /tag - response body should have correct tag name": (r) =>
-          r.json().tag.name === newTagName,
+        "getTag - GET /tags/{name} - response body should have correct tag name":
+          (r) => r.json().tag.name === newTagName,
       }
     );
 
@@ -168,14 +161,79 @@ export const getTag = () => {
     check(
       http.request(
         "DELETE",
-        `${API_HOST}/tag`,
+        `${API_HOST}/tags`,
         JSON.stringify(deleteTagPayload),
         { headers }
       ),
       {
-        "getTag - DELETE /tag - response status should be 204": (r) =>
+        "getTag - DELETE /tags - response status should be 204": (r) =>
           r.status === 204,
       }
     );
+  });
+};
+
+export const listTag = () => {
+  group("Should list tags", () => {
+    const newTags = ["browser-engine", "note-taking"];
+
+    let headers = {
+      "Content-Type": "application/json",
+    };
+
+    check(http.request("GET", `${API_HOST}/tags`, undefined, { headers }), {
+      hi: (r) => console.log(r.json()),
+      "listTag - GET /tags - no tags exist, should response 200": (r) =>
+        r.status === 200,
+    });
+
+    for (const tag of newTags) {
+      let createTagPayload = {
+        name: tag,
+      };
+
+      check(
+        http.request(
+          "POST",
+          `${API_HOST}/tags`,
+          JSON.stringify(createTagPayload),
+          {
+            headers,
+          }
+        ),
+        {
+          "listTag - POST /tags - response status should be 201": (r) =>
+            r.status === 201,
+        }
+      );
+    }
+
+    check(http.request("GET", `${API_HOST}/tags`, undefined, { headers }), {
+      "listTag - GET /tags - have two tags, should response 200": (r) =>
+        r.status === 200,
+      "listTag - GET /tags - have two tags, should response size=2": (r) =>
+        r.json().size === "2",
+    });
+
+    for (const tag of newTags) {
+      let deleteTagPayload = {
+        name: tag,
+      };
+
+      check(
+        http.request(
+          "DELETE",
+          `${API_HOST}/tags`,
+          JSON.stringify(deleteTagPayload),
+          {
+            headers,
+          }
+        ),
+        {
+          "lsitTag - DELETE /tags - response status should be 204": (r) =>
+            r.status === 204,
+        }
+      );
+    }
   });
 };

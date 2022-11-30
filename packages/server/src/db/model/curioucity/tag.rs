@@ -14,6 +14,24 @@ pub struct FullTag {
     pub resources: Option<Vec<ResourceUnion>>,
 }
 
+#[derive(Debug)]
+pub struct CreateTagPayload {
+    pub name: String,
+}
+#[derive(Debug)]
+pub struct DeleteTagPayload {
+    pub name: String,
+}
+#[derive(Debug)]
+pub struct GetTagPayload {
+    pub name: String,
+}
+
+#[derive(Debug)]
+pub struct ListTagPayload {
+    pub page_size: i64,
+}
+
 impl FullTag {
     pub async fn create(client: Client, payload: &CreateTagPayload) -> Result<Self, anyhow::Error> {
         let query = "select (
@@ -84,8 +102,39 @@ impl FullTag {
         }
     }
 
+    pub async fn list(
+        client: Client,
+        payload: &ListTagPayload,
+    ) -> Result<Vec<Self>, anyhow::Error> {
+        let query = "select Tag {
+            id,
+            name,
+            resources
+        } order by .name
+        limit <int64>$0";
+
+        let response = client.query_json(&query, &(&payload.page_size,)).await;
+
+        match response {
+            Ok(json) => {
+                let result = serde_json::from_str::<Vec<FullTag>>(json.as_ref()).unwrap();
+                Ok(result)
+            }
+            Err(error) => {
+                println!("Error: {:?}", error);
+                bail!("{}", error)
+            }
+        }
+    }
+
     pub fn as_pb_type(&self) -> pb_curioucity::FullTag {
         transform_full_tag_to_pb(self)
+    }
+}
+
+impl From<FullTag> for pb_curioucity::FullTag {
+    fn from(value: FullTag) -> Self {
+        transform_full_tag_to_pb(&value)
     }
 }
 
@@ -131,16 +180,4 @@ impl From<Tag> for pb_curioucity::Tag {
     fn from(value: Tag) -> Self {
         transform_tag_to_pb(&value)
     }
-}
-
-pub struct CreateTagPayload {
-    pub name: String,
-}
-
-pub struct DeleteTagPayload {
-    pub name: String,
-}
-
-pub struct GetTagPayload {
-    pub name: String,
 }

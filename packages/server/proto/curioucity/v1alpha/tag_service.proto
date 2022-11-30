@@ -6,6 +6,7 @@ service TagService {
   rpc CreateTag(CreateTagRequest) returns (CreateTagResponse);
   rpc DeleteTag(DeleteTagRequest) returns (DeleteTagResponse);
   rpc GetTag(GetTagRequest) returns (GetTagResponse);
+  rpc ListTag(ListTagRequest) returns (ListTagResponse);
 }
 
 message CreateTagRequest {
@@ -28,4 +29,13 @@ message GetTagRequest {
 
 message GetTagResponse {
   curioucity.v1alpha.FullTag tag = 1;
+}
+
+message ListTagRequest {
+  optional int64 page_size = 1;
+}
+
+message ListTagResponse {
+  repeated curioucity.v1alpha.FullTag tags = 1;
+  int64 size = 2;
 }

@@ -1,4 +1,4 @@
-use axum::response::Response;
+use axum::{extract::Path, response::Response};
 use axum::{http::StatusCode, response::IntoResponse, Json};
 
 use crate::db::model::curioucity as db_curioucity;
@@ -24,7 +24,7 @@ use crate::pb_gen::curioucity::v1alpha as pb_curioucity;
 // pub struct RestUrlServiceImpl {}
 
 pub async fn create_url(
-    Json(data): Json<pb_curioucity::CreateUrlRequest>,
+    payload: Json<pb_curioucity::CreateUrlRequest>,
 ) -> Result<impl IntoResponse, Response> {
     let client = match edgedb_tokio::create_client().await {
         Ok(client) => client,
@@ -37,9 +37,10 @@ pub async fn create_url(
         }
     };
 
-    let payload = db_curioucity::CreateUrlPayload {
-        url: data.url,
-        resource_type: match pb_curioucity::ResourceType::as_db_type(data.resource_type) {
+    let create_url_payload = db_curioucity::CreateUrlPayload {
+        url: payload.url.clone(),
+        resource_type: match pb_curioucity::ResourceType::as_db_type(payload.resource_type.clone())
+        {
             Ok(resource_type) => resource_type,
             Err(error) => {
                 return Err((
@@ -54,7 +55,7 @@ pub async fn create_url(
         },
     };
 
-    let url = match db_curioucity::Url::create(client, &payload).await {
+    let url = match db_curioucity::Url::create(client, &create_url_payload).await {
         Ok(url) => url,
         Err(error) => {
             return Err((
@@ -73,7 +74,7 @@ pub async fn create_url(
 }
 
 pub async fn delete_url(
-    Json(data): Json<pb_curioucity::DeleteUrlRequest>,
+    payload: Json<pb_curioucity::DeleteUrlRequest>,
 ) -> Result<impl IntoResponse, Response> {
     let client = match edgedb_tokio::create_client().await {
         Ok(client) => client,
@@ -86,9 +87,11 @@ pub async fn delete_url(
         }
     };
 
-    let payload = db_curioucity::DeleteUrlPayload { url: data.url };
+    let delete_url_paylolad = db_curioucity::DeleteUrlPayload {
+        url: payload.url.clone(),
+    };
 
-    match db_curioucity::Url::delete(client, &payload).await {
+    match db_curioucity::Url::delete(client, &delete_url_paylolad).await {
         Ok(_) => return Ok((StatusCode::NO_CONTENT, ())),
         Err(error) => {
             return Err((
@@ -101,7 +104,7 @@ pub async fn delete_url(
 }
 
 pub async fn get_url(
-    Json(data): Json<pb_curioucity::GetUrlRequest>,
+    Path(pb_curioucity::GetUrlRequest { url }): Path<pb_curioucity::GetUrlRequest>,
 ) -> Result<impl IntoResponse, Response> {
     let client = match edgedb_tokio::create_client().await {
         Ok(client) => client,
@@ -114,7 +117,7 @@ pub async fn get_url(
         }
     };
 
-    let payload = db_curioucity::GetUrlPayload { url: data.url };
+    let payload = db_curioucity::GetUrlPayload { url };
 
     let url = match db_curioucity::Url::get(client, &payload).await {
         Ok(url) => match url {
@@ -138,7 +141,7 @@ pub async fn get_url(
 }
 
 pub async fn create_tag(
-    Json(data): Json<pb_curioucity::CreateTagRequest>,
+    payload: Json<pb_curioucity::CreateTagRequest>,
 ) -> Result<impl IntoResponse, Response> {
     let client = match edgedb_tokio::create_client().await {
         Ok(client) => client,
@@ -151,9 +154,11 @@ pub async fn create_tag(
         }
     };
 
-    let payload = db_curioucity::CreateTagPayload { name: data.name };
+    let create_tag_payload = db_curioucity::CreateTagPayload {
+        name: payload.name.clone(),
+    };
 
-    let tag = match db_curioucity::FullTag::create(client, &payload).await {
+    let tag = match db_curioucity::FullTag::create(client, &create_tag_payload).await {
         Ok(tag) => tag,
         Err(error) => {
             return Err((
@@ -172,7 +177,7 @@ pub async fn create_tag(
 }
 
 pub async fn delete_tag(
-    Json(data): Json<pb_curioucity::DeleteTagRequest>,
+    payload: Json<pb_curioucity::DeleteTagRequest>,
 ) -> Result<impl IntoResponse, Response> {
     let client = match edgedb_tokio::create_client().await {
         Ok(client) => client,
@@ -185,9 +190,11 @@ pub async fn delete_tag(
         }
     };
 
-    let payload = db_curioucity::DeleteTagPayload { name: data.name };
+    let delete_tag_payload = db_curioucity::DeleteTagPayload {
+        name: payload.name.clone(),
+    };
 
-    match db_curioucity::FullTag::delete(client, &payload).await {
+    match db_curioucity::FullTag::delete(client, &delete_tag_payload).await {
         Ok(_) => return Ok((StatusCode::NO_CONTENT, ())),
         Err(error) => {
             return Err((
@@ -200,7 +207,7 @@ pub async fn delete_tag(
 }
 
 pub async fn get_tag(
-    Json(data): Json<pb_curioucity::GetTagRequest>,
+    Path(pb_curioucity::GetTagRequest { name }): Path<pb_curioucity::GetTagRequest>,
 ) -> Result<impl IntoResponse, Response> {
     let client = match edgedb_tokio::create_client().await {
         Ok(client) => client,
@@ -213,7 +220,7 @@ pub async fn get_tag(
         }
     };
 
-    let payload = db_curioucity::GetTagPayload { name: data.name };
+    let payload = db_curioucity::GetTagPayload { name };
 
     let tag = match db_curioucity::FullTag::get(client, &payload).await {
         Ok(tag) => match tag {
@@ -231,6 +238,58 @@ pub async fn get_tag(
 
     let resp = pb_curioucity::GetTagResponse {
         tag: Some(tag.as_pb_type()),
+    };
+
+    Ok((StatusCode::OK, Json(resp)))
+}
+
+pub async fn list_tag(
+    payload: Option<Json<pb_curioucity::ListTagRequest>>,
+) -> Result<impl IntoResponse, Response> {
+    let client = match edgedb_tokio::create_client().await {
+        Ok(client) => client,
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when access database: {}", error),
+            )
+                .into_response())
+        }
+    };
+
+    let mut page_size: i64 = 10;
+
+    if let Some(payload) = payload {
+        page_size = match payload.page_size {
+            Some(page_size) => page_size,
+            None => 10,
+        };
+    }
+
+    let payload = db_curioucity::ListTagPayload { page_size };
+
+    let tags = match db_curioucity::FullTag::list(client, &payload).await {
+        Ok(tags) => tags,
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when list tag: {}", error),
+            )
+                .into_response())
+        }
+    };
+
+    let mut pb_tags: Vec<pb_curioucity::FullTag> = Vec::new();
+
+    for i in tags {
+        pb_tags.push(i.as_pb_type());
+    }
+
+    let size = pb_tags.len() as i64;
+
+    let resp = pb_curioucity::ListTagResponse {
+        tags: pb_tags,
+        size,
     };
 
     Ok((StatusCode::OK, Json(resp)))
