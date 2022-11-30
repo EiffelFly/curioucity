@@ -1,4 +1,4 @@
-use axum::response::Response;
+use axum::{extract::Path, response::Response};
 use axum::{http::StatusCode, response::IntoResponse, Json};
 
 use crate::db::model::curioucity as db_curioucity;
@@ -101,7 +101,7 @@ pub async fn delete_url(
 }
 
 pub async fn get_url(
-    Json(data): Json<pb_curioucity::GetUrlRequest>,
+    Path(pb_curioucity::GetUrlRequest { url }): Path<pb_curioucity::GetUrlRequest>,
 ) -> Result<impl IntoResponse, Response> {
     let client = match edgedb_tokio::create_client().await {
         Ok(client) => client,
@@ -114,7 +114,7 @@ pub async fn get_url(
         }
     };
 
-    let payload = db_curioucity::GetUrlPayload { url: data.url };
+    let payload = db_curioucity::GetUrlPayload { url };
 
     let url = match db_curioucity::Url::get(client, &payload).await {
         Ok(url) => match url {
@@ -200,7 +200,7 @@ pub async fn delete_tag(
 }
 
 pub async fn get_tag(
-    Json(data): Json<pb_curioucity::GetTagRequest>,
+    Path(pb_curioucity::GetTagRequest { name }): Path<pb_curioucity::GetTagRequest>,
 ) -> Result<impl IntoResponse, Response> {
     let client = match edgedb_tokio::create_client().await {
         Ok(client) => client,
@@ -213,7 +213,7 @@ pub async fn get_tag(
         }
     };
 
-    let payload = db_curioucity::GetTagPayload { name: data.name };
+    let payload = db_curioucity::GetTagPayload { name };
 
     let tag = match db_curioucity::FullTag::get(client, &payload).await {
         Ok(tag) => match tag {
@@ -231,6 +231,54 @@ pub async fn get_tag(
 
     let resp = pb_curioucity::GetTagResponse {
         tag: Some(tag.as_pb_type()),
+    };
+
+    Ok((StatusCode::OK, Json(resp)))
+}
+
+pub async fn list_tag(
+    Json(data): Json<pb_curioucity::ListTagRequest>,
+) -> Result<impl IntoResponse, Response> {
+    let client = match edgedb_tokio::create_client().await {
+        Ok(client) => client,
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when access database: {}", error),
+            )
+                .into_response())
+        }
+    };
+
+    let page_size = match data.page_size {
+        Some(page_size) => page_size,
+        None => 10,
+    };
+
+    let payload = db_curioucity::ListTagPayload { page_size };
+
+    let tags = match db_curioucity::FullTag::list(client, &payload).await {
+        Ok(tags) => tags,
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when list tag: {}", error),
+            )
+                .into_response())
+        }
+    };
+
+    let mut pb_tags: Vec<pb_curioucity::FullTag> = Vec::new();
+
+    for i in tags {
+        pb_tags.push(i.as_pb_type());
+    }
+
+    let size = pb_tags.len() as i64;
+
+    let resp = pb_curioucity::ListTagResponse {
+        tags: pb_tags,
+        size,
     };
 
     Ok((StatusCode::OK, Json(resp)))
