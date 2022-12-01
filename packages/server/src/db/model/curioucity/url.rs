@@ -41,6 +41,7 @@ pub struct GetUrlPayload {
     pub url: String,
 }
 
+#[derive(Deserialize, Serialize)]
 pub struct ListUrlPayload {
     pub page_size: i64,
 }

@@ -140,6 +140,58 @@ pub async fn get_url(
     Ok((StatusCode::OK, Json(resp)))
 }
 
+pub async fn list_url(
+    payload: Option<Json<pb_curioucity::ListUrlRequest>>,
+) -> Result<impl IntoResponse, Response> {
+    let client = match edgedb_tokio::create_client().await {
+        Ok(client) => client,
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when access database: {}", error),
+            )
+                .into_response())
+        }
+    };
+
+    let mut page_size: i64 = 10;
+
+    if let Some(payload) = payload {
+        page_size = match payload.page_size {
+            Some(page_size) => page_size,
+            None => 10,
+        };
+    }
+
+    let list_url_payload = db_curioucity::ListUrlPayload { page_size };
+
+    let urls = match db_curioucity::FullUrl::list(client, &list_url_payload).await {
+        Ok(urls) => urls,
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when list url: {}", error),
+            )
+                .into_response())
+        }
+    };
+
+    let mut pb_urls: Vec<pb_curioucity::FullUrl> = Vec::new();
+
+    for i in urls {
+        pb_urls.push(i.as_pb_type());
+    }
+
+    let size = pb_urls.len() as i64;
+
+    let resp = pb_curioucity::ListUrlResponse {
+        urls: pb_urls,
+        size,
+    };
+
+    Ok((StatusCode::OK, Json(resp)))
+}
+
 pub async fn create_tag(
     payload: Json<pb_curioucity::CreateTagRequest>,
 ) -> Result<impl IntoResponse, Response> {

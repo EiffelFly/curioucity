@@ -6,9 +6,10 @@ import "curioucity/v1alpha/general.proto";
 import "curioucity/v1alpha/union.proto";
 
 service UrlService {
-  rpc CreateUrl(curioucity.v1alpha.CreateUrlRequest) returns (curioucity.v1alpha.CreateUrlResponse);
-  rpc DeleteUrl(curioucity.v1alpha.DeleteUrlRequest) returns (curioucity.v1alpha.DeleteUrlResponse);
-  rpc GetUrl(curioucity.v1alpha.GetUrlRequest) returns (curioucity.v1alpha.GetUrlResponse);
+  rpc CreateUrl(CreateUrlRequest) returns (CreateUrlResponse);
+  rpc DeleteUrl(DeleteUrlRequest) returns (DeleteUrlResponse);
+  rpc GetUrl(GetUrlRequest) returns (GetUrlResponse);
+  rpc ListUrl(ListUrlRequest) returns (ListUrlResponse);
 }
 
 message CreateUrlRequest {
@@ -39,6 +40,6 @@ message ListUrlRequest {
 }
 
 message ListUrlResponse {
-  repeated curioucity.v1alpha.FullUrl tags = 1;
+  repeated curioucity.v1alpha.FullUrl urls = 1;
   int64 size = 2;
 }
