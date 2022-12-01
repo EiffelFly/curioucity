@@ -182,7 +182,6 @@ export const listTag = () => {
     };
 
     check(http.request("GET", `${API_HOST}/tags`, undefined, { headers }), {
-      hi: (r) => console.log(r.json()),
       "listTag - GET /tags - no tags exist, should response 200": (r) =>
         r.status === 200,
     });

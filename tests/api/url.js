@@ -189,3 +189,71 @@ export const getUrl = () => {
     );
   });
 };
+
+export const listUrl = () => {
+  group("Should list tags", () => {
+    const newUrls = [
+      "https://www.summerbud.org/id/258",
+      "https://www.summerbud.org/id/2675",
+    ];
+
+    let headers = {
+      "Content-Type": "application/json",
+    };
+
+    check(http.request("GET", `${API_HOST}/urls`, undefined, { headers }), {
+      "listUrl - GET /urls - no urls exist, should response 200": (r) =>
+        r.status === 200,
+    });
+
+    for (const url of newUrls) {
+      let createUrlPayload = {
+        url,
+        resource_type: "RESOURCE_TYPE_WEBSITE",
+      };
+
+      check(
+        http.request(
+          "POST",
+          `${API_HOST}/urls`,
+          JSON.stringify(createUrlPayload),
+          {
+            headers,
+          }
+        ),
+        {
+          "listUrl - POST /urls - response status should be 201": (r) =>
+            r.status === 201,
+        }
+      );
+    }
+
+    check(http.request("GET", `${API_HOST}/urls`, undefined, { headers }), {
+      "listUrl - GET /urls - have two urls, should response 200": (r) =>
+        r.status === 200,
+      "listUrl - GET /urls - have two urls, should response size=2": (r) =>
+        r.json().size === "2",
+    });
+
+    for (const url of newUrls) {
+      let deleteUrlPayload = {
+        url,
+      };
+
+      check(
+        http.request(
+          "DELETE",
+          `${API_HOST}/urls`,
+          JSON.stringify(deleteUrlPayload),
+          {
+            headers,
+          }
+        ),
+        {
+          "listUrl - DELETE /urls - response status should be 204": (r) =>
+            r.status === 204,
+        }
+      );
+    }
+  });
+};
