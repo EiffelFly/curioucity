@@ -55,7 +55,7 @@ pub async fn create_url(
         },
     };
 
-    let url = match db_curioucity::Url::create(client, &create_url_payload).await {
+    let url = match db_curioucity::FullUrl::create(client, &create_url_payload).await {
         Ok(url) => url,
         Err(error) => {
             return Err((
@@ -91,7 +91,7 @@ pub async fn delete_url(
         url: payload.url.clone(),
     };
 
-    match db_curioucity::Url::delete(client, &delete_url_paylolad).await {
+    match db_curioucity::FullUrl::delete(client, &delete_url_paylolad).await {
         Ok(_) => return Ok((StatusCode::NO_CONTENT, ())),
         Err(error) => {
             return Err((
@@ -119,7 +119,7 @@ pub async fn get_url(
 
     let payload = db_curioucity::GetUrlPayload { url };
 
-    let url = match db_curioucity::Url::get(client, &payload).await {
+    let url = match db_curioucity::FullUrl::get(client, &payload).await {
         Ok(url) => match url {
             Some(url) => url,
             None => return Err((StatusCode::NOT_FOUND, "".to_string()).into_response()),
@@ -135,6 +135,58 @@ pub async fn get_url(
 
     let resp = pb_curioucity::GetUrlResponse {
         url: Some(url.as_pb_type()),
+    };
+
+    Ok((StatusCode::OK, Json(resp)))
+}
+
+pub async fn list_url(
+    payload: Option<Json<pb_curioucity::ListUrlRequest>>,
+) -> Result<impl IntoResponse, Response> {
+    let client = match edgedb_tokio::create_client().await {
+        Ok(client) => client,
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when access database: {}", error),
+            )
+                .into_response())
+        }
+    };
+
+    let mut page_size: i64 = 10;
+
+    if let Some(payload) = payload {
+        page_size = match payload.page_size {
+            Some(page_size) => page_size,
+            None => 10,
+        };
+    }
+
+    let list_url_payload = db_curioucity::ListUrlPayload { page_size };
+
+    let urls = match db_curioucity::FullUrl::list(client, &list_url_payload).await {
+        Ok(urls) => urls,
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when list url: {}", error),
+            )
+                .into_response())
+        }
+    };
+
+    let mut pb_urls: Vec<pb_curioucity::FullUrl> = Vec::new();
+
+    for i in urls {
+        pb_urls.push(i.as_pb_type());
+    }
+
+    let size = pb_urls.len() as i64;
+
+    let resp = pb_curioucity::ListUrlResponse {
+        urls: pb_urls,
+        size,
     };
 
     Ok((StatusCode::OK, Json(resp)))

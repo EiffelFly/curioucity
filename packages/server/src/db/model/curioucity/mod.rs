@@ -11,5 +11,7 @@ pub use self::tag::ListTagPayload;
 pub use self::tag::Tag;
 pub use self::url::CreateUrlPayload;
 pub use self::url::DeleteUrlPayload;
+pub use self::url::FullUrl;
 pub use self::url::GetUrlPayload;
+pub use self::url::ListUrlPayload;
 pub use self::url::Url;

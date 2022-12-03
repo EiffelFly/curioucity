@@ -15,7 +15,7 @@ use http::{header::CONTENT_TYPE, Request};
 use hyper::Body;
 use pb_gen::curioucity::v1alpha as pb_curioucity;
 use rest_handler::curioucity::{
-    create_tag, create_url, delete_tag, delete_url, get_tag, get_url, list_tag,
+    create_tag, create_url, delete_tag, delete_url, get_tag, get_url, list_tag, list_url,
 };
 use tonic::transport::Server;
 use tower::{steer::Steer, BoxError, ServiceExt};
@@ -31,6 +31,7 @@ async fn main() {
         .route("/urls", axum::routing::post(create_url))
         .route("/urls", axum::routing::delete(delete_url))
         .route("/urls/:url", axum::routing::get(get_url))
+        .route("/urls", axum::routing::get(list_url))
         .route("/tags", axum::routing::post(create_tag))
         .route("/tags", axum::routing::delete(delete_tag))
         .route("/tags/:name", axum::routing::get(get_tag))

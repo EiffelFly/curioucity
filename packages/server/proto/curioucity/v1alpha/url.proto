@@ -15,26 +15,3 @@ message Url {
   repeated SingularUrl references = 3;
   curioucity.v1alpha.ResourceType resource_type = 4;
 }
-
-message CreateUrlRequest {
-  string url = 1;
-  curioucity.v1alpha.ResourceType resource_type = 2;
-}
-
-message CreateUrlResponse {
-  Url url = 1;
-}
-
-message DeleteUrlRequest {
-  string url = 1;
-}
-
-message DeleteUrlResponse {}
-
-message GetUrlRequest {
-  string url = 1;
-}
-
-message GetUrlResponse {
-  Url url = 1;
-}

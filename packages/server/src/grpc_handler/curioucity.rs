@@ -36,7 +36,7 @@ impl pb_curioucity::url_service_server::UrlService for GrpcUrlServiceImpl {
             },
         };
 
-        let url = match db_curioucity::Url::create(client, &payload).await {
+        let url = match db_curioucity::FullUrl::create(client, &payload).await {
             Ok(url) => url,
             Err(error) => {
                 return Err(Status::internal(format!(
@@ -71,7 +71,7 @@ impl pb_curioucity::url_service_server::UrlService for GrpcUrlServiceImpl {
             url: req.get_ref().url.clone(),
         };
 
-        match db_curioucity::Url::delete(client, &payload).await {
+        match db_curioucity::FullUrl::delete(client, &payload).await {
             Ok(_) => {
                 let resp = pb_curioucity::DeleteUrlResponse {};
                 return Ok(Response::new(resp));
@@ -103,7 +103,7 @@ impl pb_curioucity::url_service_server::UrlService for GrpcUrlServiceImpl {
             url: req.get_ref().url.clone(),
         };
 
-        let url = match db_curioucity::Url::get(client, &payload).await {
+        let url = match db_curioucity::FullUrl::get(client, &payload).await {
             Ok(url) => match url {
                 Some(url) => url,
                 None => return Err(Status::not_found("".to_string())),
@@ -118,6 +118,52 @@ impl pb_curioucity::url_service_server::UrlService for GrpcUrlServiceImpl {
 
         let resp = pb_curioucity::GetUrlResponse {
             url: Some(url.as_pb_type()),
+        };
+
+        Ok(Response::new(resp))
+    }
+    async fn list_url(
+        &self,
+        req: Request<pb_curioucity::ListUrlRequest>,
+    ) -> Result<Response<pb_curioucity::ListUrlResponse>, Status> {
+        let client = match edgedb_tokio::create_client().await {
+            Ok(client) => client,
+            Err(error) => {
+                return Err(Status::internal(format!(
+                    "Something went wrong when access database: {}",
+                    error
+                )))
+            }
+        };
+
+        let page_size = match req.get_ref().page_size {
+            Some(page_size) => page_size,
+            None => 10,
+        };
+
+        let payload = db_curioucity::ListUrlPayload { page_size };
+
+        let urls = match db_curioucity::FullUrl::list(client, &payload).await {
+            Ok(urls) => urls,
+            Err(error) => {
+                return Err(Status::internal(format!(
+                    "Something went wrong when list url: {}",
+                    error
+                )))
+            }
+        };
+
+        let mut pb_urls: Vec<pb_curioucity::FullUrl> = Vec::new();
+
+        for i in urls {
+            pb_urls.push(i.as_pb_type());
+        }
+
+        let size = pb_urls.len() as i64;
+
+        let resp = pb_curioucity::ListUrlResponse {
+            urls: pb_urls,
+            size,
         };
 
         Ok(Response::new(resp))
@@ -259,7 +305,7 @@ impl pb_curioucity::tag_service_server::TagService for GrpcTagServiceImpl {
             Ok(tags) => tags,
             Err(error) => {
                 return Err(Status::internal(format!(
-                    "Something went wrong when get tag: {}",
+                    "Something went wrong when list tag: {}",
                     error
                 )))
             }

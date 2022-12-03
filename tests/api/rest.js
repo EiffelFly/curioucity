@@ -13,6 +13,7 @@ const main = () => {
   // tagServices.deleteTag();
   // tagServices.getTag();
   tagServices.listTag();
+  urlServices.listUrl();
 };
 
 export default main;

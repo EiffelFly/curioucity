@@ -4,6 +4,7 @@ package curioucity.v1alpha;
 import "third_party/v1alpha/discord.proto";
 import "third_party/v1alpha/website.proto";
 import "curioucity/v1alpha/url.proto";
+import "curioucity/v1alpha/general.proto";
 
 message ResourceUnion {
   oneof resource {
@@ -25,4 +26,5 @@ message FullUrl {
   string url = 2;
   repeated curioucity.v1alpha.SingularUrl references = 3;
   repeated ResourceUnion resources = 4;
+  curioucity.v1alpha.ResourceType resource_type = 5;
 }
