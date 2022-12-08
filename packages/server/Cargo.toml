@@ -29,6 +29,6 @@ protoc-gen-prost-serde = "0.2.1"
 protoc-gen-tonic = "0.2.1"
 async-trait = "0.1.58"
 form_urlencoded = "1.1.0"
-
+chrono="0.4.23"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
