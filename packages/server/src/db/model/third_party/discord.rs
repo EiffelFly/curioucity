@@ -1,4 +1,6 @@
+use anyhow::bail;
 use edgedb_derive::Queryable;
+use edgedb_tokio::Client;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -15,6 +17,8 @@ pub struct DiscordGuild {
     pub threads: Vec<DiscordThread>,
     pub tags: Vec<Tag>,
     pub url: Url,
+    pub created_timestamp_at_curioucity: String,
+    pub created_timestamp_at_discord: String,
 }
 
 impl From<DiscordGuild> for pb_third_party::DiscordGuild {
@@ -50,6 +54,8 @@ fn transform_discord_guild_to_pb(value: &DiscordGuild) -> pb_third_party::Discor
         threads: pb_threads,
         tags: pb_tags,
         url: Some(value.url.as_pb_type()),
+        created_timestamp_at_curioucity: value.created_timestamp_at_curioucity.clone(),
+        created_timestamp_at_discord: value.created_timestamp_at_discord.clone(),
     }
 }
 
@@ -64,6 +70,8 @@ pub struct DiscordThread {
     pub tags: Vec<Tag>,
     pub messages: Vec<DiscordMessage>,
     pub url: Url,
+    pub created_timestamp_at_curioucity: String,
+    pub created_timestamp_at_discord: String,
 }
 
 impl From<DiscordThread> for pb_third_party::DiscordThread {
@@ -95,7 +103,8 @@ fn transform_discord_thread_to_pb(value: &DiscordThread) -> pb_third_party::Disc
         id: value.id.clone(),
         thread_id: value.thread_id.clone(),
         full_messages_json: value.full_messages_json.clone(),
-        create_at: value.create_at.clone(),
+        created_timestamp_at_curioucity: value.created_timestamp_at_curioucity.clone(),
+        created_timestamp_at_discord: value.created_timestamp_at_discord.clone(),
         markdown_content: value.markdown_content.clone(),
         tags: pb_tags,
         messages: pb_messages,
@@ -112,6 +121,18 @@ pub struct DiscordMessage {
     pub markdown_content: String,
     pub tags: Vec<Tag>,
     pub url: Url,
+    pub created_timestamp_at_curioucity: String,
+    pub created_timestamp_at_discord: String,
+}
+
+#[derive(Debug)]
+pub struct CreateDiscordMessagePayload {
+    pub message_id: i64,
+    pub content: String,
+    pub markdown_content: String,
+    pub url: String,
+    pub created_timestamp_at_curioucity: String,
+    pub created_timestamp_at_discord: String,
 }
 
 impl From<DiscordMessage> for pb_third_party::DiscordMessage {
@@ -121,6 +142,59 @@ impl From<DiscordMessage> for pb_third_party::DiscordMessage {
 }
 
 impl DiscordMessage {
+    pub async fn create(
+        client: Client,
+        payload: &CreateDiscordMessagePayload,
+    ) -> Result<Self, anyhow::Error> {
+        let query = "select (
+            insert DiscordMessage {
+                message_id := <str>$0
+                content := <str>$1,
+                markdown_content := <str>$2,
+                created_timestamp_at_discord := <str>$3,
+                created_timestamp_at_curioucity := <str>$4,
+                url := (select Url filter .url = <str>$5)
+            }
+        ) {
+            id,
+            message_id,
+            content,
+            created_timestamp_at_discord,
+            created_timestamp_at_curioucity,
+            markdown_content,
+            url,
+            tags {
+                id,
+                name
+            }
+        };";
+
+        let response = client
+            .query_json(
+                &query,
+                &(
+                    &payload.message_id,
+                    &payload.content,
+                    &payload.markdown_content,
+                    &payload.created_timestamp_at_discord,
+                    &payload.created_timestamp_at_curioucity,
+                    &payload.url,
+                ),
+            )
+            .await;
+
+        match response {
+            Ok(json) => {
+                let result = serde_json::from_str::<Vec<DiscordMessage>>(json.as_ref()).unwrap();
+                Ok(result.into_iter().nth(0).unwrap())
+            }
+            Err(error) => {
+                println!("Error: {:?}", error);
+                bail!("{}", error)
+            }
+        }
+    }
+
     pub fn as_pb_type(&self) -> pb_third_party::DiscordMessage {
         transform_discord_message_to_pb(self)
     }
@@ -137,7 +211,8 @@ fn transform_discord_message_to_pb(value: &DiscordMessage) -> pb_third_party::Di
         id: value.id.clone(),
         message_id: value.message_id,
         content: value.content.clone(),
-        create_at: value.create_at.clone(),
+        created_timestamp_at_curioucity: value.created_timestamp_at_curioucity.clone(),
+        created_timestamp_at_discord: value.created_timestamp_at_discord.clone(),
         markdown_content: value.markdown_content.clone(),
         tags: pb_tags,
         url: Some(value.url.as_pb_type()),

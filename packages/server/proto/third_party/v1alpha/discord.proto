@@ -12,6 +12,8 @@ message DiscordGuild {
   repeated DiscordThread threads = 5;
   repeated curioucity.v1alpha.Tag tags = 6;
   curioucity.v1alpha.Url url = 7;
+  string created_timestamp_at_discord = 8;
+  string created_timestamp_at_curioucity = 9;
 }
 
 message DiscordThread {
@@ -22,7 +24,8 @@ message DiscordThread {
   repeated curioucity.v1alpha.Tag tags = 5;
   repeated DiscordMessage messages = 6;
   curioucity.v1alpha.Url url = 7;
-  string create_at = 8;
+  string created_timestamp_at_discord = 8;
+  string created_timestamp_at_curioucity = 9;
 }
 
 message DiscordMessage {
@@ -32,5 +35,6 @@ message DiscordMessage {
   string markdown_content = 4;
   repeated curioucity.v1alpha.Tag tags = 5;
   curioucity.v1alpha.Url url = 6;
-  string create_at = 7;
+  string created_timestamp_at_discord = 7;
+  string created_timestamp_at_curioucity = 8;
 }
