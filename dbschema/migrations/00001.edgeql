@@ -1,7 +1,9 @@
-CREATE MIGRATION m1unmvxcvlicwrkqi2yc5zwtsw5yszbdvuolhmuc2mjbnqikdcvwuq
+CREATE MIGRATION m1p2x7e7p3ajjecvz3mzs64tmq646cilwxqt4c23g7chwaqz3fcbga
     ONTO initial
 {
   CREATE TYPE default::DiscordGuild {
+      CREATE REQUIRED PROPERTY created_timestamp_at_curioucity -> std::datetime;
+      CREATE REQUIRED PROPERTY created_timestamp_at_discord -> std::datetime;
       CREATE REQUIRED PROPERTY guild_id -> std::int64 {
           CREATE CONSTRAINT std::exclusive;
       };
@@ -12,6 +14,7 @@ CREATE MIGRATION m1unmvxcvlicwrkqi2yc5zwtsw5yszbdvuolhmuc2mjbnqikdcvwuq
       CREATE REQUIRED PROPERTY name -> std::str;
   };
   CREATE TYPE default::Tag {
+      CREATE REQUIRED PROPERTY create_timestamp_at_curioucity -> std::datetime;
       CREATE REQUIRED PROPERTY name -> std::str {
           CREATE CONSTRAINT std::exclusive;
       };
@@ -26,7 +29,7 @@ CREATE MIGRATION m1unmvxcvlicwrkqi2yc5zwtsw5yszbdvuolhmuc2mjbnqikdcvwuq
           ON TARGET DELETE ALLOW;
       };
       CREATE PROPERTY content -> std::str;
-      CREATE PROPERTY create_at -> std::datetime;
+      CREATE REQUIRED PROPERTY created_timestamp_at_curioucity -> std::datetime;
       CREATE REQUIRED PROPERTY kind -> std::str {
           CREATE CONSTRAINT std::one_of('DiscordMessage');
       };
@@ -44,7 +47,7 @@ CREATE MIGRATION m1unmvxcvlicwrkqi2yc5zwtsw5yszbdvuolhmuc2mjbnqikdcvwuq
           CREATE CONSTRAINT std::exclusive;
           CREATE PROPERTY order -> std::int64;
       };
-      CREATE PROPERTY create_at -> std::datetime;
+      CREATE REQUIRED PROPERTY created_timestamp_at_curioucity -> std::datetime;
       CREATE PROPERTY full_messages_json -> std::json;
       CREATE REQUIRED PROPERTY kind -> std::str {
           CREATE CONSTRAINT std::one_of('DiscordThread');
@@ -64,8 +67,9 @@ CREATE MIGRATION m1unmvxcvlicwrkqi2yc5zwtsw5yszbdvuolhmuc2mjbnqikdcvwuq
   CREATE TYPE default::Url {
       CREATE MULTI LINK references -> default::Url {
           ON TARGET DELETE ALLOW;
-          CREATE PROPERTY create_at -> std::datetime;
+          CREATE PROPERTY created_at -> std::datetime;
       };
+      CREATE REQUIRED PROPERTY create_timestamp_at_curioucity -> std::datetime;
       CREATE REQUIRED PROPERTY resource_type -> default::ResourceType;
       CREATE REQUIRED PROPERTY url -> std::str {
           CREATE CONSTRAINT std::exclusive;

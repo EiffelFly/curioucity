@@ -7,6 +7,8 @@ module default {
       constraint exclusive;
     };
     required property name -> str;
+    required property created_timestamp_at_discord -> datetime;
+    required property created_timestamp_at_curioucity -> datetime;
     property icon -> str;
     multi link threads -> DiscordThread;
     multi link tags -> Tag {
@@ -24,12 +26,12 @@ module default {
     required property thread_id -> int64 {
       constraint exclusive;
     };
+    required property created_timestamp_at_curioucity -> datetime;
     property full_messages_json -> json;
     multi link messages -> DiscordMessage {
       constraint exclusive;
       property order -> int64;
     };
-    property create_at -> datetime;
     property markdown_content -> str;
     multi link tags -> Tag {
       on target delete allow;
@@ -47,8 +49,8 @@ module default {
       constraint exclusive;
     };
     required property order_in_thread -> int64;
+    required property created_timestamp_at_curioucity -> datetime;
     property content -> str;
-    property create_at -> datetime;
     property markdown_content -> str;
     multi link tags -> Tag {
       on target delete allow;
@@ -62,6 +64,7 @@ module default {
     required property name -> str {
       constraint exclusive;
     };
+    required property created_timestamp_at_curioucity -> datetime;
     multi link resources := .<tags
   }
 
@@ -72,9 +75,10 @@ module default {
       constraint exclusive;
     }
     required property resource_type -> ResourceType;
+    required property created_timestamp_at_curioucity -> datetime;
     link resource := .<url;
     multi link references -> Url {
-      property create_at -> datetime;
+      property created_at -> datetime;
       on target delete allow;
     }
   }
