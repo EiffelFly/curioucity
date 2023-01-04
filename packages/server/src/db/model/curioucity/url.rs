@@ -1,10 +1,12 @@
 use anyhow::bail;
+use chrono::{DateTime, Utc};
 use edgedb_derive::Queryable;
 use edgedb_protocol::model::Uuid;
 use edgedb_tokio::Client;
 use serde::{Deserialize, Serialize};
 
 use crate::db::model::curioucity as db_curioucity;
+use crate::helper::time::get_edgedb_timestamp_from_2000;
 use crate::pb_gen::curioucity::v1alpha as pb_curioucity;
 
 use super::ResourceUnion;
@@ -14,6 +16,7 @@ pub struct SingularUrl {
     pub id: Uuid,
     pub url: String,
     pub resource_type: db_curioucity::ResourceType,
+    pub created_timestamp_at_curioucity: i64,
 }
 
 #[derive(Queryable, Serialize, Deserialize, Debug)]
@@ -23,25 +26,32 @@ pub struct FullUrl {
     pub references: Vec<SingularUrl>,
     pub resource_type: db_curioucity::ResourceType,
     pub resources: Option<Vec<ResourceUnion>>,
+    pub created_timestamp_at_curioucity: i64,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Serialize, Deserialize, Debug)]
+pub struct FullUrlWithStringTimeStamp {
+    pub id: Uuid,
+    pub url: String,
+    pub references: Vec<SingularUrl>,
+    pub resource_type: db_curioucity::ResourceType,
+    pub resources: Option<Vec<ResourceUnion>>,
+    pub created_timestamp_at_curioucity: String,
+}
+
 pub struct CreateUrlPayload {
     pub url: String,
     pub resource_type: db_curioucity::ResourceType,
 }
 
-#[derive(Deserialize, Serialize)]
 pub struct DeleteUrlPayload {
     pub url: String,
 }
 
-#[derive(Deserialize, Serialize)]
 pub struct GetUrlPayload {
     pub url: String,
 }
 
-#[derive(Deserialize, Serialize)]
 pub struct ListUrlPayload {
     pub page_size: i64,
 }
@@ -51,7 +61,8 @@ impl FullUrl {
         let query = "select (
             insert Url {
                 url := <str>$0,
-                resource_type := <str>$1
+                resource_type := <str>$1,
+                created_timestamp_at_curioucity := <datetime>$2
             }
         ) {
             id,
@@ -62,20 +73,71 @@ impl FullUrl {
                 resource_type
             },
             resource_type,
-            resource
+            resource,
+            created_timestamp_at_curioucity
         };";
 
+        let created_timestamp_at_curioucity =
+            match get_edgedb_timestamp_from_2000(Utc::now().timestamp_micros()) {
+                Ok(time) => time,
+                Err(error) => {
+                    println!("Time is out of range: {:?}", error);
+                    bail!("{}", error)
+                }
+            };
+
         let response = client
-            .query_json(&query, &(&payload.url, &payload.resource_type.as_str()))
+            .query_json(
+                &query,
+                &(
+                    &payload.url,
+                    &payload.resource_type.as_str(),
+                    &created_timestamp_at_curioucity,
+                ),
+            )
             .await;
 
         match response {
             Ok(json) => {
-                let result = serde_json::from_str::<Vec<FullUrl>>(json.as_ref()).unwrap();
-                Ok(result.into_iter().nth(0).unwrap())
+                let result =
+                    match serde_json::from_str::<Vec<FullUrlWithStringTimeStamp>>(json.as_ref()) {
+                        Ok(json) => match json.into_iter().nth(0) {
+                            Some(result) => result,
+                            None => {
+                                println!("Deserialize Error, deserialized element not found");
+                                bail!("Deserialize Error, deserialized element not found")
+                            }
+                        },
+                        Err(error) => {
+                            println!("Deserialize Error: {}", error);
+                            bail!("Deserialize Error: {}", error)
+                        }
+                    };
+
+                let utc_timestamp = match result
+                    .created_timestamp_at_curioucity
+                    .parse::<DateTime<Utc>>()
+                {
+                    Ok(time) => time.timestamp(),
+                    Err(error) => {
+                        println!("Parse Timestamp Error: {}", error);
+                        bail!("Parse Timestamp Error: {}", error)
+                    }
+                };
+
+                let url = FullUrl {
+                    id: result.id,
+                    url: result.url,
+                    references: result.references,
+                    resource_type: result.resource_type,
+                    resources: result.resources,
+                    created_timestamp_at_curioucity: utc_timestamp,
+                };
+
+                Ok(url)
             }
             Err(error) => {
-                println!("Error: {:?}", error);
+                println!("Serialization Error: {:?}", error);
                 bail!("{}", error)
             }
         }
@@ -108,7 +170,8 @@ impl FullUrl {
                 resource_type
             },
             resource_type,
-            resource
+            resource,
+            created_timestamp_at_curioucity
         } filter .url = <str>$0";
 
         let response = client.query_json(&query, &(&payload.url,)).await;
@@ -144,7 +207,8 @@ impl FullUrl {
                 resource_type
             },
             resource_type,
-            resource
+            resource,
+            created_timestamp_at_curioucity
         } order by .url
         limit <int64>$0";
 
@@ -192,6 +256,7 @@ fn transform_full_url_to_pb(value: &FullUrl) -> pb_curioucity::FullUrl {
             id: i.id.to_string(),
             url: i.url.clone(),
             resource_type: i.resource_type.as_pb_num(),
+            created_timestamp_at_curioucity: i.created_timestamp_at_curioucity.clone(),
         };
         new_refs.push(singular_url);
     }
@@ -202,6 +267,7 @@ fn transform_full_url_to_pb(value: &FullUrl) -> pb_curioucity::FullUrl {
         resources: pb_resources,
         resource_type: value.resource_type.as_pb_num(),
         references: new_refs,
+        created_timestamp_at_curioucity: value.created_timestamp_at_curioucity.clone(),
     };
 }
 
@@ -211,6 +277,7 @@ pub struct Url {
     pub url: String,
     pub references: Vec<SingularUrl>,
     pub resource_type: db_curioucity::ResourceType,
+    pub created_timestamp_at_curioucity: i64,
 }
 
 impl Url {
@@ -233,6 +300,7 @@ fn transform_url_to_pb(value: &Url) -> pb_curioucity::Url {
             id: i.id.to_string(),
             url: i.url.clone(),
             resource_type: i.resource_type.as_pb_num(),
+            created_timestamp_at_curioucity: i.created_timestamp_at_curioucity.clone(),
         };
         new_refs.push(singular_url);
     }
@@ -242,5 +310,6 @@ fn transform_url_to_pb(value: &Url) -> pb_curioucity::Url {
         url: value.url.clone(),
         resource_type: value.resource_type.as_pb_num(),
         references: new_refs,
+        created_timestamp_at_curioucity: value.created_timestamp_at_curioucity.clone(),
     };
 }
