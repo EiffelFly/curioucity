@@ -7,6 +7,7 @@ message SingularUrl {
   string id = 1;
   string url = 2;
   curioucity.v1alpha.ResourceType resource_type = 3;
+  int64 created_timestamp_at_curioucity = 4;
 }
 
 message Url {
@@ -14,4 +15,5 @@ message Url {
   string url = 2;
   repeated SingularUrl references = 3;
   curioucity.v1alpha.ResourceType resource_type = 4;
+  int64 created_timestamp_at_curioucity = 5;
 }

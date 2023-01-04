@@ -13,7 +13,8 @@ message CreateDiscordMessageRequest {
   string content = 2;
   string markdown_content = 3;
   string url = 4;
-  string created_timestamp_at_discord = 5;
+  int64 created_timestamp_at_discord = 5;
+  int64 order_in_thread = 6;
 }
 
 message CreateDiscordMessageResponse {
