@@ -178,12 +178,46 @@ impl FullUrl {
 
         match response {
             Ok(json) => {
-                let result = serde_json::from_str::<Vec<FullUrl>>(json.as_ref()).unwrap();
+                let result =
+                    match serde_json::from_str::<Vec<FullUrlWithStringTimeStamp>>(json.as_ref()) {
+                        Ok(result) => result,
+                        Err(error) => {
+                            println!("Deserialize Error: {}", error);
+                            bail!("Deserialize Error: {}", error)
+                        }
+                    };
 
                 if result.is_empty() {
                     Ok(None)
                 } else {
-                    let url = result.into_iter().nth(0).unwrap();
+                    let full_url_with_string_timestamp = match result.into_iter().nth(0) {
+                        Some(url) => url,
+                        None => {
+                            println!("Deserialize Error, deserialized element not found");
+                            bail!("Deserialize Error, deserialized element not found")
+                        }
+                    };
+
+                    let utc_timestamp = match full_url_with_string_timestamp
+                        .created_timestamp_at_curioucity
+                        .parse::<DateTime<Utc>>()
+                    {
+                        Ok(time) => time.timestamp(),
+                        Err(error) => {
+                            println!("Parse Timestamp Error: {}", error);
+                            bail!("Parse Timestamp Error: {}", error)
+                        }
+                    };
+
+                    let url = FullUrl {
+                        id: full_url_with_string_timestamp.id,
+                        url: full_url_with_string_timestamp.url,
+                        references: full_url_with_string_timestamp.references,
+                        resource_type: full_url_with_string_timestamp.resource_type,
+                        resources: full_url_with_string_timestamp.resources,
+                        created_timestamp_at_curioucity: utc_timestamp,
+                    };
+
                     Ok(Some(url))
                 }
             }
