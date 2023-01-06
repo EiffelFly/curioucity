@@ -1,17 +1,30 @@
 use anyhow::bail;
+use chrono::{DateTime, Utc};
 use edgedb_derive::Queryable;
+use edgedb_protocol::model::Uuid;
 use edgedb_tokio::Client;
 use serde::{Deserialize, Serialize};
 
-use crate::pb_gen::curioucity::v1alpha as pb_curioucity;
+use crate::{
+    helper::time::get_edgedb_timestamp_from_2000, pb_gen::curioucity::v1alpha as pb_curioucity,
+};
 
 use super::ResourceUnion;
 
 #[derive(Queryable, Serialize, Deserialize, Debug)]
 pub struct FullTag {
-    pub id: String,
+    pub id: Uuid,
     pub name: String,
     pub resources: Option<Vec<ResourceUnion>>,
+    pub created_timestamp_at_curioucity: i64,
+}
+
+#[derive(Queryable, Serialize, Deserialize, Debug)]
+pub struct FullTagWithStringTimestamp {
+    pub id: Uuid,
+    pub name: String,
+    pub resources: Option<Vec<ResourceUnion>>,
+    pub created_timestamp_at_curioucity: String,
 }
 
 #[derive(Debug)]
@@ -37,25 +50,72 @@ impl FullTag {
         let query = "select (
             insert Tag {
                 name := <str>$0,
+                created_timestamp_at_curioucity := <datetime>$1
             }
         ) {
             id,
             name,
-            resources
+            resources,
+            created_timestamp_at_curioucity
         };";
 
-        let response = client.query_json(&query, &(&payload.name,)).await;
+        let created_timestamp_at_curioucity =
+            match get_edgedb_timestamp_from_2000(Utc::now().timestamp_micros()) {
+                Ok(time) => time,
+                Err(error) => {
+                    println!("Time is out of range: {:?}", error);
+                    bail!("{}", error)
+                }
+            };
 
-        match response {
-            Ok(json) => {
-                let result = serde_json::from_str::<Vec<FullTag>>(json.as_ref()).unwrap();
-                Ok(result.into_iter().nth(0).unwrap())
-            }
+        let response_json = match client
+            .query_json(&query, &(&payload.name, &created_timestamp_at_curioucity))
+            .await
+        {
+            Ok(json) => json,
             Err(error) => {
-                println!("Error: {:?}", error);
+                println!("Error occured when query database: {:?}", error);
                 bail!("{}", error)
             }
-        }
+        };
+
+        let full_tags_with_string_timestamp =
+            match serde_json::from_str::<Vec<FullTagWithStringTimestamp>>(response_json.as_ref()) {
+                Ok(result) => result,
+                Err(error) => {
+                    println!("Deserialize Error: {}", error);
+                    bail!("Deserialize Error: {}", error)
+                }
+            };
+
+        let full_tag_with_string_timestamp =
+            match full_tags_with_string_timestamp.into_iter().nth(0) {
+                Some(url) => url,
+                None => {
+                    println!("Deserialize Error, deserialized element not found");
+                    bail!("Deserialize Error, deserialized element not found")
+                }
+            };
+
+        let utc_timestamp = match full_tag_with_string_timestamp
+            .created_timestamp_at_curioucity
+            .parse::<DateTime<Utc>>()
+        {
+            Ok(time) => time.timestamp(),
+            Err(error) => {
+                println!("Parse Timestamp Error: {}", error);
+                bail!("Parse Timestamp Error: {}", error)
+            }
+        };
+
+        let full_tag_with_int_timestamp = FullTag {
+            id: full_tag_with_string_timestamp.id,
+            name: full_tag_with_string_timestamp.name,
+            resources: full_tag_with_string_timestamp.resources,
+            created_timestamp_at_curioucity: utc_timestamp,
+        };
+
+        Ok(full_tag_with_int_timestamp)
     }
 
     pub async fn delete(client: Client, payload: &DeleteTagPayload) -> Result<(), anyhow::Error> {
@@ -79,27 +139,59 @@ impl FullTag {
         let query = "select Tag {
             id, 
             name,
-            resources
+            resources,
+            created_timestamp_at_curioucity
         } filter .name = <str>$0";
 
-        let response = client.query_json(&query, &(&payload.name,)).await;
-
-        match response {
-            Ok(json) => {
-                let result = serde_json::from_str::<Vec<FullTag>>(json.as_ref()).unwrap();
-
-                if result.is_empty() {
-                    Ok(None)
-                } else {
-                    let url = result.into_iter().nth(0).unwrap();
-                    Ok(Some(url))
-                }
-            }
+        let response_json = match client.query_json(&query, &(&payload.name,)).await {
+            Ok(json) => json,
             Err(error) => {
-                println!("Error: {:?}", error);
+                println!("Error occured when query database: {:?}", error);
                 bail!("{}", error)
             }
+        };
+
+        let full_tags_with_string_timestamp =
+            match serde_json::from_str::<Vec<FullTagWithStringTimestamp>>(response_json.as_ref()) {
+                Ok(result) => result,
+                Err(error) => {
+                    println!("Deserialize Error: {}", error);
+                    bail!("Deserialize Error: {}", error)
+                }
+            };
+
+        if full_tags_with_string_timestamp.is_empty() {
+            return Ok(None);
         }
+
+        let full_tag_with_string_timestamp =
+            match full_tags_with_string_timestamp.into_iter().nth(0) {
+                Some(url) => url,
+                None => {
+                    println!("Deserialize Error, deserialized element not found");
+                    bail!("Deserialize Error, deserialized element not found")
+                }
+            };
+
+        let utc_timestamp = match full_tag_with_string_timestamp
+            .created_timestamp_at_curioucity
+            .parse::<DateTime<Utc>>()
+        {
+            Ok(time) => time.timestamp(),
+            Err(error) => {
+                println!("Parse Timestamp Error: {}", error);
+                bail!("Parse Timestamp Error: {}", error)
+            }
+        };
+
+        let full_tag_with_int_timestamp = FullTag {
+            id: full_tag_with_string_timestamp.id,
+            name: full_tag_with_string_timestamp.name,
+            resources: full_tag_with_string_timestamp.resources,
+            created_timestamp_at_curioucity: utc_timestamp,
+        };
+
+        Ok(Some(full_tag_with_int_timestamp))
     }
 
     pub async fn list(
@@ -109,22 +201,53 @@ impl FullTag {
         let query = "select Tag {
             id,
             name,
-            resources
+            resources,
+            created_timestamp_at_curioucity
         } order by .name
         limit <int64>$0";
 
-        let response = client.query_json(&query, &(&payload.page_size,)).await;
-
-        match response {
-            Ok(json) => {
-                let result = serde_json::from_str::<Vec<FullTag>>(json.as_ref()).unwrap();
-                Ok(result)
-            }
+        let response_json = match client.query_json(&query, &(&payload.page_size,)).await {
+            Ok(json) => json,
             Err(error) => {
-                println!("Error: {:?}", error);
+                println!("Error occured when query database: {:?}", error);
                 bail!("{}", error)
             }
+        };
+
+        let full_tags_with_string_timestamp =
+            match serde_json::from_str::<Vec<FullTagWithStringTimestamp>>(response_json.as_ref()) {
+                Ok(result) => result,
+                Err(error) => {
+                    println!("Deserialize Error: {}", error);
+                    bail!("Deserialize Error: {}", error)
+                }
+            };
+
+        let mut full_tags_with_int_timestamp: Vec<FullTag> = Vec::new();
+
+        for full_tag_with_string_timestamp in full_tags_with_string_timestamp {
+            let utc_timestamp = match full_tag_with_string_timestamp
+                .created_timestamp_at_curioucity
+                .parse::<DateTime<Utc>>()
+            {
+                Ok(time) => time.timestamp(),
+                Err(error) => {
+                    println!("Parse Timestamp Error: {}", error);
+                    bail!("Parse Timestamp Error: {}", error)
+                }
+            };
+
+            let full_tag_with_int_timestamp = FullTag {
+                id: full_tag_with_string_timestamp.id,
+                name: full_tag_with_string_timestamp.name,
+                resources: full_tag_with_string_timestamp.resources,
+                created_timestamp_at_curioucity: utc_timestamp,
+            };
+
+            full_tags_with_int_timestamp.push(full_tag_with_int_timestamp)
         }
+
+        Ok(full_tags_with_int_timestamp)
     }
 
     pub fn as_pb_type(&self) -> pb_curioucity::FullTag {
@@ -151,16 +274,18 @@ fn transform_full_tag_to_pb(value: &FullTag) -> pb_curioucity::FullTag {
     }
 
     return pb_curioucity::FullTag {
-        id: value.id.clone(),
+        id: value.id.to_string(),
         name: value.name.clone(),
         resources: pb_resources,
+        created_timestamp_at_curioucity: value.created_timestamp_at_curioucity.clone(),
     };
 }
 
 #[derive(Queryable, Serialize, Deserialize, Debug)]
 pub struct Tag {
-    pub id: String,
+    pub id: Uuid,
     pub name: String,
+    pub created_timestamp_at_curioucity: i64,
 }
 
 impl Tag {
@@ -171,8 +296,9 @@ impl Tag {
 
 fn transform_tag_to_pb(value: &Tag) -> pb_curioucity::Tag {
     pb_curioucity::Tag {
-        id: value.id.clone(),
+        id: value.id.to_string(),
         name: value.name.clone(),
+        created_timestamp_at_curioucity: value.created_timestamp_at_curioucity.clone(),
     }
 }
 
