@@ -1,4 +1,4 @@
-CREATE MIGRATION m1p2x7e7p3ajjecvz3mzs64tmq646cilwxqt4c23g7chwaqz3fcbga
+CREATE MIGRATION m1rgfa2kf33qdwd27tibaveexw5keppekbfxfealtegqtiajs5vvia
     ONTO initial
 {
   CREATE TYPE default::DiscordGuild {
@@ -9,12 +9,12 @@ CREATE MIGRATION m1p2x7e7p3ajjecvz3mzs64tmq646cilwxqt4c23g7chwaqz3fcbga
       };
       CREATE PROPERTY icon -> std::str;
       CREATE REQUIRED PROPERTY kind -> std::str {
-          CREATE CONSTRAINT std::one_of('DiscordGuild');
+          CREATE CONSTRAINT std::one_of('DISCORD_GUILD');
       };
       CREATE REQUIRED PROPERTY name -> std::str;
   };
   CREATE TYPE default::Tag {
-      CREATE REQUIRED PROPERTY create_timestamp_at_curioucity -> std::datetime;
+      CREATE REQUIRED PROPERTY created_timestamp_at_curioucity -> std::datetime;
       CREATE REQUIRED PROPERTY name -> std::str {
           CREATE CONSTRAINT std::exclusive;
       };
@@ -30,8 +30,9 @@ CREATE MIGRATION m1p2x7e7p3ajjecvz3mzs64tmq646cilwxqt4c23g7chwaqz3fcbga
       };
       CREATE PROPERTY content -> std::str;
       CREATE REQUIRED PROPERTY created_timestamp_at_curioucity -> std::datetime;
+      CREATE REQUIRED PROPERTY created_timestamp_at_discord -> std::datetime;
       CREATE REQUIRED PROPERTY kind -> std::str {
-          CREATE CONSTRAINT std::one_of('DiscordMessage');
+          CREATE CONSTRAINT std::one_of('DISCORD_MESSAGE');
       };
       CREATE PROPERTY markdown_content -> std::str;
       CREATE REQUIRED PROPERTY message_id -> std::int64 {
@@ -48,9 +49,10 @@ CREATE MIGRATION m1p2x7e7p3ajjecvz3mzs64tmq646cilwxqt4c23g7chwaqz3fcbga
           CREATE PROPERTY order -> std::int64;
       };
       CREATE REQUIRED PROPERTY created_timestamp_at_curioucity -> std::datetime;
+      CREATE REQUIRED PROPERTY created_timestamp_at_discord -> std::datetime;
       CREATE PROPERTY full_messages_json -> std::json;
       CREATE REQUIRED PROPERTY kind -> std::str {
-          CREATE CONSTRAINT std::one_of('DiscordThread');
+          CREATE CONSTRAINT std::one_of('DISCORD_THREAD');
       };
       CREATE PROPERTY markdown_content -> std::str;
       CREATE REQUIRED PROPERTY thread_id -> std::int64 {
@@ -69,7 +71,7 @@ CREATE MIGRATION m1p2x7e7p3ajjecvz3mzs64tmq646cilwxqt4c23g7chwaqz3fcbga
           ON TARGET DELETE ALLOW;
           CREATE PROPERTY created_at -> std::datetime;
       };
-      CREATE REQUIRED PROPERTY create_timestamp_at_curioucity -> std::datetime;
+      CREATE REQUIRED PROPERTY created_timestamp_at_curioucity -> std::datetime;
       CREATE REQUIRED PROPERTY resource_type -> default::ResourceType;
       CREATE REQUIRED PROPERTY url -> std::str {
           CREATE CONSTRAINT std::exclusive;
