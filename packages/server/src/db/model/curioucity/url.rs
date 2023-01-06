@@ -267,35 +267,35 @@ impl FullUrl {
         if full_urls_with_string_timestamp.is_empty() {
             let empty_urls: Vec<FullUrl> = Vec::new();
             return Ok(empty_urls);
-        } else {
-            let mut full_urls_with_int_timestamp: Vec<FullUrl> = Vec::new();
-
-            for full_url_with_string_timestamp in full_urls_with_string_timestamp {
-                let utc_timestamp = match full_url_with_string_timestamp
-                    .created_timestamp_at_curioucity
-                    .parse::<DateTime<Utc>>()
-                {
-                    Ok(time) => time.timestamp(),
-                    Err(error) => {
-                        println!("Parse Timestamp Error: {}", error);
-                        bail!("Parse Timestamp Error: {}", error)
-                    }
-                };
-
-                let url_with_int_timestamp = FullUrl {
-                    id: full_url_with_string_timestamp.id,
-                    url: full_url_with_string_timestamp.url,
-                    references: full_url_with_string_timestamp.references,
-                    resource_type: full_url_with_string_timestamp.resource_type,
-                    resources: full_url_with_string_timestamp.resources,
-                    created_timestamp_at_curioucity: utc_timestamp,
-                };
-
-                full_urls_with_int_timestamp.push(url_with_int_timestamp)
-            }
-
-            Ok(full_urls_with_int_timestamp)
         }
+
+        let mut full_urls_with_int_timestamp: Vec<FullUrl> = Vec::new();
+
+        for full_url_with_string_timestamp in full_urls_with_string_timestamp {
+            let utc_timestamp = match full_url_with_string_timestamp
+                .created_timestamp_at_curioucity
+                .parse::<DateTime<Utc>>()
+            {
+                Ok(time) => time.timestamp(),
+                Err(error) => {
+                    println!("Parse Timestamp Error: {}", error);
+                    bail!("Parse Timestamp Error: {}", error)
+                }
+            };
+
+            let url_with_int_timestamp = FullUrl {
+                id: full_url_with_string_timestamp.id,
+                url: full_url_with_string_timestamp.url,
+                references: full_url_with_string_timestamp.references,
+                resource_type: full_url_with_string_timestamp.resource_type,
+                resources: full_url_with_string_timestamp.resources,
+                created_timestamp_at_curioucity: utc_timestamp,
+            };
+
+            full_urls_with_int_timestamp.push(url_with_int_timestamp)
+        }
+
+        Ok(full_urls_with_int_timestamp)
     }
 
     pub fn as_pb_type(&self) -> pb_curioucity::FullUrl {
