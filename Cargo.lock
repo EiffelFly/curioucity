@@ -396,6 +396,7 @@ source = "git+https://github.com/edgedb/edgedb-rust?branch=master#675cf0a329b2bb
 dependencies = [
  "bitflags",
  "bytes",
+ "chrono",
  "edgedb-errors",
  "snafu",
  "uuid",
