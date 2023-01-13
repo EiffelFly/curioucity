@@ -4,7 +4,7 @@ import { API_HOST } from "./rest.js";
 
 export const createUrl = () => {
   group("Url - Should create url", () => {
-    const url = "https://summerbud.org/id/234d1";
+    const url = "https://summerbud.org/id/234azyyq456";
 
     let createUrlPayload = {
       url: url,
@@ -33,6 +33,10 @@ export const createUrl = () => {
           r.json().url.url === url,
         "createUrl - POST /urls - response body should have correct resource_type":
           (r) => r.json().url.resource_type === createUrlPayload.resource_type,
+        "createUrl - POST /urls - response body should have created_timestamp_at_curioucity":
+          (r) =>
+            r.json().url.created_timestamp_at_curioucity !== null ||
+            r.json().url.created_timestamp_at_curioucity !== undefined,
       }
     );
 
@@ -168,6 +172,10 @@ export const getUrl = () => {
           r.json().url.url === newUrl,
         "getUrl - GET /urls - response body should have correct resource_type":
           (r) => r.json().url.resource_type === createUrlPayload.resource_type,
+        "getUrl - GET /urls - response body should have correct created_timestamp_at_curioucity":
+          (r) =>
+            r.json().url.created_timestamp_at_curioucity !== null ||
+            r.json().url.created_timestamp_at_curioucity !== undefined,
       }
     );
 

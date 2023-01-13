@@ -1,5 +1,6 @@
 import * as urlServices from "./url.js";
 import * as tagServices from "./tag.js";
+import * as discordServices from "./discord.js";
 
 export const options = {};
 
@@ -12,8 +13,9 @@ const main = () => {
   // tagServices.createTag();
   // tagServices.deleteTag();
   // tagServices.getTag();
-  tagServices.listTag();
+  // tagServices.listTag();
   urlServices.listUrl();
+  // discordServices.createDiscordMessage();
 };
 
 export default main;
