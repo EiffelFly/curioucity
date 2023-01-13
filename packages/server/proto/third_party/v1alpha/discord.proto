@@ -4,33 +4,57 @@ package third_party.v1alpha;
 import "curioucity/v1alpha/tag.proto";
 import "curioucity/v1alpha/url.proto";
 
+enum DiscordGuildKind {
+  DISCORD_GUILD_UNSPECIFIC = 0;
+  DISCORD_GUILD = 1;
+}
+
 message DiscordGuild {
   string id = 1;
-  int64 guild_id = 2;
-  string name = 3;
-  string icon = 4;
-  repeated DiscordThread threads = 5;
-  repeated curioucity.v1alpha.Tag tags = 6;
-  curioucity.v1alpha.Url url = 7;
+  DiscordGuildKind kind = 2;
+  int64 guild_id = 3;
+  string name = 4;
+  string icon = 5;
+  repeated DiscordThread threads = 6;
+  repeated curioucity.v1alpha.Tag tags = 7;
+  curioucity.v1alpha.Url url = 8;
+  int64 created_timestamp_at_discord = 9;
+  int64 created_timestamp_at_curioucity = 10;
+}
+
+
+enum DiscordThreadKind {
+  DISCORD_THREAD_UNSPECIFIC = 0;
+  DISCORD_THREAD = 1;
 }
 
 message DiscordThread {
   string id = 1;
-  int64 thread_id = 2;
-  map<string, string> full_messages_json = 3;
-  string markdown_content = 4;
-  repeated curioucity.v1alpha.Tag tags = 5;
-  repeated DiscordMessage messages = 6;
-  curioucity.v1alpha.Url url = 7;
-  string create_at = 8;
+  DiscordThreadKind kind = 2;
+  int64 thread_id = 3;
+  map<string, string> full_messages_json = 4;
+  string markdown_content = 5;
+  repeated curioucity.v1alpha.Tag tags = 6;
+  repeated DiscordMessage messages = 7;
+  curioucity.v1alpha.Url url = 8;
+  int64 created_timestamp_at_discord = 9;
+  int64 created_timestamp_at_curioucity = 10;
+}
+
+enum DiscordMessageKind {
+  DISCORD_MESSAGE_UNSPECIFIC = 0;
+  DISCORD_MESSAGE = 1;
 }
 
 message DiscordMessage {
   string id = 1;
-  int64 message_id = 2;
-  string content = 3;
-  string markdown_content = 4;
-  repeated curioucity.v1alpha.Tag tags = 5;
-  curioucity.v1alpha.Url url = 6;
-  string create_at = 7;
+  DiscordMessageKind kind = 2;
+  int64 message_id = 3;
+  string content = 4;
+  string markdown_content = 5;
+  repeated curioucity.v1alpha.Tag tags = 6;
+  curioucity.v1alpha.Url url = 7;
+  int64 created_timestamp_at_discord = 8;
+  int64 created_timestamp_at_curioucity = 9;
+  int64 order_in_thread = 10;
 }

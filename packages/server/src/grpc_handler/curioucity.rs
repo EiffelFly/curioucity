@@ -36,7 +36,7 @@ impl pb_curioucity::url_service_server::UrlService for GrpcUrlServiceImpl {
             },
         };
 
-        let url = match db_curioucity::FullUrl::create(client, &payload).await {
+        let url = match db_curioucity::FullUrl::create(&client, &payload).await {
             Ok(url) => url,
             Err(error) => {
                 return Err(Status::internal(format!(

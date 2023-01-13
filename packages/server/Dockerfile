@@ -1,5 +1,5 @@
 # Build Stage
-FROM rust:1.64.0 as builder
+FROM rust:1.66.0 as builder
 
 # Install protoc
 ENV PROTOC_VERSION 21.9

@@ -1,8 +1,7 @@
-use axum::{extract::Path, response::Response};
-use axum::{http::StatusCode, response::IntoResponse, Json};
-
 use crate::db::model::curioucity as db_curioucity;
 use crate::pb_gen::curioucity::v1alpha as pb_curioucity;
+use axum::{extract::Path, response::Response};
+use axum::{http::StatusCode, response::IntoResponse, Json};
 
 // Note: In the future we want to have this kind of structure
 //
@@ -55,7 +54,7 @@ pub async fn create_url(
         },
     };
 
-    let url = match db_curioucity::FullUrl::create(client, &create_url_payload).await {
+    let url = match db_curioucity::FullUrl::create(&client, &create_url_payload).await {
         Ok(url) => url,
         Err(error) => {
             return Err((

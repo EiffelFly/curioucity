@@ -31,6 +31,10 @@ export const createTag = () => {
         "createTag - POST /tags - response body should have correct tag name": (
           r
         ) => r.json().tag.name === tagName,
+        "createTag - POST /tags - response body should have created_timestamp_at_curioucity":
+          (r) =>
+            r.json().tag.created_timestamp_at_curioucity !== null ||
+            r.json().tag.created_timestamp_at_curioucity !== undefined,
       }
     );
 
@@ -119,7 +123,7 @@ export const getTag = () => {
     );
 
     // Should get the newly created tag
-    const newTagName = "knowledge-management-toolkit-123";
+    const newTagName = "knowledge-management-toolkit-1453";
 
     let createTagPayload = {
       name: newTagName,
@@ -151,6 +155,10 @@ export const getTag = () => {
           typeof r.json().tag.id !== undefined || r.json().tag.id !== null,
         "getTag - GET /tags/{name} - response body should have correct tag name":
           (r) => r.json().tag.name === newTagName,
+        "getTag - GET /tags/{name} - response body should have created_timestamp_at_curioucity":
+          (r) =>
+            r.json().tag.created_timestamp_at_curioucity !== null ||
+            r.json().tag.created_timestamp_at_curioucity !== undefined,
       }
     );
 

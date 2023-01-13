@@ -1,12 +1,14 @@
 module default {
   type DiscordGuild {
     required property kind -> str {
-      constraint one_of("DiscordGuild");
+      constraint one_of("DISCORD_GUILD");
     };
     required property guild_id -> int64 {
       constraint exclusive;
     };
     required property name -> str;
+    required property created_timestamp_at_discord -> datetime;
+    required property created_timestamp_at_curioucity -> datetime;
     property icon -> str;
     multi link threads -> DiscordThread;
     multi link tags -> Tag {
@@ -19,17 +21,18 @@ module default {
 
   type DiscordThread {
     required property kind -> str {
-      constraint one_of("DiscordThread");
+      constraint one_of("DISCORD_THREAD");
     };
     required property thread_id -> int64 {
       constraint exclusive;
     };
+    required property created_timestamp_at_discord -> datetime;
+    required property created_timestamp_at_curioucity -> datetime;
     property full_messages_json -> json;
     multi link messages -> DiscordMessage {
       constraint exclusive;
       property order -> int64;
     };
-    property create_at -> datetime;
     property markdown_content -> str;
     multi link tags -> Tag {
       on target delete allow;
@@ -41,14 +44,15 @@ module default {
 
   type DiscordMessage {
     required property kind -> str {
-      constraint one_of("DiscordMessage");
+      constraint one_of("DISCORD_MESSAGE");
     };
     required property message_id -> int64 {
       constraint exclusive;
     };
     required property order_in_thread -> int64;
+    required property created_timestamp_at_discord -> datetime;
+    required property created_timestamp_at_curioucity -> datetime;
     property content -> str;
-    property create_at -> datetime;
     property markdown_content -> str;
     multi link tags -> Tag {
       on target delete allow;
@@ -62,6 +66,7 @@ module default {
     required property name -> str {
       constraint exclusive;
     };
+    required property created_timestamp_at_curioucity -> datetime;
     multi link resources := .<tags
   }
 
@@ -72,9 +77,10 @@ module default {
       constraint exclusive;
     }
     required property resource_type -> ResourceType;
+    required property created_timestamp_at_curioucity -> datetime;
     link resource := .<url;
     multi link references -> Url {
-      property create_at -> datetime;
+      property created_at -> datetime;
       on target delete allow;
     }
   }
