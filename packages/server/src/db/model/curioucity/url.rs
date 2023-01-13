@@ -29,7 +29,7 @@ pub struct FullUrl {
     pub created_timestamp_at_curioucity: i64,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Queryable, Serialize, Deserialize, Debug)]
 pub struct FullUrlWithStringTimeStamp {
     pub id: Uuid,
     pub url: String,
@@ -57,7 +57,10 @@ pub struct ListUrlPayload {
 }
 
 impl FullUrl {
-    pub async fn create(client: Client, payload: &CreateUrlPayload) -> Result<Self, anyhow::Error> {
+    pub async fn create(
+        client: &Client,
+        payload: &CreateUrlPayload,
+    ) -> Result<Self, anyhow::Error> {
         let query = "select (
             insert Url {
                 url := <str>$0,

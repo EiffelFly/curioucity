@@ -9,7 +9,7 @@ mod rest_handler;
 
 use std::net::SocketAddr;
 
-use axum::Router;
+use axum::{Json, Router};
 use grpc_handler::curioucity::{GrpcTagServiceImpl, GrpcUrlServiceImpl};
 use grpc_handler::third_party::discord::GrpcDiscordServiceImpl;
 use http::{header::CONTENT_TYPE, Request};
@@ -40,6 +40,7 @@ async fn main() {
         .route("/tags", axum::routing::delete(delete_tag))
         .route("/tags/:name", axum::routing::get(get_tag))
         .route("/tags", axum::routing::get(list_tag))
+        .route("/test", axum::routing::get(test))
         .route(
             "/discord/messages",
             axum::routing::post(create_discord_message),
@@ -101,4 +102,14 @@ async fn fallback(uri: axum::http::Uri) -> impl axum::response::IntoResponse {
         axum::http::StatusCode::NOT_FOUND,
         format!("Not found {}", uri),
     )
+}
+
+#[derive(serde::Serialize)]
+struct TestS {
+    time: i64,
+}
+
+async fn test() -> Json<TestS> {
+    let test = TestS { time: 123 };
+    Json(test)
 }

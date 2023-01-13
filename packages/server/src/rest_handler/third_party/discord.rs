@@ -1,9 +1,7 @@
-use axum::response::Response;
-use axum::{http::StatusCode, response::IntoResponse, Json};
-use chrono::{DateTime, Utc};
-
 use crate::db::model::third_party as db_third_party;
 use crate::pb_gen::third_party::v1alpha as pb_third_party;
+use axum::response::Response;
+use axum::{http::StatusCode, response::IntoResponse, Json};
 
 pub async fn create_discord_message(
     payload: Json<pb_third_party::CreateDiscordMessageRequest>,
@@ -19,15 +17,13 @@ pub async fn create_discord_message(
         }
     };
 
-    let utc_now: DateTime<Utc> = Utc::now();
-
     let payload = db_third_party::discord::CreateDiscordMessagePayload {
-        message_id: payload.message_id,
+        message_id: payload.message_id as i64,
         content: payload.content.clone(),
-        created_timestamp_at_curioucity: utc_now.to_string(),
         created_timestamp_at_discord: payload.created_timestamp_at_discord.clone(),
         markdown_content: payload.markdown_content.clone(),
         url: payload.url.clone(),
+        order_in_thread: payload.order_in_thread.clone(),
     };
 
     let discord_message =

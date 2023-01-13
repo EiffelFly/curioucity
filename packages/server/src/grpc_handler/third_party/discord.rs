@@ -1,6 +1,5 @@
 use crate::db::model::third_party as db_third_party;
 use crate::pb_gen::third_party::v1alpha as pb_third_party;
-use chrono::{DateTime, Utc};
 use tonic::{Request, Response, Status};
 
 #[derive(Default)]
@@ -24,15 +23,13 @@ impl pb_third_party::discord_service_server::DiscordService for GrpcDiscordServi
 
         let req_ref = req.get_ref();
 
-        let utc_now: DateTime<Utc> = Utc::now();
-
         let payload = db_third_party::discord::CreateDiscordMessagePayload {
-            message_id: req_ref.message_id,
+            message_id: req_ref.message_id as i64,
             content: req_ref.content.clone(),
             created_timestamp_at_discord: req_ref.created_timestamp_at_discord.clone(),
-            created_timestamp_at_curioucity: utc_now.to_string(),
             markdown_content: req_ref.markdown_content.clone(),
             url: req_ref.url.clone(),
+            order_in_thread: req_ref.order_in_thread.clone(),
         };
 
         let discord_message =
