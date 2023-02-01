@@ -20,7 +20,3 @@ message CreateDiscordMessageRequest {
 message CreateDiscordMessageResponse {
   third_party.v1alpha.DiscordMessage discord_message = 1;
 }
-
-message TestResponse {
-  int64 data = 1;
-}

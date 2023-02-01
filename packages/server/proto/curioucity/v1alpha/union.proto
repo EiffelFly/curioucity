@@ -19,7 +19,7 @@ message FullTag {
   string id = 1;
   string name = 2;
   repeated curioucity.v1alpha.ResourceUnion resources = 3;
-  int64 created_timestamp_at_curioucity = 4;
+  string created_timestamp_at_curioucity = 4;
 }
 
 message FullUrl {
@@ -28,5 +28,5 @@ message FullUrl {
   repeated curioucity.v1alpha.SingularUrl references = 3;
   repeated ResourceUnion resources = 4;
   curioucity.v1alpha.ResourceType resource_type = 5;
-  int64 created_timestamp_at_curioucity = 6;
+  string created_timestamp_at_curioucity = 6;
 }

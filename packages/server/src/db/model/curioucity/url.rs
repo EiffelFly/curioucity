@@ -1,12 +1,12 @@
 use anyhow::bail;
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use edgedb_derive::Queryable;
 use edgedb_protocol::model::Uuid;
 use edgedb_tokio::Client;
 use serde::{Deserialize, Serialize};
 
 use crate::db::model::curioucity as db_curioucity;
-use crate::helper::time::get_edgedb_timestamp_from_2000;
+use crate::helper::time::get_edgedb_timestamp_from_2000_micros;
 use crate::pb_gen::curioucity::v1alpha as pb_curioucity;
 
 use super::ResourceUnion;
@@ -16,7 +16,7 @@ pub struct SingularUrl {
     pub id: Uuid,
     pub url: String,
     pub resource_type: db_curioucity::ResourceType,
-    pub created_timestamp_at_curioucity: i64,
+    pub created_timestamp_at_curioucity: String,
 }
 
 #[derive(Queryable, Serialize, Deserialize, Debug)]
@@ -26,16 +26,15 @@ pub struct FullUrl {
     pub references: Vec<SingularUrl>,
     pub resource_type: db_curioucity::ResourceType,
     pub resources: Option<Vec<ResourceUnion>>,
-    pub created_timestamp_at_curioucity: i64,
+    pub created_timestamp_at_curioucity: String,
 }
 
 #[derive(Queryable, Serialize, Deserialize, Debug)]
-pub struct FullUrlWithStringTimeStamp {
+pub struct Url {
     pub id: Uuid,
     pub url: String,
     pub references: Vec<SingularUrl>,
     pub resource_type: db_curioucity::ResourceType,
-    pub resources: Option<Vec<ResourceUnion>>,
     pub created_timestamp_at_curioucity: String,
 }
 
@@ -81,7 +80,7 @@ impl FullUrl {
         };";
 
         let created_timestamp_at_curioucity =
-            match get_edgedb_timestamp_from_2000(Utc::now().timestamp_micros()) {
+            match get_edgedb_timestamp_from_2000_micros(Utc::now().timestamp_micros()) {
                 Ok(time) => time,
                 Err(error) => {
                     println!("Time is out of range: {:?}", error);
@@ -107,45 +106,23 @@ impl FullUrl {
             }
         };
 
-        let full_urls_with_string_timestamp =
-            match serde_json::from_str::<Vec<FullUrlWithStringTimeStamp>>(response_json.as_ref()) {
-                Ok(result) => result,
-                Err(error) => {
-                    println!("Deserialize Error: {}", error);
-                    bail!("Deserialize Error: {}", error)
-                }
-            };
-
-        let full_url_with_string_timestamp =
-            match full_urls_with_string_timestamp.into_iter().nth(0) {
-                Some(url) => url,
-                None => {
-                    println!("Deserialize Error, deserialized element not found");
-                    bail!("Deserialize Error, deserialized element not found")
-                }
-            };
-
-        let utc_timestamp = match full_url_with_string_timestamp
-            .created_timestamp_at_curioucity
-            .parse::<DateTime<Utc>>()
-        {
-            Ok(time) => time.timestamp(),
+        let full_urls = match serde_json::from_str::<Vec<FullUrl>>(response_json.as_ref()) {
+            Ok(result) => result,
             Err(error) => {
-                println!("Parse Timestamp Error: {}", error);
-                bail!("Parse Timestamp Error: {}", error)
+                println!("Deserialize Error: {}", error);
+                bail!("Deserialize Error: {}", error)
             }
         };
 
-        let url = FullUrl {
-            id: full_url_with_string_timestamp.id,
-            url: full_url_with_string_timestamp.url,
-            references: full_url_with_string_timestamp.references,
-            resource_type: full_url_with_string_timestamp.resource_type,
-            resources: full_url_with_string_timestamp.resources,
-            created_timestamp_at_curioucity: utc_timestamp,
+        let full_url = match full_urls.into_iter().nth(0) {
+            Some(url) => url,
+            None => {
+                println!("Deserialize Error, deserialized element not found");
+                bail!("Deserialize Error, deserialized element not found")
+            }
         };
 
-        return Ok(url);
+        return Ok(full_url);
     }
 
     pub async fn delete(client: Client, payload: &DeleteUrlPayload) -> Result<(), anyhow::Error> {
@@ -187,48 +164,26 @@ impl FullUrl {
             }
         };
 
-        let full_urls_with_string_timestamp =
-            match serde_json::from_str::<Vec<FullUrlWithStringTimeStamp>>(response_json.as_ref()) {
-                Ok(result) => result,
-                Err(error) => {
-                    println!("Deserialize Error: {}", error);
-                    bail!("Deserialize Error: {}", error)
-                }
-            };
+        let full_urls = match serde_json::from_str::<Vec<FullUrl>>(response_json.as_ref()) {
+            Ok(result) => result,
+            Err(error) => {
+                println!("Deserialize Error: {}", error);
+                bail!("Deserialize Error: {}", error)
+            }
+        };
 
-        if full_urls_with_string_timestamp.is_empty() {
+        if full_urls.is_empty() {
             return Ok(None);
         } else {
-            let full_url_with_string_timestamp =
-                match full_urls_with_string_timestamp.into_iter().nth(0) {
-                    Some(url) => url,
-                    None => {
-                        println!("Deserialize Error, deserialized element not found");
-                        bail!("Deserialize Error, deserialized element not found")
-                    }
-                };
-
-            let utc_timestamp = match full_url_with_string_timestamp
-                .created_timestamp_at_curioucity
-                .parse::<DateTime<Utc>>()
-            {
-                Ok(time) => time.timestamp(),
-                Err(error) => {
-                    println!("Parse Timestamp Error: {}", error);
-                    bail!("Parse Timestamp Error: {}", error)
+            let full_url = match full_urls.into_iter().nth(0) {
+                Some(url) => url,
+                None => {
+                    println!("Deserialize Error, deserialized element not found");
+                    bail!("Deserialize Error, deserialized element not found")
                 }
             };
 
-            let url = FullUrl {
-                id: full_url_with_string_timestamp.id,
-                url: full_url_with_string_timestamp.url,
-                references: full_url_with_string_timestamp.references,
-                resource_type: full_url_with_string_timestamp.resource_type,
-                resources: full_url_with_string_timestamp.resources,
-                created_timestamp_at_curioucity: utc_timestamp,
-            };
-
-            return Ok(Some(url));
+            return Ok(Some(full_url));
         }
     }
 
@@ -258,47 +213,20 @@ impl FullUrl {
             }
         };
 
-        let full_urls_with_string_timestamp =
-            match serde_json::from_str::<Vec<FullUrlWithStringTimeStamp>>(response_json.as_ref()) {
-                Ok(result) => result,
-                Err(error) => {
-                    println!("Deserialize Error: {}", error);
-                    bail!("Deserialize Error: {}", error)
-                }
-            };
+        let full_urls = match serde_json::from_str::<Vec<FullUrl>>(response_json.as_ref()) {
+            Ok(result) => result,
+            Err(error) => {
+                println!("Deserialize Error: {}", error);
+                bail!("Deserialize Error: {}", error)
+            }
+        };
 
-        if full_urls_with_string_timestamp.is_empty() {
+        if full_urls.is_empty() {
             let empty_urls: Vec<FullUrl> = Vec::new();
             return Ok(empty_urls);
         }
 
-        let mut full_urls_with_int_timestamp: Vec<FullUrl> = Vec::new();
-
-        for full_url_with_string_timestamp in full_urls_with_string_timestamp {
-            let utc_timestamp = match full_url_with_string_timestamp
-                .created_timestamp_at_curioucity
-                .parse::<DateTime<Utc>>()
-            {
-                Ok(time) => time.timestamp(),
-                Err(error) => {
-                    println!("Parse Timestamp Error: {}", error);
-                    bail!("Parse Timestamp Error: {}", error)
-                }
-            };
-
-            let url_with_int_timestamp = FullUrl {
-                id: full_url_with_string_timestamp.id,
-                url: full_url_with_string_timestamp.url,
-                references: full_url_with_string_timestamp.references,
-                resource_type: full_url_with_string_timestamp.resource_type,
-                resources: full_url_with_string_timestamp.resources,
-                created_timestamp_at_curioucity: utc_timestamp,
-            };
-
-            full_urls_with_int_timestamp.push(url_with_int_timestamp)
-        }
-
-        Ok(full_urls_with_int_timestamp)
+        Ok(full_urls)
     }
 
     pub fn as_pb_type(&self) -> pb_curioucity::FullUrl {
@@ -344,15 +272,6 @@ fn transform_full_url_to_pb(value: &FullUrl) -> pb_curioucity::FullUrl {
         references: new_refs,
         created_timestamp_at_curioucity: value.created_timestamp_at_curioucity.clone(),
     };
-}
-
-#[derive(Queryable, Serialize, Deserialize, Debug)]
-pub struct Url {
-    pub id: Uuid,
-    pub url: String,
-    pub references: Vec<SingularUrl>,
-    pub resource_type: db_curioucity::ResourceType,
-    pub created_timestamp_at_curioucity: i64,
 }
 
 impl Url {
