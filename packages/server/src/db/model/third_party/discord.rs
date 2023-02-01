@@ -1,16 +1,14 @@
 use anyhow::bail;
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use edgedb_derive::Queryable;
-use edgedb_protocol::model::Uuid;
+use edgedb_protocol::model::{Datetime, Uuid};
 use edgedb_tokio::Client;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::db::model::curioucity::{
-    self as db_curioucity, FullTagWithStringTimestamp, FullUrl, FullUrlWithStringTimeStamp,
-};
+use crate::db::model::curioucity::{self as db_curioucity, FullUrl};
 use crate::db::model::curioucity::{Tag, Url};
-use crate::helper::time::get_edgedb_timestamp_from_2000;
+use crate::helper::time::get_edgedb_timestamp_from_2000_micros;
 use crate::pb_gen::curioucity::v1alpha as pb_curioucity;
 use crate::pb_gen::third_party::v1alpha as pb_third_party;
 
@@ -24,8 +22,8 @@ pub struct DiscordGuild {
     pub threads: Vec<DiscordThread>,
     pub tags: Vec<Tag>,
     pub url: Url,
-    pub created_timestamp_at_curioucity: i64,
-    pub created_timestamp_at_discord: i64,
+    pub created_timestamp_at_curioucity: String,
+    pub created_timestamp_at_discord: String,
 }
 
 impl From<DiscordGuild> for pb_third_party::DiscordGuild {
@@ -78,8 +76,8 @@ pub struct DiscordThread {
     pub tags: Vec<Tag>,
     pub messages: Vec<DiscordMessage>,
     pub url: Url,
-    pub created_timestamp_at_curioucity: i64,
-    pub created_timestamp_at_discord: i64,
+    pub created_timestamp_at_curioucity: String,
+    pub created_timestamp_at_discord: String,
 }
 
 impl From<DiscordThread> for pb_third_party::DiscordThread {
@@ -130,20 +128,6 @@ pub struct DiscordMessage {
     pub markdown_content: String,
     pub tags: Vec<Tag>,
     pub url: Url,
-    pub created_timestamp_at_curioucity: i64,
-    pub created_timestamp_at_discord: i64,
-    pub order_in_thread: i64,
-}
-
-#[derive(Queryable, Serialize, Deserialize, Debug)]
-pub struct DiscordMessageWithStringTimestamp {
-    pub id: Uuid,
-    pub kind: String,
-    pub message_id: i64,
-    pub content: String,
-    pub markdown_content: String,
-    pub tags: Vec<FullTagWithStringTimestamp>,
-    pub url: FullUrlWithStringTimeStamp,
     pub created_timestamp_at_curioucity: String,
     pub created_timestamp_at_discord: String,
     pub order_in_thread: i64,
@@ -155,7 +139,7 @@ pub struct CreateDiscordMessagePayload {
     pub content: String,
     pub markdown_content: String,
     pub url: String,
-    pub created_timestamp_at_discord: i64,
+    pub created_timestamp_at_discord: Datetime,
     pub order_in_thread: i64,
 }
 
@@ -217,16 +201,7 @@ impl DiscordMessage {
         };";
 
         let created_timestamp_at_curioucity =
-            match get_edgedb_timestamp_from_2000(Utc::now().timestamp_micros()) {
-                Ok(time) => time,
-                Err(error) => {
-                    println!("Time is out of range: {:?}", error);
-                    bail!("{}", error)
-                }
-            };
-
-        let created_timestamp_at_discord =
-            match get_edgedb_timestamp_from_2000(payload.created_timestamp_at_discord) {
+            match get_edgedb_timestamp_from_2000_micros(Utc::now().timestamp_micros()) {
                 Ok(time) => time,
                 Err(error) => {
                     println!("Time is out of range: {:?}", error);
@@ -241,7 +216,7 @@ impl DiscordMessage {
                     &payload.message_id,
                     &payload.content,
                     &payload.markdown_content,
-                    &created_timestamp_at_discord,
+                    &payload.created_timestamp_at_discord,
                     &created_timestamp_at_curioucity,
                     &payload.url,
                     &payload.order_in_thread,
@@ -256,103 +231,24 @@ impl DiscordMessage {
             }
         };
 
-        let discord_messages_with_string_timestamp = match serde_json::from_str::<
-            Vec<DiscordMessageWithStringTimestamp>,
-        >(response_json.as_ref())
-        {
-            Ok(result) => result,
-            Err(error) => {
-                println!("Deserialize Error: {}", error);
-                bail!("Deserialize Error: {}", error)
-            }
-        };
-
-        let discord_message_with_string_timestamp =
-            match discord_messages_with_string_timestamp.into_iter().nth(0) {
-                Some(message) => message,
-                None => {
-                    println!("Deserialize Error, deserialized element not found");
-                    bail!("Deserialize Error, deserialized element not found")
-                }
-            };
-
-        let created_timestamp_at_discord_int = match discord_message_with_string_timestamp
-            .created_timestamp_at_discord
-            .parse::<DateTime<Utc>>()
-        {
-            Ok(time) => time.timestamp(),
-            Err(error) => {
-                println!("Parse Timestamp Error: {}", error);
-                bail!("Parse Timestamp Error: {}", error)
-            }
-        };
-
-        let created_timestamp_at_curioucity_int = match discord_message_with_string_timestamp
-            .created_timestamp_at_curioucity
-            .parse::<DateTime<Utc>>()
-        {
-            Ok(time) => time.timestamp(),
-            Err(error) => {
-                println!("Parse Timestamp Error: {}", error);
-                bail!("Parse Timestamp Error: {}", error)
-            }
-        };
-
-        let mut tags_with_int_timestamp: Vec<Tag> = Vec::new();
-
-        for tag_with_string_timestamp in discord_message_with_string_timestamp.tags {
-            let int_timestamp = match tag_with_string_timestamp
-                .created_timestamp_at_curioucity
-                .parse::<DateTime<Utc>>()
-            {
-                Ok(time) => time.timestamp(),
+        let discord_messages =
+            match serde_json::from_str::<Vec<DiscordMessage>>(response_json.as_ref()) {
+                Ok(result) => result,
                 Err(error) => {
-                    println!("Parse Timestamp Error: {}", error);
-                    bail!("Parse Timestamp Error: {}", error)
+                    println!("Deserialize Error: {}", error);
+                    bail!("Deserialize Error: {}", error)
                 }
             };
 
-            let tag = Tag {
-                id: tag_with_string_timestamp.id,
-                name: tag_with_string_timestamp.name,
-                created_timestamp_at_curioucity: int_timestamp,
-            };
-
-            tags_with_int_timestamp.push(tag)
-        }
-
-        let url_with_int_timestamp = Url {
-            id: discord_message_with_string_timestamp.url.id,
-            url: discord_message_with_string_timestamp.url.url,
-            references: discord_message_with_string_timestamp.url.references,
-            resource_type: discord_message_with_string_timestamp.url.resource_type,
-            created_timestamp_at_curioucity: match discord_message_with_string_timestamp
-                .url
-                .created_timestamp_at_curioucity
-                .parse::<DateTime<Utc>>()
-            {
-                Ok(time) => time.timestamp(),
-                Err(error) => {
-                    println!("Parse Timestamp Error: {}", error);
-                    bail!("Parse Timestamp Error: {}", error)
-                }
-            },
+        let discord_message = match discord_messages.into_iter().nth(0) {
+            Some(message) => message,
+            None => {
+                println!("Deserialize Error, deserialized element not found");
+                bail!("Deserialize Error, deserialized element not found")
+            }
         };
 
-        let discord_message_with_int_timestamp = DiscordMessage {
-            id: discord_message_with_string_timestamp.id,
-            kind: discord_message_with_string_timestamp.kind,
-            message_id: discord_message_with_string_timestamp.message_id,
-            content: discord_message_with_string_timestamp.content,
-            markdown_content: discord_message_with_string_timestamp.markdown_content,
-            tags: tags_with_int_timestamp,
-            url: url_with_int_timestamp,
-            created_timestamp_at_curioucity: created_timestamp_at_curioucity_int,
-            created_timestamp_at_discord: created_timestamp_at_discord_int,
-            order_in_thread: discord_message_with_string_timestamp.order_in_thread,
-        };
-
-        Ok(discord_message_with_int_timestamp)
+        Ok(discord_message)
     }
 
     pub fn as_pb_type(&self) -> pb_third_party::DiscordMessage {

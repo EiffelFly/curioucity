@@ -5,5 +5,5 @@ import "google/protobuf/struct.proto";
 message Tag {
   string id = 1;
   string name = 2;
-  int64 created_timestamp_at_curioucity = 3;
+  string created_timestamp_at_curioucity = 3;
 }

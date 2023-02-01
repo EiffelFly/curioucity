@@ -18,8 +18,8 @@ message DiscordGuild {
   repeated DiscordThread threads = 6;
   repeated curioucity.v1alpha.Tag tags = 7;
   curioucity.v1alpha.Url url = 8;
-  int64 created_timestamp_at_discord = 9;
-  int64 created_timestamp_at_curioucity = 10;
+  string created_timestamp_at_discord = 9;
+  string created_timestamp_at_curioucity = 10;
 }
 
 
@@ -37,8 +37,8 @@ message DiscordThread {
   repeated curioucity.v1alpha.Tag tags = 6;
   repeated DiscordMessage messages = 7;
   curioucity.v1alpha.Url url = 8;
-  int64 created_timestamp_at_discord = 9;
-  int64 created_timestamp_at_curioucity = 10;
+  string created_timestamp_at_discord = 9;
+  string created_timestamp_at_curioucity = 10;
 }
 
 enum DiscordMessageKind {
@@ -54,7 +54,7 @@ message DiscordMessage {
   string markdown_content = 5;
   repeated curioucity.v1alpha.Tag tags = 6;
   curioucity.v1alpha.Url url = 7;
-  int64 created_timestamp_at_discord = 8;
-  int64 created_timestamp_at_curioucity = 9;
+  string created_timestamp_at_discord = 8;
+  string created_timestamp_at_curioucity = 9;
   int64 order_in_thread = 10;
 }
