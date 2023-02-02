@@ -9,12 +9,12 @@ service DiscordService {
 }
 
 message CreateDiscordMessageRequest {
-  int64 message_id = 1;
+  string message_id = 1;
   string content = 2;
   string markdown_content = 3;
   string url = 4;
   int64 created_timestamp_at_discord = 5;
-  int64 order_in_thread = 6;
+  int32 order_in_thread = 6;
 }
 
 message CreateDiscordMessageResponse {

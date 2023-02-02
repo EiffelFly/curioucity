@@ -59,10 +59,10 @@ export const createDiscordMessage = () => {
             typeof r.json().discord_message.created_timestamp_at_curioucity !==
               "undefined" &&
             r.json().discord_message.created_timestamp_at_curioucity !== null,
-        // "createDiscordMessage - POST /discord/messages - response body should have correct order_in_thread":
-        //   (r) =>
-        //     r.json().discord_message.order_in_thread ===
-        //     createDiscordMessagePayload.order_in_thread,
+        "createDiscordMessage - POST /discord/messages - response body should have correct order_in_thread":
+          (r) =>
+            r.json().discord_message.order_in_thread ===
+            createDiscordMessagePayload.order_in_thread,
       }
     );
   });
