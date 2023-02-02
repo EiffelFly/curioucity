@@ -130,7 +130,7 @@ pub struct DiscordMessage {
     pub url: Url,
     pub created_timestamp_at_curioucity: String,
     pub created_timestamp_at_discord: String,
-    pub order_in_thread: i64,
+    pub order_in_thread: i32,
 }
 
 #[derive(Debug)]
@@ -140,7 +140,7 @@ pub struct CreateDiscordMessagePayload {
     pub markdown_content: String,
     pub url: String,
     pub created_timestamp_at_discord: Datetime,
-    pub order_in_thread: i64,
+    pub order_in_thread: i32,
 }
 
 impl From<DiscordMessage> for pb_third_party::DiscordMessage {
@@ -176,7 +176,7 @@ impl DiscordMessage {
                 created_timestamp_at_discord := <datetime>$3,
                 created_timestamp_at_curioucity := <datetime>$4,
                 url := (select Url filter .url = <str>$5),
-                order_in_thread := <int64>$6,
+                order_in_thread := <int32>$6,
             }
         ) {
             id,

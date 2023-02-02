@@ -56,5 +56,5 @@ message DiscordMessage {
   curioucity.v1alpha.Url url = 7;
   string created_timestamp_at_discord = 8;
   string created_timestamp_at_curioucity = 9;
-  int64 order_in_thread = 10;
+  int32 order_in_thread = 10;
 }
