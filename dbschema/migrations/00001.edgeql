@@ -1,10 +1,10 @@
-CREATE MIGRATION m1rgfa2kf33qdwd27tibaveexw5keppekbfxfealtegqtiajs5vvia
+CREATE MIGRATION m1pt7u3zyz34cz3tpgjkukjidojqycvfzrvsmtnm3cu3334bj3e7la
     ONTO initial
 {
   CREATE TYPE default::DiscordGuild {
       CREATE REQUIRED PROPERTY created_timestamp_at_curioucity -> std::datetime;
       CREATE REQUIRED PROPERTY created_timestamp_at_discord -> std::datetime;
-      CREATE REQUIRED PROPERTY guild_id -> std::int64 {
+      CREATE REQUIRED PROPERTY guild_id -> std::str {
           CREATE CONSTRAINT std::exclusive;
       };
       CREATE PROPERTY icon -> std::str;
@@ -35,10 +35,10 @@ CREATE MIGRATION m1rgfa2kf33qdwd27tibaveexw5keppekbfxfealtegqtiajs5vvia
           CREATE CONSTRAINT std::one_of('DISCORD_MESSAGE');
       };
       CREATE PROPERTY markdown_content -> std::str;
-      CREATE REQUIRED PROPERTY message_id -> std::int64 {
+      CREATE REQUIRED PROPERTY message_id -> std::str {
           CREATE CONSTRAINT std::exclusive;
       };
-      CREATE REQUIRED PROPERTY order_in_thread -> std::int64;
+      CREATE REQUIRED PROPERTY order_in_thread -> std::int32;
   };
   CREATE TYPE default::DiscordThread {
       CREATE MULTI LINK tags -> default::Tag {
@@ -46,7 +46,7 @@ CREATE MIGRATION m1rgfa2kf33qdwd27tibaveexw5keppekbfxfealtegqtiajs5vvia
       };
       CREATE MULTI LINK messages -> default::DiscordMessage {
           CREATE CONSTRAINT std::exclusive;
-          CREATE PROPERTY order -> std::int64;
+          CREATE PROPERTY order -> std::int32;
       };
       CREATE REQUIRED PROPERTY created_timestamp_at_curioucity -> std::datetime;
       CREATE REQUIRED PROPERTY created_timestamp_at_discord -> std::datetime;
@@ -55,7 +55,7 @@ CREATE MIGRATION m1rgfa2kf33qdwd27tibaveexw5keppekbfxfealtegqtiajs5vvia
           CREATE CONSTRAINT std::one_of('DISCORD_THREAD');
       };
       CREATE PROPERTY markdown_content -> std::str;
-      CREATE REQUIRED PROPERTY thread_id -> std::int64 {
+      CREATE REQUIRED PROPERTY thread_id -> std::str {
           CREATE CONSTRAINT std::exclusive;
       };
   };
