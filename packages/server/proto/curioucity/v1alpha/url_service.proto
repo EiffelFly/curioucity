@@ -36,7 +36,7 @@ message GetUrlResponse {
 }
 
 message ListUrlRequest {
-  optional int64 page_size = 1;
+  optional int32 page_size = 1;
 }
 
 message ListUrlResponse {
