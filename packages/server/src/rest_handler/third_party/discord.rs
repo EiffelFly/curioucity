@@ -36,7 +36,7 @@ pub async fn create_discord_message(
         };
 
     let payload = db_third_party::discord::CreateDiscordMessagePayload {
-        message_id: payload.message_id as i64,
+        message_id: payload.message_id.clone(),
         content: payload.content.clone(),
         created_timestamp_at_discord: edgedb_datetime,
         markdown_content: payload.markdown_content.clone(),

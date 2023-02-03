@@ -42,7 +42,7 @@ pub struct GetTagPayload {
 
 #[derive(Debug)]
 pub struct ListTagPayload {
-    pub page_size: i64,
+    pub page_size: i32,
 }
 
 impl FullTag {
@@ -163,8 +163,8 @@ impl FullTag {
             name,
             resources,
             created_timestamp_at_curioucity
-        } order by .name
-        limit <int64>$0";
+        } order by .id
+        limit <int32>$0";
 
         let response_json = match client.query_json(&query, &(&payload.page_size,)).await {
             Ok(json) => json,

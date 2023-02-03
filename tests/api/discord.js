@@ -5,7 +5,7 @@ import { API_HOST } from "./rest.js";
 export const createDiscordMessage = () => {
   group("Disocrd - Should create discord message", () => {
     let createDiscordMessagePayload = {
-      message_id: Math.floor(Math.random() * 100000000),
+      message_id: `${Math.floor(Math.random() * 100000000)}`,
       content: "Hi i am here",
       markdown_content: "Hi i am here",
       url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,

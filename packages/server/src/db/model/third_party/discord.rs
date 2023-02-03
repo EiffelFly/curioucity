@@ -16,7 +16,7 @@ use crate::pb_gen::third_party::v1alpha as pb_third_party;
 pub struct DiscordGuild {
     pub id: Uuid,
     pub kind: String,
-    pub guild_id: i64,
+    pub guild_id: String,
     pub name: String,
     pub icon: String,
     pub threads: Vec<DiscordThread>,
@@ -54,7 +54,7 @@ fn transform_discord_guild_to_pb(value: &DiscordGuild) -> pb_third_party::Discor
     pb_third_party::DiscordGuild {
         id: value.id.clone().to_string(),
         kind: 0,
-        guild_id: value.guild_id,
+        guild_id: value.guild_id.clone(),
         name: value.name.clone(),
         icon: value.icon.clone(),
         threads: pb_threads,
@@ -69,7 +69,7 @@ fn transform_discord_guild_to_pb(value: &DiscordGuild) -> pb_third_party::Discor
 pub struct DiscordThread {
     pub id: Uuid,
     pub kind: String,
-    pub thread_id: i64,
+    pub thread_id: String,
     #[edgedb(json)]
     pub full_messages_json: HashMap<String, String>,
     pub markdown_content: String,
@@ -123,7 +123,7 @@ fn transform_discord_thread_to_pb(value: &DiscordThread) -> pb_third_party::Disc
 pub struct DiscordMessage {
     pub id: Uuid,
     pub kind: String,
-    pub message_id: i64,
+    pub message_id: String,
     pub content: String,
     pub markdown_content: String,
     pub tags: Vec<Tag>,
@@ -135,7 +135,7 @@ pub struct DiscordMessage {
 
 #[derive(Debug)]
 pub struct CreateDiscordMessagePayload {
-    pub message_id: i64,
+    pub message_id: String,
     pub content: String,
     pub markdown_content: String,
     pub url: String,
@@ -169,7 +169,7 @@ impl DiscordMessage {
 
         let create_discord_message_query = "select (
             insert DiscordMessage {
-                message_id := <int64>$0,
+                message_id := <str>$0,
                 kind := 'DISCORD_MESSAGE',
                 content := <str>$1,
                 markdown_content := <str>$2,
@@ -266,7 +266,7 @@ fn transform_discord_message_to_pb(value: &DiscordMessage) -> pb_third_party::Di
     pb_third_party::DiscordMessage {
         id: value.id.clone().to_string(),
         kind: 1, // By default 0 will be unspecific, 1 will be its kind
-        message_id: value.message_id,
+        message_id: value.message_id.clone(),
         content: value.content.clone(),
         created_timestamp_at_curioucity: value.created_timestamp_at_curioucity.clone(),
         created_timestamp_at_discord: value.created_timestamp_at_discord.clone(),

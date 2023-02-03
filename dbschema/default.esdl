@@ -3,7 +3,7 @@ module default {
     required property kind -> str {
       constraint one_of("DISCORD_GUILD");
     };
-    required property guild_id -> int64 {
+    required property guild_id -> str {
       constraint exclusive;
     };
     required property name -> str;
@@ -23,7 +23,7 @@ module default {
     required property kind -> str {
       constraint one_of("DISCORD_THREAD");
     };
-    required property thread_id -> int64 {
+    required property thread_id -> str {
       constraint exclusive;
     };
     required property created_timestamp_at_discord -> datetime;
@@ -31,7 +31,7 @@ module default {
     property full_messages_json -> json;
     multi link messages -> DiscordMessage {
       constraint exclusive;
-      property order -> int64;
+      property order -> int32;
     };
     property markdown_content -> str;
     multi link tags -> Tag {
@@ -46,10 +46,10 @@ module default {
     required property kind -> str {
       constraint one_of("DISCORD_MESSAGE");
     };
-    required property message_id -> int64 {
+    required property message_id -> str {
       constraint exclusive;
     };
-    required property order_in_thread -> int64;
+    required property order_in_thread -> int32;
     required property created_timestamp_at_discord -> datetime;
     required property created_timestamp_at_curioucity -> datetime;
     property content -> str;
