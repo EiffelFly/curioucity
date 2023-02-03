@@ -52,7 +52,7 @@ pub struct GetUrlPayload {
 }
 
 pub struct ListUrlPayload {
-    pub page_size: i64,
+    pub page_size: i32,
 }
 
 impl FullUrl {
@@ -202,8 +202,8 @@ impl FullUrl {
             resource_type,
             resource,
             created_timestamp_at_curioucity
-        } order by .url
-        limit <int64>$0";
+        } order by .id
+        limit <int32>$0";
 
         let response_json = match client.query_json(&query, &(&payload.page_size,)).await {
             Ok(json) => json,

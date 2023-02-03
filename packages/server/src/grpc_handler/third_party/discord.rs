@@ -39,7 +39,7 @@ impl pb_third_party::discord_service_server::DiscordService for GrpcDiscordServi
         };
 
         let payload = db_third_party::discord::CreateDiscordMessagePayload {
-            message_id: req_ref.message_id as i64,
+            message_id: req_ref.message_id.clone(),
             content: req_ref.content.clone(),
             created_timestamp_at_discord: edgedb_datetime,
             markdown_content: req_ref.markdown_content.clone(),

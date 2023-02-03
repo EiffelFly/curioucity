@@ -153,7 +153,7 @@ pub async fn list_url(
         }
     };
 
-    let mut page_size: i64 = 10;
+    let mut page_size: i32 = 10;
 
     if let Some(payload) = payload {
         page_size = match payload.page_size {
@@ -308,7 +308,7 @@ pub async fn list_tag(
         }
     };
 
-    let mut page_size: i64 = 10;
+    let mut page_size: i32 = 10;
 
     if let Some(payload) = payload {
         page_size = match payload.page_size {
