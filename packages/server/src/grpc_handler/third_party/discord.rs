@@ -64,4 +64,36 @@ impl pb_third_party::discord_service_server::DiscordService for GrpcDiscordServi
 
         Ok(Response::new(resp))
     }
+
+    async fn delete_discord_message(
+        &self,
+        req: Request<pb_third_party::DeleteDiscordMessageRequest>,
+    ) -> Result<Response<pb_third_party::DeleteDiscordMessageResponse>, Status> {
+        let client = match edgedb_tokio::create_client().await {
+            Ok(client) => client,
+            Err(error) => {
+                return Err(Status::internal(format!(
+                    "Something went wrong when access database: {}",
+                    error
+                )))
+            }
+        };
+
+        let payload = db_third_party::discord::DeleteDiscordMessagePayload {
+            message_id: req.get_ref().message_id.clone(),
+        };
+
+        match db_third_party::discord::DiscordMessage::delete(client, &payload).await {
+            Ok(_) => {
+                let resp = pb_third_party::DeleteDiscordMessageResponse {};
+                return Ok(Response::new(resp));
+            }
+            Err(error) => {
+                return Err(Status::internal(format!(
+                    "Something went wrong when delete discord message: {}",
+                    error
+                )))
+            }
+        }
+    }
 }

@@ -7,15 +7,16 @@ export const options = {};
 export const API_HOST = "http://localhost:8080";
 
 const main = () => {
-  urlServices.createUrl();
-  urlServices.deleteUrl();
-  urlServices.getUrl();
-  tagServices.createTag();
-  tagServices.deleteTag();
-  tagServices.getTag();
-  tagServices.listTag();
-  urlServices.listUrl();
-  discordServices.createDiscordMessage();
+  // urlServices.createUrl();
+  // urlServices.deleteUrl();
+  // urlServices.getUrl();
+  // tagServices.createTag();
+  // tagServices.deleteTag();
+  // tagServices.getTag();
+  // tagServices.listTag();
+  // urlServices.listUrl();
+  // discordServices.createDiscordMessage();
+  discordServices.deleteDiscordMessage();
 };
 
 export default main;
