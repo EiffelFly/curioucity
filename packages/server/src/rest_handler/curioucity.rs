@@ -73,7 +73,7 @@ pub async fn create_url(
 }
 
 pub async fn delete_url(
-    payload: Json<pb_curioucity::DeleteUrlRequest>,
+    Path(pb_curioucity::GetUrlRequest { url }): Path<pb_curioucity::GetUrlRequest>,
 ) -> Result<impl IntoResponse, Response> {
     let client = match edgedb_tokio::create_client().await {
         Ok(client) => client,
@@ -86,9 +86,7 @@ pub async fn delete_url(
         }
     };
 
-    let delete_url_paylolad = db_curioucity::DeleteUrlPayload {
-        url: payload.url.clone(),
-    };
+    let delete_url_paylolad = db_curioucity::DeleteUrlPayload { url };
 
     match db_curioucity::FullUrl::delete(client, &delete_url_paylolad).await {
         Ok(_) => return Ok((StatusCode::NO_CONTENT, ())),
@@ -228,7 +226,7 @@ pub async fn create_tag(
 }
 
 pub async fn delete_tag(
-    payload: Json<pb_curioucity::DeleteTagRequest>,
+    Path(pb_curioucity::DeleteTagRequest { name }): Path<pb_curioucity::DeleteTagRequest>,
 ) -> Result<impl IntoResponse, Response> {
     let client = match edgedb_tokio::create_client().await {
         Ok(client) => client,
@@ -241,9 +239,7 @@ pub async fn delete_tag(
         }
     };
 
-    let delete_tag_payload = db_curioucity::DeleteTagPayload {
-        name: payload.name.clone(),
-    };
+    let delete_tag_payload = db_curioucity::DeleteTagPayload { name };
 
     match db_curioucity::FullTag::delete(client, &delete_tag_payload).await {
         Ok(_) => return Ok((StatusCode::NO_CONTENT, ())),

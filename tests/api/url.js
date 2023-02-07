@@ -1,10 +1,11 @@
 import http from "k6/http";
 import { check, group } from "k6";
 import { API_HOST } from "./rest.js";
+import { makeRandStr } from "./helper.js";
 
 export const createUrl = () => {
   group("Url - Should create url", () => {
-    const url = "https://summerbud.org/id/234azyyq456";
+    const url = makeRandStr(6);
 
     let createUrlPayload = {
       url: url,
@@ -18,41 +19,37 @@ export const createUrl = () => {
     check(
       http.request(
         "POST",
-        `${API_HOST}/urls`,
+        `${API_HOST}/urls/create`,
         JSON.stringify(createUrlPayload),
         {
           headers,
         }
       ),
       {
-        "createUrl - POST /urls - response status should be 201": (r) =>
+        "createUrl - POST /urls/create - response status should be 201": (r) =>
           r.status === 201,
-        "createUrl - POST /urls - response body should have id": (r) =>
+        "createUrl - POST /urls/create - response body should have id": (r) =>
           typeof r.json().url.id !== undefined || r.json().url.id !== null,
-        "createUrl - POST /urls - response body should have correct url": (r) =>
-          r.json().url.url === url,
-        "createUrl - POST /urls - response body should have correct resource_type":
+        "createUrl - POST /urls/create - response body should have correct url":
+          (r) => r.json().url.url === url,
+        "createUrl - POST /urls/create - response body should have correct resource_type":
           (r) => r.json().url.resource_type === createUrlPayload.resource_type,
-        "createUrl - POST /urls - response body should have created_timestamp_at_curioucity":
+        "createUrl - POST /urls/create - response body should have created_timestamp_at_curioucity":
           (r) =>
             r.json().url.created_timestamp_at_curioucity !== null ||
             r.json().url.created_timestamp_at_curioucity !== undefined,
       }
     );
 
-    let deleteUrlPayload = {
-      url,
-    };
-
     check(
       http.request(
         "DELETE",
-        `${API_HOST}/urls`,
-        JSON.stringify(deleteUrlPayload),
+        `${API_HOST}/urls/${encodeURIComponent(url)}`,
+        undefined,
         { headers }
       ),
       {
-        "createUrl - DELETE /urls - response status should be 204": (r) =>
+        "createUrl - DELETE /urls/:url - response status should be 204": (r) =>
           r.status === 204,
       }
     );
@@ -61,7 +58,7 @@ export const createUrl = () => {
 
 export const deleteUrl = () => {
   group("Url - Should delete url", () => {
-    const url = "https://summerbud.org/id/test";
+    const url = makeRandStr(6);
 
     let createUrlPayload = {
       url: url,
@@ -75,31 +72,27 @@ export const deleteUrl = () => {
     check(
       http.request(
         "POST",
-        `${API_HOST}/urls`,
+        `${API_HOST}/urls/create`,
         JSON.stringify(createUrlPayload),
         {
           headers,
         }
       ),
       {
-        "deleteUrl - POST /urls - response status should be 201": (r) =>
+        "deleteUrl - POST /urls/create - response status should be 201": (r) =>
           r.status === 201,
       }
     );
 
-    let deleteUrlPayload = {
-      url,
-    };
-
     check(
       http.request(
         "DELETE",
-        `${API_HOST}/urls`,
-        JSON.stringify(deleteUrlPayload),
+        `${API_HOST}/urls/${encodeURIComponent(url)}`,
+        undefined,
         { headers }
       ),
       {
-        "deleteUrl - DELETE /urls - response status should be 204": (r) =>
+        "deleteUrl - DELETE /urls/:url - response status should be 204": (r) =>
           r.status === 204,
       }
     );
@@ -109,7 +102,7 @@ export const deleteUrl = () => {
 export const getUrl = () => {
   group("Url - Should get url", () => {
     // Should return not found when try to get not exist url
-    const notExistUrl = "https://summerbud.org/id/21afr23";
+    const notExistUrl = makeRandStr(6);
 
     let headers = {
       "Content-Type": "application/json",
@@ -125,14 +118,13 @@ export const getUrl = () => {
         }
       ),
       {
-        "getUrl - GET /urls - not exist url, response status should be 404": (
-          r
-        ) => r.status === 404,
+        "getUrl - GET /urls/:url - not exist url, response status should be 404":
+          (r) => r.status === 404,
       }
     );
 
     // Should get the newly created url
-    const newUrl = "https://summerbud.org/id/305968";
+    const newUrl = makeRandStr(6);
 
     let createUrlPayload = {
       url: newUrl,
@@ -142,14 +134,14 @@ export const getUrl = () => {
     check(
       http.request(
         "POST",
-        `${API_HOST}/urls`,
+        `${API_HOST}/urls/create`,
         JSON.stringify(createUrlPayload),
         {
           headers,
         }
       ),
       {
-        "getUrl - POST /urls - response status should be 201": (r) =>
+        "getUrl - POST /urls/create - response status should be 201": (r) =>
           r.status === 201,
       }
     );
@@ -164,15 +156,16 @@ export const getUrl = () => {
         }
       ),
       {
-        "getUrl - GET /urls - response status should be 200": (r) =>
+        "getUrl - GET /urls/:url - response status should be 200": (r) =>
           r.status === 200,
-        "getUrl - GET /urls - response body should have id": (r) =>
+        "getUrl - GET /urls/:url - response body should have id": (r) =>
           typeof r.json().url.id !== undefined || r.json().url.id !== null,
-        "getUrl - GET /urls - response body should have correct url": (r) =>
-          r.json().url.url === newUrl,
-        "getUrl - GET /urls - response body should have correct resource_type":
+        "getUrl - GET /urls/:url - response body should have correct url": (
+          r
+        ) => r.json().url.url === newUrl,
+        "getUrl - GET /urls/:url - response body should have correct resource_type":
           (r) => r.json().url.resource_type === createUrlPayload.resource_type,
-        "getUrl - GET /urls - response body should have correct created_timestamp_at_curioucity":
+        "getUrl - GET /urls/:url - response body should have correct created_timestamp_at_curioucity":
           (r) =>
             r.json().url.created_timestamp_at_curioucity !== null ||
             r.json().url.created_timestamp_at_curioucity !== undefined,
@@ -186,12 +179,12 @@ export const getUrl = () => {
     check(
       http.request(
         "DELETE",
-        `${API_HOST}/urls`,
-        JSON.stringify(deleteUrlPayload),
+        `${API_HOST}/urls/${encodeURIComponent(newUrl)}`,
+        undefined,
         { headers }
       ),
       {
-        "getUrl - DELETE /urls - response status should be 204": (r) =>
+        "getUrl - DELETE /urls/:url - response status should be 204": (r) =>
           r.status === 204,
       }
     );
@@ -199,11 +192,8 @@ export const getUrl = () => {
 };
 
 export const listUrl = () => {
-  group("Should list tags", () => {
-    const newUrls = [
-      "https://www.summerbud.org/id/258",
-      "https://www.summerbud.org/id/2675",
-    ];
+  group("Should list urls", () => {
+    const newUrls = [makeRandStr(6), makeRandStr(6)];
 
     let headers = {
       "Content-Type": "application/json",
@@ -223,14 +213,14 @@ export const listUrl = () => {
       check(
         http.request(
           "POST",
-          `${API_HOST}/urls`,
+          `${API_HOST}/urls/create`,
           JSON.stringify(createUrlPayload),
           {
             headers,
           }
         ),
         {
-          "listUrl - POST /urls - response status should be 201": (r) =>
+          "listUrl - POST /urls/create - response status should be 201": (r) =>
             r.status === 201,
         }
       );
@@ -246,21 +236,17 @@ export const listUrl = () => {
     // });
 
     for (const url of newUrls) {
-      let deleteUrlPayload = {
-        url,
-      };
-
       check(
         http.request(
           "DELETE",
-          `${API_HOST}/urls`,
-          JSON.stringify(deleteUrlPayload),
+          `${API_HOST}/urls/${encodeURIComponent(url)}`,
+          undefined,
           {
             headers,
           }
         ),
         {
-          "listUrl - DELETE /urls - response status should be 204": (r) =>
+          "listUrl - DELETE /urls/:url - response status should be 204": (r) =>
             r.status === 204,
         }
       );
