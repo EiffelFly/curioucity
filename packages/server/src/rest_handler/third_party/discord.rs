@@ -1,6 +1,7 @@
 use crate::db::model::third_party as db_third_party;
 use crate::helper::time::get_edgedb_timestamp_from_2000_micros;
 use crate::pb_gen::third_party::v1alpha as pb_third_party;
+use axum::extract::Path;
 use axum::response::Response;
 use axum::{http::StatusCode, response::IntoResponse, Json};
 
@@ -67,7 +68,9 @@ pub async fn create_discord_message(
 }
 
 pub async fn delete_discord_message(
-    payload: Json<pb_third_party::CreateDiscordMessageRequest>,
+    Path(pb_third_party::DeleteDiscordMessageRequest { message_id }): Path<
+        pb_third_party::DeleteDiscordMessageRequest,
+    >,
 ) -> Result<impl IntoResponse, Response> {
     let client = match edgedb_tokio::create_client().await {
         Ok(client) => client,
@@ -80,9 +83,8 @@ pub async fn delete_discord_message(
         }
     };
 
-    let delete_discord_message_payload = db_third_party::discord::DeleteDiscordMessagePayload {
-        message_id: payload.message_id.clone(),
-    };
+    let delete_discord_message_payload =
+        db_third_party::discord::DeleteDiscordMessagePayload { message_id };
 
     match db_third_party::discord::DiscordMessage::delete(client, &delete_discord_message_payload)
         .await

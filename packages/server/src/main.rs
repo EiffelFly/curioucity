@@ -30,22 +30,23 @@ async fn main() {
     tracing_subscriber::registry();
 
     // build our application with a route
+    // the name of :<query> will follow protobuf
     let http = Router::new()
         .route("/", axum::routing::get(hello))
-        .route("/urls", axum::routing::post(create_url))
-        .route("/urls", axum::routing::delete(delete_url))
+        .route("/urls/create", axum::routing::post(create_url))
+        .route("/urls/:url", axum::routing::delete(delete_url))
         .route("/urls/:url", axum::routing::get(get_url))
         .route("/urls", axum::routing::get(list_url))
-        .route("/tags", axum::routing::post(create_tag))
-        .route("/tags", axum::routing::delete(delete_tag))
+        .route("/tags/create", axum::routing::post(create_tag))
+        .route("/tags/:name", axum::routing::delete(delete_tag))
         .route("/tags/:name", axum::routing::get(get_tag))
         .route("/tags", axum::routing::get(list_tag))
         .route(
-            "/discord/messages",
+            "/discord/messages/create",
             axum::routing::post(create_discord_message),
         )
         .route(
-            "/discord/messages/delete",
+            "/discord/messages/:message_id",
             axum::routing::delete(delete_discord_message),
         )
         .fallback(fallback)
