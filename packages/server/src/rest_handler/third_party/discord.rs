@@ -65,3 +65,38 @@ pub async fn create_discord_message(
 
     Ok((StatusCode::CREATED, Json(resp)))
 }
+
+pub async fn delete_discord_message(
+    payload: Json<pb_third_party::CreateDiscordMessageRequest>,
+) -> Result<impl IntoResponse, Response> {
+    let client = match edgedb_tokio::create_client().await {
+        Ok(client) => client,
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when access database: {}", error),
+            )
+                .into_response())
+        }
+    };
+
+    let delete_discord_message_payload = db_third_party::discord::DeleteDiscordMessagePayload {
+        message_id: payload.message_id.clone(),
+    };
+
+    match db_third_party::discord::DiscordMessage::delete(client, &delete_discord_message_payload)
+        .await
+    {
+        Ok(_) => return Ok((StatusCode::NO_CONTENT, ())),
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!(
+                    "Something went wrong when delete discord message: {}",
+                    error
+                ),
+            )
+                .into_response())
+        }
+    };
+}

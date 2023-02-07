@@ -143,6 +143,10 @@ pub struct CreateDiscordMessagePayload {
     pub order_in_thread: i32,
 }
 
+pub struct DeleteDiscordMessagePayload {
+    pub message_id: String,
+}
+
 impl From<DiscordMessage> for pb_third_party::DiscordMessage {
     fn from(value: DiscordMessage) -> Self {
         transform_discord_message_to_pb(&value)
@@ -249,6 +253,23 @@ impl DiscordMessage {
         };
 
         Ok(discord_message)
+    }
+
+    pub async fn delete(
+        client: Client,
+        payload: &DeleteDiscordMessagePayload,
+    ) -> Result<(), anyhow::Error> {
+        let query = "delete DiscordMessage filter .message_id = <str>$0";
+
+        let response = client.query_json(&query, &(&payload.message_id,)).await;
+
+        match response {
+            Ok(_) => Ok(()),
+            Err(error) => {
+                println!("Error: {:?}", error);
+                bail!("{}", error)
+            }
+        }
     }
 
     pub fn as_pb_type(&self) -> pb_third_party::DiscordMessage {

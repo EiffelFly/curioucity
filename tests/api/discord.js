@@ -67,3 +67,54 @@ export const createDiscordMessage = () => {
     );
   });
 };
+
+export const deleteDiscordMessage = () => {
+  group("DiscordMessage - Should delete disocrd message", () => {
+    const messageId = `${Math.floor(Math.random() * 100000000)}`;
+
+    let createDiscordMessagePayload = {
+      message_id: messageId,
+      content: "Hi i am here",
+      markdown_content: "Hi i am here",
+      url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,
+      created_timestamp_at_discord: 1675220675,
+      order_in_thread: 20,
+    };
+
+    let headers = {
+      "Content-Type": "application/json",
+    };
+
+    check(
+      http.request(
+        "POST",
+        `${API_HOST}/discord/messages`,
+        JSON.stringify(createDiscordMessagePayload),
+        {
+          headers,
+        }
+      ),
+      {
+        "deleteDiscordMessage - POST /discord/messages - response status should be 201":
+          (r) => r.status === 201,
+      }
+    );
+
+    let deleteDiscordMessagePayload = {
+      message_id: messageId,
+    };
+
+    check(
+      http.request(
+        "DELETE",
+        `${API_HOST}/discord/messages/delete`,
+        JSON.stringify(deleteDiscordMessagePayload),
+        { headers }
+      ),
+      {
+        "deleteDiscordMessage - DELETE /discord/messages/delete - response status should be 204":
+          (r) => r.status === 204,
+      }
+    );
+  });
+};

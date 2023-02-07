@@ -9,7 +9,7 @@ mod rest_handler;
 
 use std::net::SocketAddr;
 
-use axum::{Json, Router};
+use axum::Router;
 use grpc_handler::curioucity::{GrpcTagServiceImpl, GrpcUrlServiceImpl};
 use grpc_handler::third_party::discord::GrpcDiscordServiceImpl;
 use http::{header::CONTENT_TYPE, Request};
@@ -19,7 +19,7 @@ use pb_gen::third_party::v1alpha as pb_third_party;
 use rest_handler::curioucity::{
     create_tag, create_url, delete_tag, delete_url, get_tag, get_url, list_tag, list_url,
 };
-use rest_handler::third_party::discord::create_discord_message;
+use rest_handler::third_party::discord::{create_discord_message, delete_discord_message};
 
 use tonic::transport::Server;
 use tower::{steer::Steer, BoxError, ServiceExt};
@@ -40,10 +40,13 @@ async fn main() {
         .route("/tags", axum::routing::delete(delete_tag))
         .route("/tags/:name", axum::routing::get(get_tag))
         .route("/tags", axum::routing::get(list_tag))
-        .route("/test", axum::routing::get(test))
         .route(
             "/discord/messages",
             axum::routing::post(create_discord_message),
+        )
+        .route(
+            "/discord/messages/delete",
+            axum::routing::delete(delete_discord_message),
         )
         .fallback(fallback)
         .map_response(|r| r.map(axum::body::boxed))
@@ -107,9 +110,4 @@ async fn fallback(uri: axum::http::Uri) -> impl axum::response::IntoResponse {
 #[derive(serde::Serialize)]
 struct TestS {
     time: i64,
-}
-
-async fn test() -> Json<TestS> {
-    let test = TestS { time: 123 };
-    Json(test)
 }
