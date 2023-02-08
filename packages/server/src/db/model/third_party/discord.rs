@@ -10,7 +10,7 @@ use crate::db::model::curioucity::{self as db_curioucity, FullUrl};
 use crate::db::model::curioucity::{Tag, Url};
 use crate::helper::time::get_edgedb_timestamp_from_2000_micros;
 use crate::pb_gen::curioucity::v1alpha as pb_curioucity;
-use crate::pb_gen::third_party::v1alpha as pb_third_party;
+use crate::pb_gen::third_party::v1alpha::{self as pb_third_party};
 
 #[derive(Queryable, Serialize, Deserialize, Debug)]
 pub struct DiscordGuild {
@@ -147,6 +147,10 @@ pub struct DeleteDiscordMessagePayload {
     pub message_id: String,
 }
 
+pub struct GetDiscordMessagePayload {
+    pub message_id: String,
+}
+
 impl From<DiscordMessage> for pb_third_party::DiscordMessage {
     fn from(value: DiscordMessage) -> Self {
         transform_discord_message_to_pb(&value)
@@ -270,6 +274,64 @@ impl DiscordMessage {
                 bail!("{}", error)
             }
         }
+    }
+
+    pub async fn get(
+        client: Client,
+        payload: &GetDiscordMessagePayload,
+    ) -> Result<Option<Self>, anyhow::Error> {
+        let query = "select DiscordMessage {
+            id,
+            message_id,
+            kind,
+            content,
+            created_timestamp_at_discord,
+            created_timestamp_at_curioucity,
+            markdown_content,
+            order_in_thread,
+            url: {
+                id,
+                url,
+                references,
+                resource_type,
+                created_timestamp_at_curioucity,
+            },
+            tags: {
+                id,
+                name
+            }
+        } filter .message_id = <str>$0";
+
+        let response_json = match client.query_json(&query, &(&payload.message_id,)).await {
+            Ok(json) => json,
+            Err(error) => {
+                println!("Error occured when query database: {:?}", error);
+                bail!("{}", error)
+            }
+        };
+
+        let discord_messages =
+            match serde_json::from_str::<Vec<DiscordMessage>>(response_json.as_ref()) {
+                Ok(result) => result,
+                Err(error) => {
+                    println!("Deserialize Error: {}", error);
+                    bail!("Deserialize Error: {}", error)
+                }
+            };
+
+        if discord_messages.is_empty() {
+            return Ok(None);
+        }
+
+        let discord_message = match discord_messages.into_iter().nth(0) {
+            Some(url) => url,
+            None => {
+                println!("Deserialize Error, deserialized element not found");
+                bail!("Deserialize Error, deserialized element not found")
+            }
+        };
+
+        Ok(Some(discord_message))
     }
 
     pub fn as_pb_type(&self) -> pb_third_party::DiscordMessage {

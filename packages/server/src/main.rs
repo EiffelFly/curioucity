@@ -19,7 +19,9 @@ use pb_gen::third_party::v1alpha as pb_third_party;
 use rest_handler::curioucity::{
     create_tag, create_url, delete_tag, delete_url, get_tag, get_url, list_tag, list_url,
 };
-use rest_handler::third_party::discord::{create_discord_message, delete_discord_message};
+use rest_handler::third_party::discord::{
+    create_discord_message, delete_discord_message, get_discord_message,
+};
 
 use tonic::transport::Server;
 use tower::{steer::Steer, BoxError, ServiceExt};
@@ -44,6 +46,10 @@ async fn main() {
         .route(
             "/discord/messages/create",
             axum::routing::post(create_discord_message),
+        )
+        .route(
+            "/discord/messages/:message_id",
+            axum::routing::get(get_discord_message),
         )
         .route(
             "/discord/messages/:message_id",
