@@ -7,6 +7,7 @@ import "third_party/v1alpha/discord.proto";
 service DiscordService {
   rpc CreateDiscordMessage(CreateDiscordMessageRequest) returns (CreateDiscordMessageResponse);
   rpc DeleteDiscordMessage(DeleteDiscordMessageRequest) returns (DeleteDiscordMessageResponse);
+  rpc GetDiscordMessage(GetDiscordMessageRequest) returns (GetDiscordMessageResponse);
 }
 
 message CreateDiscordMessageRequest {
@@ -27,3 +28,11 @@ message DeleteDiscordMessageRequest {
 }
 
 message DeleteDiscordMessageResponse {}
+
+message GetDiscordMessageRequest {
+  string message_id = 1;
+}
+
+message GetDiscordMessageResponse {
+  third_party.v1alpha.DiscordMessage discord_message = 1;
+}

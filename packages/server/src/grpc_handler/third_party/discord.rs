@@ -96,4 +96,43 @@ impl pb_third_party::discord_service_server::DiscordService for GrpcDiscordServi
             }
         }
     }
+
+    async fn get_discord_message(
+        &self,
+        req: Request<pb_third_party::GetDiscordMessageRequest>,
+    ) -> Result<Response<pb_third_party::GetDiscordMessageResponse>, Status> {
+        let client = match edgedb_tokio::create_client().await {
+            Ok(client) => client,
+            Err(error) => {
+                return Err(Status::internal(format!(
+                    "Something went wrong when access database: {}",
+                    error
+                )))
+            }
+        };
+
+        let payload = db_third_party::discord::GetDiscordMessagePayload {
+            message_id: req.get_ref().message_id.clone(),
+        };
+
+        let discord_message =
+            match db_third_party::discord::DiscordMessage::get(client, &payload).await {
+                Ok(discord_message) => match discord_message {
+                    Some(discord_message) => discord_message,
+                    None => return Err(Status::not_found("".to_string())),
+                },
+                Err(error) => {
+                    return Err(Status::internal(format!(
+                        "Something went wrong when get discord message: {}",
+                        error
+                    )))
+                }
+            };
+
+        let resp = pb_third_party::GetDiscordMessageResponse {
+            discord_message: Some(discord_message.as_pb_type()),
+        };
+
+        Ok(Response::new(resp))
+    }
 }
