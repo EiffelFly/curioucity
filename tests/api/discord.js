@@ -245,3 +245,87 @@ export const getDiscordMessage = () => {
     );
   });
 };
+
+export const listDiscordMessage = () => {
+  group("Should list discord messages", () => {
+    let testSize = 10;
+    let newDiscordMessages = [];
+
+    for (let i = 0; i < testSize; i++) {
+      let createDiscordMessagePayload = {
+        message_id: `${Math.floor(Math.random() * 100000000)}`,
+        content: "Hi i am here",
+        markdown_content: "Hi i am here",
+        url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,
+        created_timestamp_at_discord: 1675220675,
+        order_in_thread: 20,
+      };
+      newDiscordMessages.push(createDiscordMessagePayload);
+    }
+
+    let headers = {
+      "Content-Type": "application/json",
+    };
+
+    check(
+      http.request("GET", `${API_HOST}/discord/messages`, undefined, {
+        headers,
+      }),
+      {
+        "listDiscordMessage - GET /discord/messages - should response 200": (
+          r
+        ) => r.status === 200,
+        // In the future, we have to stop protobuf from emit default value
+        "listDiscordMessage - GET /discord/messages - no discord message exist":
+          (r) => r.json().discord_messages === undefined,
+      }
+    );
+
+    for (const discordMessage of newDiscordMessages) {
+      check(
+        http.request(
+          "POST",
+          `${API_HOST}/discord/messages/create`,
+          JSON.stringify(discordMessage),
+          {
+            headers,
+          }
+        ),
+        {
+          "listDiscordMessage - POST /discord/messages/create - response status should be 201":
+            (r) => r.status === 201,
+        }
+      );
+    }
+
+    check(
+      http.request("GET", `${API_HOST}/discord/messages`, undefined, {
+        headers,
+      }),
+      {
+        "listDiscordMessage - GET /discord/messages - should response 200": (
+          r
+        ) => r.status === 200,
+        "listDiscordMessage - GET /discord/messages - should have 10 discord messages":
+          (r) => r.json().discord_messages.length === 10,
+      }
+    );
+
+    for (const discordMessage of newDiscordMessages) {
+      check(
+        http.request(
+          "DELETE",
+          `${API_HOST}/discord/messages/${discordMessage.message_id}`,
+          undefined,
+          {
+            headers,
+          }
+        ),
+        {
+          "listDiscordMessage - DELETE /discord/messages/:message_id - response status should be 204":
+            (r) => r.status === 204,
+        }
+      );
+    }
+  });
+};

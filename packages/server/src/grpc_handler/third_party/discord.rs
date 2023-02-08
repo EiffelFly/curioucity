@@ -135,4 +135,52 @@ impl pb_third_party::discord_service_server::DiscordService for GrpcDiscordServi
 
         Ok(Response::new(resp))
     }
+
+    async fn list_discord_message(
+        &self,
+        req: Request<pb_third_party::ListDiscordMessageRequest>,
+    ) -> Result<Response<pb_third_party::ListDiscordMessageResponse>, Status> {
+        let client = match edgedb_tokio::create_client().await {
+            Ok(client) => client,
+            Err(error) => {
+                return Err(Status::internal(format!(
+                    "Something went wrong when access database: {}",
+                    error
+                )))
+            }
+        };
+
+        let page_size = match req.get_ref().page_size {
+            Some(page_size) => page_size,
+            None => 10,
+        };
+
+        let payload = db_third_party::discord::ListDiscordMessagePayload { page_size };
+
+        let discord_messages =
+            match db_third_party::discord::DiscordMessage::list(client, &payload).await {
+                Ok(discord_messages) => discord_messages,
+                Err(error) => {
+                    return Err(Status::internal(format!(
+                        "Something went wrong when list discord message: {}",
+                        error
+                    )))
+                }
+            };
+
+        let mut pb_discord_messages: Vec<pb_third_party::DiscordMessage> = Vec::new();
+
+        for i in discord_messages {
+            pb_discord_messages.push(i.as_pb_type());
+        }
+
+        let size = pb_discord_messages.len() as i32;
+
+        let resp = pb_third_party::ListDiscordMessageResponse {
+            discord_messages: pb_discord_messages,
+            size,
+        };
+
+        Ok(Response::new(resp))
+    }
 }

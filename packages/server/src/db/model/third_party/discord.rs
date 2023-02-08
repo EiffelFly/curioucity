@@ -151,6 +151,10 @@ pub struct GetDiscordMessagePayload {
     pub message_id: String,
 }
 
+pub struct ListDiscordMessagePayload {
+    pub page_size: i32,
+}
+
 impl From<DiscordMessage> for pb_third_party::DiscordMessage {
     fn from(value: DiscordMessage) -> Self {
         transform_discord_message_to_pb(&value)
@@ -332,6 +336,53 @@ impl DiscordMessage {
         };
 
         Ok(Some(discord_message))
+    }
+
+    pub async fn list(
+        client: Client,
+        payload: &ListDiscordMessagePayload,
+    ) -> Result<Vec<Self>, anyhow::Error> {
+        let query = "select DiscordMessage {
+            id,
+            message_id,
+            kind,
+            content,
+            created_timestamp_at_discord,
+            created_timestamp_at_curioucity,
+            markdown_content,
+            order_in_thread,
+            url: {
+                id,
+                url,
+                references,
+                resource_type,
+                created_timestamp_at_curioucity,
+            },
+            tags: {
+                id,
+                name
+            }
+        } order by .id
+        limit <int32>$0";
+
+        let response_json = match client.query_json(&query, &(&payload.page_size,)).await {
+            Ok(json) => json,
+            Err(error) => {
+                println!("Error occured when query database: {:?}", error);
+                bail!("{}", error)
+            }
+        };
+
+        let discord_messages =
+            match serde_json::from_str::<Vec<DiscordMessage>>(response_json.as_ref()) {
+                Ok(result) => result,
+                Err(error) => {
+                    println!("Deserialize Error: {}", error);
+                    bail!("Deserialize Error: {}", error)
+                }
+            };
+
+        Ok(discord_messages)
     }
 
     pub fn as_pb_type(&self) -> pb_third_party::DiscordMessage {

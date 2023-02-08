@@ -200,10 +200,6 @@ export const listTag = () => {
     });
 
     for (const tag of newTags) {
-      let deleteTagPayload = {
-        name: tag,
-      };
-
       check(
         http.request("DELETE", `${API_HOST}/tags/${tag}`, undefined, {
           headers,
