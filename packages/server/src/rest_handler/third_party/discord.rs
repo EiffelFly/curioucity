@@ -142,3 +142,59 @@ pub async fn get_discord_message(
 
     Ok((StatusCode::OK, Json(resp)))
 }
+
+pub async fn list_discord_message(
+    payload: Option<Json<pb_third_party::ListDiscordMessageRequest>>,
+) -> Result<impl IntoResponse, Response> {
+    let client = match edgedb_tokio::create_client().await {
+        Ok(client) => client,
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when access database: {}", error),
+            )
+                .into_response())
+        }
+    };
+
+    let mut page_size: i32 = 10;
+
+    if let Some(payload) = payload {
+        page_size = match payload.page_size {
+            Some(page_size) => page_size,
+            None => 10,
+        };
+    }
+
+    let list_discord_message_payload =
+        db_third_party::discord::ListDiscordMessagePayload { page_size };
+
+    let db_discord_messages =
+        match db_third_party::discord::DiscordMessage::list(client, &list_discord_message_payload)
+            .await
+        {
+            Ok(discord_messages) => discord_messages,
+            Err(error) => {
+                return Err((
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    format!("Something went wrong when list discord message: {}", error),
+                )
+                    .into_response())
+            }
+        };
+
+    let mut pb_discord_messages: Vec<pb_third_party::DiscordMessage> = Vec::new();
+
+    for i in db_discord_messages {
+        pb_discord_messages.push(i.as_pb_type());
+    }
+
+    let size = pb_discord_messages.len() as i32;
+
+    let resp = pb_third_party::ListDiscordMessageResponse {
+        discord_messages: pb_discord_messages,
+        size,
+    };
+
+    Ok((StatusCode::OK, Json(resp)))
+}

@@ -8,6 +8,7 @@ service DiscordService {
   rpc CreateDiscordMessage(CreateDiscordMessageRequest) returns (CreateDiscordMessageResponse);
   rpc DeleteDiscordMessage(DeleteDiscordMessageRequest) returns (DeleteDiscordMessageResponse);
   rpc GetDiscordMessage(GetDiscordMessageRequest) returns (GetDiscordMessageResponse);
+  rpc ListDiscordMessage(ListDiscordMessageRequest) returns (ListDiscordMessageResponse);
 }
 
 message CreateDiscordMessageRequest {
@@ -35,4 +36,13 @@ message GetDiscordMessageRequest {
 
 message GetDiscordMessageResponse {
   third_party.v1alpha.DiscordMessage discord_message = 1;
+}
+
+message ListDiscordMessageRequest {
+  optional int32 page_size = 1;
+}
+
+message ListDiscordMessageResponse {
+  repeated third_party.v1alpha.DiscordMessage discord_messages = 1;
+  int32 size = 2;
 }
