@@ -329,3 +329,60 @@ export const listDiscordMessage = () => {
     }
   });
 };
+
+export const createDiscordThread = () => {
+  group("Disocrd - Should create discord thread", () => {
+    let discordThreadId = `${Math.floor(Math.random() * 100000000)}`;
+
+    let createDiscordThreadPayload = {
+      thread_id: discordThreadId,
+      markdown_content: "Hi i am here",
+      url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,
+      created_timestamp_at_discord: 1675220675,
+    };
+
+    let headers = {
+      "Content-Type": "application/json",
+    };
+
+    check(
+      http.request(
+        "POST",
+        `${API_HOST}/discord/threads/create`,
+        JSON.stringify(createDiscordThreadPayload),
+        {
+          headers,
+        }
+      ),
+      {
+        "createDiscordThread - POST /discord/threads/create - response status should be 201":
+          (r) => r.status === 201,
+        "createDiscordThread - POST /discord/threads/create - response body should have id":
+          (r) =>
+            typeof r.json().discord_thread.id !== undefined &&
+            r.json().discord_thread.id !== null,
+        "createDiscordThread - POST /discord/threads/create - response body should have correct thread_id":
+          (r) =>
+            r.json().discord_thread.thread_id ===
+            createDiscordThreadPayload.thread_id.toString(),
+        "createDiscordThread - POST /discord/threads/create - response body should have correct markdown content":
+          (r) =>
+            r.json().discord_thread.markdown_content ===
+            createDiscordThreadPayload.markdown_content,
+        "createDiscordThread - POST /discord/threads/create - response body should have correct url":
+          (r) =>
+            r.json().discord_thread.url.url === createDiscordThreadPayload.url,
+        "createDiscordThread - POST /discord/threads/create - response body should have correct created_timestamp_at_discord":
+          (r) =>
+            Date.parse(r.json().discord_thread.created_timestamp_at_discord) /
+              1000 ===
+            createDiscordThreadPayload.created_timestamp_at_discord,
+        "createDiscordThread - POST /discord/threads/create - response body should have created_timestamp_at_curioucity":
+          (r) =>
+            typeof r.json().discord_thread.created_timestamp_at_curioucity !==
+              "undefined" &&
+            r.json().discord_thread.created_timestamp_at_curioucity !== null,
+      }
+    );
+  });
+};
