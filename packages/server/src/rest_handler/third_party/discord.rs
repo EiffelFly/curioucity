@@ -5,6 +5,63 @@ use axum::extract::Path;
 use axum::response::Response;
 use axum::{http::StatusCode, response::IntoResponse, Json};
 
+pub async fn create_discord_thread(
+    payload: Json<pb_third_party::CreateDiscordThreadRequest>,
+) -> Result<impl IntoResponse, Response> {
+    let client = match edgedb_tokio::create_client().await {
+        Ok(result) => result,
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when access database: {}", error),
+            )
+                .into_response())
+        }
+    };
+
+    // Discord store their timestamp in seconds, but we need to convert it to micros seconds
+    let edgedb_datetime =
+        match get_edgedb_timestamp_from_2000_micros(payload.created_timestamp_at_discord * 1000000)
+        {
+            Ok(result) => result,
+            Err(error) => {
+                return Err((
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    format!(
+                        "Something went wrong when parse discord int timestamp: {}",
+                        error
+                    ),
+                )
+                    .into_response())
+            }
+        };
+
+    let payload = db_third_party::discord::CreateDiscordThreadPayload {
+        thread_id: payload.thread_id.clone(),
+        created_timestamp_at_discord: edgedb_datetime,
+        markdown_content: payload.markdown_content.clone(),
+        url: payload.url.clone(),
+    };
+
+    let discord_thread =
+        match db_third_party::discord::DiscordThread::create(client, &payload).await {
+            Ok(result) => result,
+            Err(error) => {
+                return Err((
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    format!("Something went wrong when create discord thread: {}", error),
+                )
+                    .into_response())
+            }
+        };
+
+    let resp = pb_third_party::CreateDiscordThreadResponse {
+        discord_thread: Some(discord_thread.as_pb_type()),
+    };
+
+    Ok((StatusCode::CREATED, Json(resp)))
+}
+
 pub async fn create_discord_message(
     payload: Json<pb_third_party::CreateDiscordMessageRequest>,
 ) -> Result<impl IntoResponse, Response> {
@@ -52,7 +109,7 @@ pub async fn create_discord_message(
                 return Err((
                     StatusCode::INTERNAL_SERVER_ERROR,
                     format!(
-                        "Something went wrong when create discord_message: {}",
+                        "Something went wrong when create discord message: {}",
                         error
                     ),
                 )

@@ -80,6 +80,120 @@ pub struct DiscordThread {
     pub created_timestamp_at_discord: String,
 }
 
+#[derive(Debug)]
+pub struct CreateDiscordThreadPayload {
+    pub thread_id: String,
+    pub markdown_content: String,
+    pub url: String,
+    pub created_timestamp_at_discord: Datetime,
+}
+
+impl DiscordThread {
+    pub async fn create(
+        client: Client,
+        payload: &CreateDiscordThreadPayload,
+    ) -> Result<Self, anyhow::Error> {
+        let create_url_payload = db_curioucity::CreateUrlPayload {
+            url: payload.url.clone(),
+            resource_type: db_curioucity::ResourceType::DiscordThread,
+        };
+
+        match FullUrl::create(&client, &create_url_payload).await {
+            Ok(_) => {}
+            Err(error) => {
+                println!("Error when create url: {:?}", error);
+                bail!("Error when create url: {}", error)
+            }
+        }
+
+        let create_discord_thread_query = "select (
+            insert DiscordThread {
+                kind := 'DISCORD_THREAD',
+                thread_id := <str>$0,
+                markdown_content := <str>$1,
+                created_timestamp_at_discord := <datetime>$2,
+                created_timestamp_at_curioucity := <datetime>$3,
+                url := (select Url filter .url = <str>$4),
+                full_messages_json := to_json(<str>$5),
+            }
+        ) {
+            id,
+            thread_id,
+            kind,
+            created_timestamp_at_discord,
+            created_timestamp_at_curioucity,
+            markdown_content,
+            full_messages_json,
+            url: {
+                id,
+                url,
+                references,
+                resource_type,
+                created_timestamp_at_curioucity,
+            },
+            tags: {
+                id,
+                name
+            },
+            messages: {
+                id
+            }
+        };";
+
+        let created_timestamp_at_curioucity =
+            match get_edgedb_timestamp_from_2000_micros(Utc::now().timestamp_micros()) {
+                Ok(time) => time,
+                Err(error) => {
+                    println!("Time is out of range: {:?}", error);
+                    bail!("{}", error)
+                }
+            };
+
+        // We need to implement this json object in the future
+        let mock_json_value = serde_json::json!({"key": "value"}).to_string();
+
+        let response_json = match client
+            .query_json(
+                &create_discord_thread_query,
+                &(
+                    &payload.thread_id,
+                    &payload.markdown_content,
+                    &payload.created_timestamp_at_discord,
+                    &created_timestamp_at_curioucity,
+                    &payload.url,
+                    &mock_json_value,
+                ),
+            )
+            .await
+        {
+            Ok(json) => json,
+            Err(error) => {
+                println!("Error: {:?}", error);
+                bail!("{}", error)
+            }
+        };
+
+        let discord_threads =
+            match serde_json::from_str::<Vec<DiscordThread>>(response_json.as_ref()) {
+                Ok(result) => result,
+                Err(error) => {
+                    println!("Deserialize Error: {}", error);
+                    bail!("Deserialize Error: {}", error)
+                }
+            };
+
+        let discord_thread = match discord_threads.into_iter().nth(0) {
+            Some(result) => result,
+            None => {
+                println!("Deserialize Error, deserialized element not found");
+                bail!("Deserialize Error, deserialized element not found")
+            }
+        };
+
+        Ok(discord_thread)
+    }
+}
+
 impl From<DiscordThread> for pb_third_party::DiscordThread {
     fn from(value: DiscordThread) -> Self {
         transform_discord_thread_to_pb(&value)

@@ -9,6 +9,7 @@ service DiscordService {
   rpc DeleteDiscordMessage(DeleteDiscordMessageRequest) returns (DeleteDiscordMessageResponse);
   rpc GetDiscordMessage(GetDiscordMessageRequest) returns (GetDiscordMessageResponse);
   rpc ListDiscordMessage(ListDiscordMessageRequest) returns (ListDiscordMessageResponse);
+  rpc CreateDiscordThread(CreateDiscordThreadRequest) returns (CreateDiscordThreadResponse);
 }
 
 message CreateDiscordMessageRequest {
@@ -45,4 +46,15 @@ message ListDiscordMessageRequest {
 message ListDiscordMessageResponse {
   repeated third_party.v1alpha.DiscordMessage discord_messages = 1;
   int32 size = 2;
+}
+
+message CreateDiscordThreadRequest {
+  string thread_id = 1;
+  string markdown_content = 2;
+  string url = 3;
+  int64 created_timestamp_at_discord = 4;
+}
+
+message CreateDiscordThreadResponse {
+  third_party.v1alpha.DiscordThread discord_thread = 1;
 }
