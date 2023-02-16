@@ -7,11 +7,11 @@ export const createTag = () => {
   group("Tag - Should create tag", () => {
     const tagName = makeRandStr(6);
 
-    let createTagPayload = {
+    const createTagPayload = {
       name: tagName,
     };
 
-    let headers = {
+    const headers = {
       "Content-Type": "application/json",
     };
 
@@ -54,11 +54,11 @@ export const deleteTag = () => {
   group("Tag - Should delete tag", () => {
     const tagName = makeRandStr(6);
 
-    let createTagPayload = {
+    const createTagPayload = {
       name: tagName,
     };
 
-    let headers = {
+    const headers = {
       "Content-Type": "application/json",
     };
 
@@ -94,7 +94,7 @@ export const getTag = () => {
     // Should return not found when try to get not exist tag
     const notExistTag = makeRandStr(6);
 
-    let headers = {
+    const headers = {
       "Content-Type": "application/json",
     };
 
@@ -111,7 +111,7 @@ export const getTag = () => {
     // Should get the newly created tag
     const newTagName = makeRandStr(6);
 
-    let createTagPayload = {
+    const createTagPayload = {
       name: newTagName,
     };
 
@@ -164,7 +164,7 @@ export const listTag = () => {
   group("Should list tags", () => {
     const newTags = [makeRandStr(6), makeRandStr(6)];
 
-    let headers = {
+    const headers = {
       "Content-Type": "application/json",
     };
 
@@ -174,7 +174,7 @@ export const listTag = () => {
     });
 
     for (const tag of newTags) {
-      let createTagPayload = {
+      const createTagPayload = {
         name: tag,
       };
 

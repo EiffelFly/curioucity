@@ -38,11 +38,15 @@ impl pb_third_party::discord_service_server::DiscordService for GrpcDiscordServi
             }
         };
 
+        // We need to implement this json object in the future
+        let mock_json_value = serde_json::json!({"key": "value"}).to_string();
+
         let payload = db_third_party::discord::CreateDiscordThreadPayload {
             thread_id: req_ref.thread_id.clone(),
             created_timestamp_at_discord: edgedb_datetime,
             markdown_content: req_ref.markdown_content.clone(),
             url: req_ref.url.clone(),
+            full_messages_json: mock_json_value,
         };
 
         let discord_thread =
@@ -61,6 +65,38 @@ impl pb_third_party::discord_service_server::DiscordService for GrpcDiscordServi
         };
 
         Ok(Response::new(resp))
+    }
+
+    async fn delete_discord_thread(
+        &self,
+        req: Request<pb_third_party::DeleteDiscordThreadRequest>,
+    ) -> Result<Response<pb_third_party::DeleteDiscordThreadResponse>, Status> {
+        let client = match edgedb_tokio::create_client().await {
+            Ok(client) => client,
+            Err(error) => {
+                return Err(Status::internal(format!(
+                    "Something went wrong when access database: {}",
+                    error
+                )))
+            }
+        };
+
+        let payload = db_third_party::discord::DeleteDiscordThreadPayload {
+            thread_id: req.get_ref().thread_id.clone(),
+        };
+
+        match db_third_party::discord::DiscordThread::delete(client, &payload).await {
+            Ok(_) => {
+                let resp = pb_third_party::DeleteDiscordThreadResponse {};
+                return Ok(Response::new(resp));
+            }
+            Err(error) => {
+                return Err(Status::internal(format!(
+                    "Something went wrong when delete discord thread: {}",
+                    error
+                )))
+            }
+        }
     }
 
     async fn create_discord_message(

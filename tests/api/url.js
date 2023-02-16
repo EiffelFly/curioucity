@@ -7,12 +7,12 @@ export const createUrl = () => {
   group("Url - Should create url", () => {
     const url = makeRandStr(6);
 
-    let createUrlPayload = {
+    const createUrlPayload = {
       url: url,
       resource_type: "RESOURCE_TYPE_WEBSITE",
     };
 
-    let headers = {
+    const headers = {
       "Content-Type": "application/json",
     };
 
@@ -60,12 +60,12 @@ export const deleteUrl = () => {
   group("Url - Should delete url", () => {
     const url = makeRandStr(6);
 
-    let createUrlPayload = {
+    const createUrlPayload = {
       url: url,
       resourceType: "RESOURCE_TYPE_WEBSITE",
     };
 
-    let headers = {
+    const headers = {
       "Content-Type": "application/json",
     };
 
@@ -104,7 +104,7 @@ export const getUrl = () => {
     // Should return not found when try to get not exist url
     const notExistUrl = makeRandStr(6);
 
-    let headers = {
+    const headers = {
       "Content-Type": "application/json",
     };
 
@@ -126,7 +126,7 @@ export const getUrl = () => {
     // Should get the newly created url
     const newUrl = makeRandStr(6);
 
-    let createUrlPayload = {
+    const createUrlPayload = {
       url: newUrl,
       resource_type: "RESOURCE_TYPE_WEBSITE",
     };
@@ -172,7 +172,7 @@ export const getUrl = () => {
       }
     );
 
-    let deleteUrlPayload = {
+    const deleteUrlPayload = {
       url: newUrl,
     };
 
@@ -195,7 +195,7 @@ export const listUrl = () => {
   group("Should list urls", () => {
     const newUrls = [makeRandStr(6), makeRandStr(6)];
 
-    let headers = {
+    const headers = {
       "Content-Type": "application/json",
     };
 
@@ -205,7 +205,7 @@ export const listUrl = () => {
     });
 
     for (const url of newUrls) {
-      let createUrlPayload = {
+      const createUrlPayload = {
         url,
         resource_type: "RESOURCE_TYPE_WEBSITE",
       };

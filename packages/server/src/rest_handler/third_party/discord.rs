@@ -36,11 +36,15 @@ pub async fn create_discord_thread(
             }
         };
 
+    // We need to implement this json object in the future
+    let mock_json_value = serde_json::json!({"key": "value"}).to_string();
+
     let payload = db_third_party::discord::CreateDiscordThreadPayload {
         thread_id: payload.thread_id.clone(),
         created_timestamp_at_discord: edgedb_datetime,
         markdown_content: payload.markdown_content.clone(),
         url: payload.url.clone(),
+        full_messages_json: mock_json_value,
     };
 
     let discord_thread =
@@ -60,6 +64,39 @@ pub async fn create_discord_thread(
     };
 
     Ok((StatusCode::CREATED, Json(resp)))
+}
+
+pub async fn delete_discord_thread(
+    Path(pb_third_party::DeleteDiscordThreadRequest { thread_id }): Path<
+        pb_third_party::DeleteDiscordThreadRequest,
+    >,
+) -> Result<impl IntoResponse, Response> {
+    let client = match edgedb_tokio::create_client().await {
+        Ok(client) => client,
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when access database: {}", error),
+            )
+                .into_response())
+        }
+    };
+
+    let delete_discord_thread_payload =
+        db_third_party::discord::DeleteDiscordThreadPayload { thread_id };
+
+    match db_third_party::discord::DiscordThread::delete(client, &delete_discord_thread_payload)
+        .await
+    {
+        Ok(_) => return Ok((StatusCode::NO_CONTENT, ())),
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when delete discord thread: {}", error),
+            )
+                .into_response())
+        }
+    };
 }
 
 pub async fn create_discord_message(
