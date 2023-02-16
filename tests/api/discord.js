@@ -135,7 +135,7 @@ export const getDiscordMessage = () => {
     // Should return not found when try to get not exist discord message
     const notExistMessageId = `${Math.floor(Math.random() * 100000000)}`;
 
-    let headers = {
+    const headers = {
       "Content-Type": "application/json",
     };
 
@@ -248,11 +248,11 @@ export const getDiscordMessage = () => {
 
 export const listDiscordMessage = () => {
   group("Should list discord messages", () => {
-    let testSize = 10;
-    let newDiscordMessages = [];
+    const testSize = 10;
+    const newDiscordMessages = [];
 
     for (let i = 0; i < testSize; i++) {
-      let createDiscordMessagePayload = {
+      const createDiscordMessagePayload = {
         message_id: `${Math.floor(Math.random() * 100000000)}`,
         content: "Hi i am here",
         markdown_content: "Hi i am here",
@@ -263,7 +263,7 @@ export const listDiscordMessage = () => {
       newDiscordMessages.push(createDiscordMessagePayload);
     }
 
-    let headers = {
+    const headers = {
       "Content-Type": "application/json",
     };
 
@@ -332,16 +332,16 @@ export const listDiscordMessage = () => {
 
 export const createDiscordThread = () => {
   group("Disocrd - Should create discord thread", () => {
-    let discordThreadId = `${Math.floor(Math.random() * 100000000)}`;
+    const discordThreadId = `${Math.floor(Math.random() * 100000000)}`;
 
-    let createDiscordThreadPayload = {
+    const createDiscordThreadPayload = {
       thread_id: discordThreadId,
       markdown_content: "Hi i am here",
       url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,
       created_timestamp_at_discord: 1675220675,
     };
 
-    let headers = {
+    const headers = {
       "Content-Type": "application/json",
     };
 
@@ -382,6 +382,64 @@ export const createDiscordThread = () => {
             typeof r.json().discord_thread.created_timestamp_at_curioucity !==
               "undefined" &&
             r.json().discord_thread.created_timestamp_at_curioucity !== null,
+      }
+    );
+
+    check(
+      http.request(
+        "DELETE",
+        `${API_HOST}/discord/threads/${discordThreadId}`,
+        undefined,
+        { headers }
+      ),
+      {
+        "createDiscordThread - POST /discord/threads/:thread_id - response status should be 204":
+          (r) => r.status === 204,
+      }
+    );
+  });
+};
+
+export const deleteDiscordThread = () => {
+  group("DiscordMessage - Should delete disocrd message", () => {
+    const discordThreadId = `${Math.floor(Math.random() * 100000000)}`;
+
+    const createDiscordThreadPayload = {
+      thread_id: discordThreadId,
+      markdown_content: "Hi i am here",
+      url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,
+      created_timestamp_at_discord: 1675220675,
+    };
+
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    check(
+      http.request(
+        "POST",
+        `${API_HOST}/discord/threads/create`,
+        JSON.stringify(createDiscordThreadPayload),
+        {
+          headers,
+        }
+      ),
+      {
+        "deleteDiscordThread - POST /discord/threads/create - response status should be 201":
+          (r) => r.status === 201,
+      }
+    );
+
+    check(
+      http.request(
+        "DELETE",
+        `${API_HOST}/discord/threads/${discordThreadId}`,
+        undefined,
+        { headers }
+      ),
+      {
+        "deleteDiscordThread - POST /discord/threads/:thread_id - response status should be 204":
+          (r) => r.status === 204,
       }
     );
   });
