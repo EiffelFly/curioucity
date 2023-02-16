@@ -86,6 +86,11 @@ pub struct CreateDiscordThreadPayload {
     pub markdown_content: String,
     pub url: String,
     pub created_timestamp_at_discord: Datetime,
+    pub full_messages_json: String,
+}
+
+pub struct DeleteDiscordThreadPayload {
+    pub thread_id: String,
 }
 
 impl DiscordThread {
@@ -149,9 +154,6 @@ impl DiscordThread {
                 }
             };
 
-        // We need to implement this json object in the future
-        let mock_json_value = serde_json::json!({"key": "value"}).to_string();
-
         let response_json = match client
             .query_json(
                 &create_discord_thread_query,
@@ -161,7 +163,7 @@ impl DiscordThread {
                     &payload.created_timestamp_at_discord,
                     &created_timestamp_at_curioucity,
                     &payload.url,
-                    &mock_json_value,
+                    &payload.full_messages_json,
                 ),
             )
             .await
@@ -191,6 +193,23 @@ impl DiscordThread {
         };
 
         Ok(discord_thread)
+    }
+
+    pub async fn delete(
+        client: Client,
+        payload: &DeleteDiscordThreadPayload,
+    ) -> Result<(), anyhow::Error> {
+        let query = "delete DiscordThread filter .thread_id = <str>$0";
+
+        let response = client.query_json(&query, &(&payload.thread_id,)).await;
+
+        match response {
+            Ok(_) => Ok(()),
+            Err(error) => {
+                println!("Error: {:?}", error);
+                bail!("{}", error)
+            }
+        }
     }
 }
 
