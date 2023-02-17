@@ -21,6 +21,7 @@ const main = () => {
   discordServices.listDiscordMessage();
   discordServices.createDiscordThread();
   discordServices.deleteDiscordThread();
+  discordServices.getDiscordThread();
 };
 
 export default main;

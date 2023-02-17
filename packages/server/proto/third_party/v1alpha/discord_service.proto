@@ -11,6 +11,7 @@ service DiscordService {
   rpc ListDiscordMessage(ListDiscordMessageRequest) returns (ListDiscordMessageResponse);
   rpc CreateDiscordThread(CreateDiscordThreadRequest) returns (CreateDiscordThreadResponse);
   rpc DeleteDiscordThread(DeleteDiscordThreadRequest) returns (DeleteDiscordThreadResponse);
+  rpc GetDiscordThread(GetDiscordThreadRequest) returns (GetDiscordThreadResponse);
 }
 
 message CreateDiscordMessageRequest {
@@ -64,4 +65,12 @@ message DeleteDiscordThreadRequest {
   string thread_id = 1;
 }
 
+message GetDiscordThreadRequest {
+  string thread_id = 1;
+}
+
 message DeleteDiscordThreadResponse {}
+
+message GetDiscordThreadResponse {
+  third_party.v1alpha.DiscordThread discord_thread = 1;
+}
