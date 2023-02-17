@@ -89,7 +89,13 @@ pub struct CreateDiscordThreadPayload {
     pub full_messages_json: String,
 }
 
+#[derive(Debug)]
 pub struct DeleteDiscordThreadPayload {
+    pub thread_id: String,
+}
+
+#[derive(Debug)]
+pub struct GetDiscordThreadPayload {
     pub thread_id: String,
 }
 
@@ -210,6 +216,66 @@ impl DiscordThread {
                 bail!("{}", error)
             }
         }
+    }
+
+    pub async fn get(
+        client: Client,
+        payload: &GetDiscordThreadPayload,
+    ) -> Result<Option<Self>, anyhow::Error> {
+        let query = "select DiscordThread {
+            id,
+            thread_id,
+            kind,
+            created_timestamp_at_discord,
+            created_timestamp_at_curioucity,
+            markdown_content,
+            full_messages_json,
+            url: {
+                id,
+                url,
+                references,
+                resource_type,
+                created_timestamp_at_curioucity,
+            },
+            tags: {
+                id,
+                name
+            },
+            messages: {
+                id
+            }
+        } filter .thread_id = <str>$0";
+
+        let response_json = match client.query_json(&query, &(&payload.thread_id,)).await {
+            Ok(result) => result,
+            Err(error) => {
+                println!("Error occured when query database: {:?}", error);
+                bail!("{}", error)
+            }
+        };
+
+        let discord_threads =
+            match serde_json::from_str::<Vec<DiscordThread>>(response_json.as_ref()) {
+                Ok(result) => result,
+                Err(error) => {
+                    println!("Deserialize Error: {}", error);
+                    bail!("Deserialize Error: {}", error)
+                }
+            };
+
+        if discord_threads.is_empty() {
+            return Ok(None);
+        }
+
+        let discord_thread = match discord_threads.into_iter().nth(0) {
+            Some(result) => result,
+            None => {
+                println!("Deserialize Error, deserialized element not found");
+                bail!("Deserialize Error, deserialized element not found")
+            }
+        };
+
+        Ok(Some(discord_thread))
     }
 }
 
@@ -461,7 +527,7 @@ impl DiscordMessage {
         }
 
         let discord_message = match discord_messages.into_iter().nth(0) {
-            Some(url) => url,
+            Some(result) => result,
             None => {
                 println!("Deserialize Error, deserialized element not found");
                 bail!("Deserialize Error, deserialized element not found")

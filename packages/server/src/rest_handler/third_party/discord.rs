@@ -99,6 +99,45 @@ pub async fn delete_discord_thread(
     };
 }
 
+pub async fn get_discord_thread(
+    Path(pb_third_party::GetDiscordThreadRequest { thread_id }): Path<
+        pb_third_party::GetDiscordThreadRequest,
+    >,
+) -> Result<impl IntoResponse, Response> {
+    let client = match edgedb_tokio::create_client().await {
+        Ok(client) => client,
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when access database: {}", error),
+            )
+                .into_response())
+        }
+    };
+
+    let payload = db_third_party::discord::GetDiscordThreadPayload { thread_id };
+
+    let discord_thread = match db_third_party::discord::DiscordThread::get(client, &payload).await {
+        Ok(result) => match result {
+            Some(result) => result,
+            None => return Err((StatusCode::NOT_FOUND, "".to_string()).into_response()),
+        },
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when get discord message: {}", error),
+            )
+                .into_response())
+        }
+    };
+
+    let resp = pb_third_party::GetDiscordThreadResponse {
+        discord_thread: Some(discord_thread.as_pb_type()),
+    };
+
+    Ok((StatusCode::OK, Json(resp)))
+}
+
 pub async fn create_discord_message(
     payload: Json<pb_third_party::CreateDiscordMessageRequest>,
 ) -> Result<impl IntoResponse, Response> {

@@ -4,9 +4,9 @@ import { API_HOST } from "./rest.js";
 
 export const createDiscordMessage = () => {
   group("Disocrd - Should create discord message", () => {
-    let discordMessageId = `${Math.floor(Math.random() * 100000000)}`;
+    const discordMessageId = `${Math.floor(Math.random() * 100000000)}`;
 
-    let createDiscordMessagePayload = {
+    const createDiscordMessagePayload = {
       message_id: discordMessageId,
       content: "Hi i am here",
       markdown_content: "Hi i am here",
@@ -15,7 +15,7 @@ export const createDiscordMessage = () => {
       order_in_thread: 20,
     };
 
-    let headers = {
+    const headers = {
       "Content-Type": "application/json",
     };
 
@@ -87,7 +87,7 @@ export const deleteDiscordMessage = () => {
   group("DiscordMessage - Should delete disocrd message", () => {
     const messageId = `${Math.floor(Math.random() * 100000000)}`;
 
-    let createDiscordMessagePayload = {
+    const createDiscordMessagePayload = {
       message_id: messageId,
       content: "Hi i am here",
       markdown_content: "Hi i am here",
@@ -96,7 +96,7 @@ export const deleteDiscordMessage = () => {
       order_in_thread: 20,
     };
 
-    let headers = {
+    const headers = {
       "Content-Type": "application/json",
     };
 
@@ -158,7 +158,7 @@ export const getDiscordMessage = () => {
 
     const newMessageId = `${Math.floor(Math.random() * 100000000)}`;
 
-    let createDiscordMessagePayload = {
+    const createDiscordMessagePayload = {
       message_id: newMessageId,
       content: "Hi i am here",
       markdown_content: "Hi i am here",
@@ -439,6 +439,111 @@ export const deleteDiscordThread = () => {
       ),
       {
         "deleteDiscordThread - POST /discord/threads/:thread_id - response status should be 204":
+          (r) => r.status === 204,
+      }
+    );
+  });
+};
+
+export const getDiscordThread = () => {
+  group("DiscordThread - Should get discord thread", () => {
+    // Should return not found when try to get not exist discord message
+    const notExistThreadId = `${Math.floor(Math.random() * 100000000)}`;
+
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    check(
+      http.request(
+        "GET",
+        `${API_HOST}/discord/threads/${notExistThreadId}`,
+        undefined,
+        {
+          headers,
+        }
+      ),
+      {
+        "getDiscordThread - GET /discord/threads/:thread_id - not exist discord thead, response status should be 404":
+          (r) => r.status === 404,
+      }
+    );
+
+    // Should get the newly created discord message
+
+    const newThreadId = `${Math.floor(Math.random() * 100000000)}`;
+
+    const createDiscordThreadPayload = {
+      thread_id: newThreadId,
+      markdown_content: "Hi i am here",
+      url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,
+      created_timestamp_at_discord: 1675220675,
+    };
+
+    check(
+      http.request(
+        "POST",
+        `${API_HOST}/discord/threads/create`,
+        JSON.stringify(createDiscordThreadPayload),
+        {
+          headers,
+        }
+      ),
+      {
+        "getDiscordThread - POST /discord/threads/create - response status should be 201":
+          (r) => r.status === 201,
+      }
+    );
+
+    check(
+      http.request(
+        "GET",
+        `${API_HOST}/discord/threads/${newThreadId}`,
+        undefined,
+        {
+          headers,
+        }
+      ),
+      {
+        "getDiscordThread - GET /discord/threads/:thread_id - response status should be 200":
+          (r) => r.status === 200,
+        "getDiscordThread - GET /discord/threads/:thread_id - response body should have id":
+          (r) =>
+            typeof r.json().discord_thread.id !== undefined &&
+            r.json().discord_thread.id !== null,
+        "getDiscordThread - GET /discord/threads/:thread_id - response body should have correct thread_id":
+          (r) =>
+            r.json().discord_thread.thread_id ===
+            createDiscordThreadPayload.thread_id.toString(),
+        "getDiscordThread - GET /discord/threads/:thread_id - response body should have correct markdown content":
+          (r) =>
+            r.json().discord_thread.markdown_content ===
+            createDiscordThreadPayload.markdown_content,
+        "getDiscordThread - GET /discord/threads/:thread_id - response body should have correct url":
+          (r) =>
+            r.json().discord_thread.url.url === createDiscordThreadPayload.url,
+        "getDiscordThread - GET /discord/threads/:thread_id - response body should have correct created_timestamp_at_discord":
+          (r) =>
+            Date.parse(r.json().discord_thread.created_timestamp_at_discord) /
+              1000 ===
+            createDiscordThreadPayload.created_timestamp_at_discord,
+        "getDiscordThread - GET /discord/threads/:thread_id - response body should have created_timestamp_at_curioucity":
+          (r) =>
+            typeof r.json().discord_thread.created_timestamp_at_curioucity !==
+              "undefined" &&
+            r.json().discord_thread.created_timestamp_at_curioucity !== null,
+      }
+    );
+
+    check(
+      http.request(
+        "DELETE",
+        `${API_HOST}/discord/messages/${newMessageId}`,
+        undefined,
+        { headers }
+      ),
+      {
+        "deleteDiscordMessage - DELETE /discord/messages/:message_id - response status should be 204":
           (r) => r.status === 204,
       }
     );
