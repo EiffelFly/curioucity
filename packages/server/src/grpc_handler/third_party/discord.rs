@@ -312,4 +312,52 @@ impl pb_third_party::discord_service_server::DiscordService for GrpcDiscordServi
 
         Ok(Response::new(resp))
     }
+
+    async fn list_discord_thread(
+        &self,
+        req: Request<pb_third_party::ListDiscordThreadRequest>,
+    ) -> Result<Response<pb_third_party::ListDiscordThreadResponse>, Status> {
+        let client = match edgedb_tokio::create_client().await {
+            Ok(client) => client,
+            Err(error) => {
+                return Err(Status::internal(format!(
+                    "Something went wrong when access database: {}",
+                    error
+                )))
+            }
+        };
+
+        let page_size = match req.get_ref().page_size {
+            Some(page_size) => page_size,
+            None => 10,
+        };
+
+        let payload = db_third_party::discord::ListDiscordThreadPayload { page_size };
+
+        let db_discord_threads =
+            match db_third_party::discord::DiscordThread::list(client, &payload).await {
+                Ok(result) => result,
+                Err(error) => {
+                    return Err(Status::internal(format!(
+                        "Something went wrong when list discord threads: {}",
+                        error
+                    )))
+                }
+            };
+
+        let mut pb_discord_threads: Vec<pb_third_party::DiscordThread> = Vec::new();
+
+        for i in db_discord_threads {
+            pb_discord_threads.push(i.as_pb_type());
+        }
+
+        let size = pb_discord_threads.len() as i32;
+
+        let resp = pb_third_party::ListDiscordThreadResponse {
+            discord_threads: pb_discord_threads,
+            size,
+        };
+
+        Ok(Response::new(resp))
+    }
 }

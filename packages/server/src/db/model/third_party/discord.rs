@@ -99,6 +99,10 @@ pub struct GetDiscordThreadPayload {
     pub thread_id: String,
 }
 
+pub struct ListDiscordThreadPayload {
+    pub page_size: i32,
+}
+
 impl DiscordThread {
     pub async fn create(
         client: Client,
@@ -276,6 +280,54 @@ impl DiscordThread {
         };
 
         Ok(Some(discord_thread))
+    }
+
+    pub async fn list(
+        client: Client,
+        payload: &ListDiscordThreadPayload,
+    ) -> Result<Vec<Self>, anyhow::Error> {
+        let query = "select DiscordThread {
+            id,
+            thread_id,
+            kind,
+            created_timestamp_at_discord,
+            created_timestamp_at_curioucity,
+            markdown_content,
+            full_messages_json,
+            url: {
+                id,
+                url,
+                references,
+                resource_type,
+                created_timestamp_at_curioucity,
+            },
+            tags: {
+                id,
+                name
+            },
+            messages: {
+                id
+            }
+        } order by .id limit <int32>$0";
+
+        let response_json = match client.query_json(&query, &(&payload.page_size,)).await {
+            Ok(result) => result,
+            Err(error) => {
+                println!("Error occured when query database: {:?}", error);
+                bail!("{}", error)
+            }
+        };
+
+        let discord_threads =
+            match serde_json::from_str::<Vec<DiscordThread>>(response_json.as_ref()) {
+                Ok(result) => result,
+                Err(error) => {
+                    println!("Deserialize Error: {}", error);
+                    bail!("Deserialize Error: {}", error)
+                }
+            };
+
+        Ok(discord_threads)
     }
 }
 
