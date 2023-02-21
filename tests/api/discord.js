@@ -549,3 +549,84 @@ export const getDiscordThread = () => {
     );
   });
 };
+
+export const listDiscordThread = () => {
+  group("Should list discord threads", () => {
+    const testSize = 10;
+    const newDiscordThreads = [];
+
+    for (let i = 0; i < testSize; i++) {
+      const createDiscordThreadPayload = {
+        thread_id: `${Math.floor(Math.random() * 100000000)}`,
+        markdown_content: "Hi i am here",
+        url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,
+        created_timestamp_at_discord: 1675220675,
+      };
+      newDiscordThreads.push(createDiscordThreadPayload);
+    }
+
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    check(
+      http.request("GET", `${API_HOST}/discord/messages`, undefined, {
+        headers,
+      }),
+      {
+        "listDiscordThread - GET /discord/threads - should response 200": (r) =>
+          r.status === 200,
+        // In the future, we have to stop protobuf from emit default value
+        "listDiscordThread - GET /discord/threads - no discord thread exist": (
+          r
+        ) => r.json().discord_messages === undefined,
+      }
+    );
+
+    for (const discordThread of newDiscordThreads) {
+      check(
+        http.request(
+          "POST",
+          `${API_HOST}/discord/threads/create`,
+          JSON.stringify(discordThread),
+          {
+            headers,
+          }
+        ),
+        {
+          "listDiscordThread - POST /discord/threads/create - response status should be 201":
+            (r) => r.status === 201,
+        }
+      );
+    }
+
+    check(
+      http.request("GET", `${API_HOST}/discord/threads`, undefined, {
+        headers,
+      }),
+      {
+        "listDiscordThread - GET /discord/threads - should response 200": (r) =>
+          r.status === 200,
+        "listDiscordThread - GET /discord/threads - should have 10 discord messages":
+          (r) => r.json().discord_threads.length === 10,
+      }
+    );
+
+    for (const discordThread of newDiscordThreads) {
+      check(
+        http.request(
+          "DELETE",
+          `${API_HOST}/discord/threads/${discordThread.thread_id}`,
+          undefined,
+          {
+            headers,
+          }
+        ),
+        {
+          "listDiscordThread - DELETE /discord/threads/:thread_id - response status should be 204":
+            (r) => r.status === 204,
+        }
+      );
+    }
+  });
+};

@@ -331,3 +331,59 @@ pub async fn list_discord_message(
 
     Ok((StatusCode::OK, Json(resp)))
 }
+
+pub async fn list_discord_threads(
+    payload: Option<Json<pb_third_party::ListDiscordThreadRequest>>,
+) -> Result<impl IntoResponse, Response> {
+    let client = match edgedb_tokio::create_client().await {
+        Ok(client) => client,
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when access database: {}", error),
+            )
+                .into_response())
+        }
+    };
+
+    let mut page_size: i32 = 10;
+
+    if let Some(payload) = payload {
+        page_size = match payload.page_size {
+            Some(page_size) => page_size,
+            None => 10,
+        };
+    }
+
+    let list_discord_thread_payload =
+        db_third_party::discord::ListDiscordThreadPayload { page_size };
+
+    let db_discord_threads =
+        match db_third_party::discord::DiscordThread::list(client, &list_discord_thread_payload)
+            .await
+        {
+            Ok(result) => result,
+            Err(error) => {
+                return Err((
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    format!("Something went wrong when list discord message: {}", error),
+                )
+                    .into_response())
+            }
+        };
+
+    let mut pb_discord_threads: Vec<pb_third_party::DiscordThread> = Vec::new();
+
+    for i in db_discord_threads {
+        pb_discord_threads.push(i.as_pb_type());
+    }
+
+    let size = pb_discord_threads.len() as i32;
+
+    let resp = pb_third_party::ListDiscordThreadResponse {
+        discord_threads: pb_discord_threads,
+        size,
+    };
+
+    Ok((StatusCode::OK, Json(resp)))
+}
