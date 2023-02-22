@@ -65,6 +65,118 @@ fn transform_discord_guild_to_pb(value: &DiscordGuild) -> pb_third_party::Discor
     }
 }
 
+#[derive(Debug)]
+pub struct CreateDiscordGuildPayload {
+    pub guild_id: String,
+    pub icon: String,
+    pub name: String,
+    pub created_timestamp_at_discord: Datetime,
+    pub url: String,
+}
+
+impl DiscordGuild {
+    pub async fn create(
+        client: Client,
+        payload: &CreateDiscordGuildPayload,
+    ) -> Result<Self, anyhow::Error> {
+        let create_url_payload = db_curioucity::CreateUrlPayload {
+            url: payload.url.clone(),
+            resource_type: db_curioucity::ResourceType::DiscordGuild,
+        };
+
+        match FullUrl::create(&client, &create_url_payload).await {
+            Ok(_) => {}
+            Err(error) => {
+                println!("Error when create url: {:?}", error);
+                bail!("Error when create url: {}", error)
+            }
+        }
+
+        let create_discord_guild_query = "select (
+            insert DiscordGuild {
+                kind := 'DISCORD_GUILD',
+                guild_id := <str>$0,
+                icon := <str>$1,
+                name := <str>$2,
+                created_timestamp_at_discord := <datetime>$3,
+                created_timestamp_at_curioucity := <datetime>$4,
+                url := (select Url filter .url = <str>$5),
+            }
+        ) {
+            id,
+            guild_id,
+            kind,
+            created_timestamp_at_discord,
+            created_timestamp_at_curioucity,
+            icon,
+            name,
+            url: {
+                id,
+                url,
+                references,
+                resource_type,
+                created_timestamp_at_curioucity,
+            },
+            tags: {
+                id,
+                name
+            },
+            threads: {
+                id
+            }
+        };";
+
+        let created_timestamp_at_curioucity =
+            match get_edgedb_timestamp_from_2000_micros(Utc::now().timestamp_micros()) {
+                Ok(time) => time,
+                Err(error) => {
+                    println!("Time is out of range: {:?}", error);
+                    bail!("{}", error)
+                }
+            };
+
+        let response_json = match client
+            .query_json(
+                &create_discord_guild_query,
+                &(
+                    &payload.guild_id,
+                    &payload.icon,
+                    &payload.name,
+                    &payload.created_timestamp_at_discord,
+                    &created_timestamp_at_curioucity,
+                    &payload.url,
+                ),
+            )
+            .await
+        {
+            Ok(result) => result,
+            Err(error) => {
+                println!("Error: {:?}", error);
+                bail!("{}", error)
+            }
+        };
+
+        let discord_guilds = match serde_json::from_str::<Vec<DiscordGuild>>(response_json.as_ref())
+        {
+            Ok(result) => result,
+            Err(error) => {
+                println!("Deserialize Error: {}", error);
+                bail!("Deserialize Error: {}", error)
+            }
+        };
+
+        let discord_guild = match discord_guilds.into_iter().nth(0) {
+            Some(result) => result,
+            None => {
+                println!("Deserialize Error, deserialized element not found");
+                bail!("Deserialize Error, deserialized element not found")
+            }
+        };
+
+        Ok(discord_guild)
+    }
+}
+
 #[derive(Queryable, Serialize, Deserialize, Debug)]
 pub struct DiscordThread {
     pub id: Uuid,

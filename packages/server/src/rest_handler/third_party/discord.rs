@@ -5,6 +5,64 @@ use axum::extract::Path;
 use axum::response::Response;
 use axum::{http::StatusCode, response::IntoResponse, Json};
 
+pub async fn create_discord_guild(
+    payload: Json<pb_third_party::CreateDiscordGuildRequest>,
+) -> Result<impl IntoResponse, Response> {
+    let client = match edgedb_tokio::create_client().await {
+        Ok(client) => client,
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when access database: {}", error),
+            )
+                .into_response())
+        }
+    };
+
+    // Discord store their timestamp in seconds, but we need to convert it to micros seconds
+    let edgedb_datetime =
+        match get_edgedb_timestamp_from_2000_micros(payload.created_timestamp_at_discord * 1000000)
+        {
+            Ok(datetime) => datetime,
+            Err(error) => {
+                return Err((
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    format!(
+                        "Something went wrong when parse discord int timestamp: {}",
+                        error
+                    ),
+                )
+                    .into_response())
+            }
+        };
+
+    let payload = db_third_party::discord::CreateDiscordGuildPayload {
+        guild_id: payload.guild_id.clone(),
+        created_timestamp_at_discord: edgedb_datetime,
+        icon: payload.icon.clone(),
+        url: payload.url.clone(),
+        name: payload.name.clone(),
+    };
+
+    let discord_guild = match db_third_party::discord::DiscordGuild::create(client, &payload).await
+    {
+        Ok(result) => result,
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when create discord guild: {}", error),
+            )
+                .into_response())
+        }
+    };
+
+    let resp = pb_third_party::CreateDiscordGuildResponse {
+        discord_guild: Some(discord_guild.as_pb_type()),
+    };
+
+    Ok((StatusCode::CREATED, Json(resp)))
+}
+
 pub async fn create_discord_thread(
     payload: Json<pb_third_party::CreateDiscordThreadRequest>,
 ) -> Result<impl IntoResponse, Response> {

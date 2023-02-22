@@ -2,6 +2,77 @@ import http from "k6/http";
 import { check, group } from "k6";
 import { API_HOST } from "./rest.js";
 
+export const createDiscordGuild = () => {
+  group("Disocrd - Should create discord guild", () => {
+    const discordGuildId = `${Math.floor(Math.random() * 100000000)}`;
+
+    const createDiscordGuildPayload = {
+      guild_id: discordGuildId,
+      icon: "icon",
+      name: "Curioucity",
+      url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,
+      created_timestamp_at_discord: 1675220675,
+    };
+
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    check(
+      http.request(
+        "POST",
+        `${API_HOST}/discord/guilds/create`,
+        JSON.stringify(createDiscordGuildPayload),
+        {
+          headers,
+        }
+      ),
+      {
+        "createDiscordGuild - POST /discord/guilds/create - response status should be 201":
+          (r) => r.status === 201,
+        "createDiscordGuild - POST /discord/guilds/create - response body should have id":
+          (r) =>
+            typeof r.json().discord_guild.id !== undefined &&
+            r.json().discord_guild.id !== null,
+        "createDiscordGuild - POST /discord/guilds/create - response body should have correct message_id":
+          (r) =>
+            r.json().discord_guild.guild_id ===
+            createDiscordGuildPayload.guild_id.toString(),
+        "createDiscordGuild - POST /discord/guilds/create - response body should have correct content":
+          (r) => r.json().discord_guild.icon === createDiscordGuildPayload.icon,
+        "createDiscordGuild - POST /discord/guilds/create - response body should have correct markdown content":
+          (r) => r.json().discord_guild.name === createDiscordGuildPayload.name,
+        "createDiscordGuild - POST /discord/guilds/create - response body should have correct url":
+          (r) =>
+            r.json().discord_guild.url.url === createDiscordGuildPayload.url,
+        "createDiscordGuild - POST /discord/guilds/create - response body should have correct created_timestamp_at_discord":
+          (r) =>
+            Date.parse(r.json().discord_guild.created_timestamp_at_discord) /
+              1000 ===
+            createDiscordGuildPayload.created_timestamp_at_discord,
+        "createDiscordGuild - POST /discord/guilds/create - response body should have created_timestamp_at_curioucity":
+          (r) =>
+            typeof r.json().discord_guild.created_timestamp_at_curioucity !==
+              "undefined" &&
+            r.json().discord_guild.created_timestamp_at_curioucity !== null,
+      }
+    );
+
+    // check(
+    //   http.request(
+    //     "DELETE",
+    //     `${API_HOST}/discord/guild/${discordGuildId}`,
+    //     undefined,
+    //     { headers }
+    //   ),
+    //   {
+    //     "createDiscordMessage - DELETE /discord/messages/:message_id - response status should be 204":
+    //       (r) => r.status === 204,
+    //   }
+    // );
+  });
+};
+
 export const createDiscordMessage = () => {
   group("Disocrd - Should create discord message", () => {
     const discordMessageId = `${Math.floor(Math.random() * 100000000)}`;

@@ -22,7 +22,7 @@ const main = () => {
   // discordServices.createDiscordThread();
   // discordServices.deleteDiscordThread();
   // discordServices.getDiscordThread();
-  discordServices.listDiscordThread();
+  discordServices.createDiscordGuild();
 };
 
 export default main;
