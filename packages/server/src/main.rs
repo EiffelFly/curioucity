@@ -20,8 +20,9 @@ use rest_handler::curioucity::{
     create_tag, create_url, delete_tag, delete_url, get_tag, get_url, list_tag, list_url,
 };
 use rest_handler::third_party::discord::{
-    create_discord_message, create_discord_thread, delete_discord_message, delete_discord_thread,
-    get_discord_message, get_discord_thread, list_discord_message, list_discord_threads,
+    create_discord_guild, create_discord_message, create_discord_thread, delete_discord_message,
+    delete_discord_thread, get_discord_message, get_discord_thread, list_discord_message,
+    list_discord_threads,
 };
 
 use tonic::transport::Server;
@@ -44,6 +45,10 @@ async fn main() {
         .route("/tags/:name", axum::routing::delete(delete_tag))
         .route("/tags/:name", axum::routing::get(get_tag))
         .route("/tags", axum::routing::get(list_tag))
+        .route(
+            "/discord/guilds/create",
+            axum::routing::post(create_discord_guild),
+        )
         .route(
             "/discord/threads/create",
             axum::routing::post(create_discord_thread),

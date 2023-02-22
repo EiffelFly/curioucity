@@ -13,6 +13,7 @@ service DiscordService {
   rpc DeleteDiscordThread(DeleteDiscordThreadRequest) returns (DeleteDiscordThreadResponse);
   rpc GetDiscordThread(GetDiscordThreadRequest) returns (GetDiscordThreadResponse);
   rpc ListDiscordThread(ListDiscordThreadRequest) returns (ListDiscordThreadResponse);
+  rpc CreateDiscordGuild(CreateDiscordGuildRequest) returns (CreateDiscordGuildResponse);
 }
 
 message CreateDiscordMessageRequest {
@@ -83,4 +84,16 @@ message ListDiscordThreadRequest {
 message ListDiscordThreadResponse {
   repeated third_party.v1alpha.DiscordThread discord_threads = 1;
   int32 size = 2;
+}
+
+message CreateDiscordGuildRequest {
+  string guild_id = 1;
+  string name = 2;
+  string icon = 3;
+  string url = 4;
+  int64 created_timestamp_at_discord = 5;
+}
+
+message CreateDiscordGuildResponse {
+  third_party.v1alpha.DiscordGuild discord_guild = 1;
 }
