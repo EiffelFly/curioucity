@@ -32,12 +32,6 @@ impl From<DiscordGuild> for pb_third_party::DiscordGuild {
     }
 }
 
-impl DiscordGuild {
-    pub fn as_pb_type(&self) -> pb_third_party::DiscordGuild {
-        transform_discord_guild_to_pb(self)
-    }
-}
-
 fn transform_discord_guild_to_pb(value: &DiscordGuild) -> pb_third_party::DiscordGuild {
     let mut pb_tags: Vec<pb_curioucity::Tag> = Vec::new();
 
@@ -72,6 +66,11 @@ pub struct CreateDiscordGuildPayload {
     pub name: String,
     pub created_timestamp_at_discord: Datetime,
     pub url: String,
+}
+
+#[derive(Debug)]
+pub struct DeleteDiscordGuildPayload {
+    pub guild_id: String,
 }
 
 impl DiscordGuild {
@@ -174,6 +173,27 @@ impl DiscordGuild {
         };
 
         Ok(discord_guild)
+    }
+
+    pub async fn delete(
+        client: Client,
+        payload: &DeleteDiscordGuildPayload,
+    ) -> Result<(), anyhow::Error> {
+        let query = "delete DiscordGuild filter .guild_id = <str>$0";
+
+        let response = client.query_json(&query, &(&payload.guild_id,)).await;
+
+        match response {
+            Ok(_) => Ok(()),
+            Err(error) => {
+                println!("Error: {:?}", error);
+                bail!("{}", error)
+            }
+        }
+    }
+
+    pub fn as_pb_type(&self) -> pb_third_party::DiscordGuild {
+        transform_discord_guild_to_pb(self)
     }
 }
 

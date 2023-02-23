@@ -63,6 +63,38 @@ pub async fn create_discord_guild(
     Ok((StatusCode::CREATED, Json(resp)))
 }
 
+pub async fn delete_discord_guild(
+    Path(pb_third_party::DeleteDiscordGuildRequest { guild_id }): Path<
+        pb_third_party::DeleteDiscordGuildRequest,
+    >,
+) -> Result<impl IntoResponse, Response> {
+    let client = match edgedb_tokio::create_client().await {
+        Ok(client) => client,
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when access database: {}", error),
+            )
+                .into_response())
+        }
+    };
+
+    let delete_discord_guild_payload =
+        db_third_party::discord::DeleteDiscordGuildPayload { guild_id };
+
+    match db_third_party::discord::DiscordGuild::delete(client, &delete_discord_guild_payload).await
+    {
+        Ok(_) => return Ok((StatusCode::NO_CONTENT, ())),
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when delete discord guild: {}", error),
+            )
+                .into_response())
+        }
+    };
+}
+
 pub async fn create_discord_thread(
     payload: Json<pb_third_party::CreateDiscordThreadRequest>,
 ) -> Result<impl IntoResponse, Response> {
