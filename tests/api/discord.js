@@ -4,10 +4,10 @@ import { API_HOST } from "./rest.js";
 
 export const createDiscordGuild = () => {
   group("Disocrd - Should create discord guild", () => {
-    const discordGuildId = `${Math.floor(Math.random() * 100000000)}`;
+    const guildId = `${Math.floor(Math.random() * 100000000)}`;
 
     const createDiscordGuildPayload = {
-      guild_id: discordGuildId,
+      guild_id: guildId,
       icon: "icon",
       name: "Curioucity",
       url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,
@@ -58,18 +58,64 @@ export const createDiscordGuild = () => {
       }
     );
 
-    // check(
-    //   http.request(
-    //     "DELETE",
-    //     `${API_HOST}/discord/guild/${discordGuildId}`,
-    //     undefined,
-    //     { headers }
-    //   ),
-    //   {
-    //     "createDiscordMessage - DELETE /discord/messages/:message_id - response status should be 204":
-    //       (r) => r.status === 204,
-    //   }
-    // );
+    check(
+      http.request(
+        "DELETE",
+        `${API_HOST}/discord/guilds/${guildId}`,
+        undefined,
+        { headers }
+      ),
+      {
+        "createDiscordGuild - DELETE /discord/guilds/:guild_id - response status should be 204":
+          (r) => r.status === 204,
+      }
+    );
+  });
+};
+
+export const deleteDiscordGuild = () => {
+  group("Discord - Should delete disocrd message", () => {
+    const guildId = `${Math.floor(Math.random() * 100000000)}`;
+
+    const createDiscordGuildPayload = {
+      guild_id: guildId,
+      icon: "icon",
+      name: "Curioucity",
+      url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,
+      created_timestamp_at_discord: 1675220675,
+    };
+
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    check(
+      http.request(
+        "POST",
+        `${API_HOST}/discord/guilds/create`,
+        JSON.stringify(createDiscordGuildPayload),
+        {
+          headers,
+        }
+      ),
+      {
+        "deleteDiscordGuild - POST /discord/guilds/create - response status should be 201":
+          (r) => r.status === 201,
+      }
+    );
+
+    check(
+      http.request(
+        "DELETE",
+        `${API_HOST}/discord/guilds/${guildId}`,
+        undefined,
+        { headers }
+      ),
+      {
+        "deleteDiscordGuild - DELETE /discord/guilds/:guild_id - response status should be 204":
+          (r) => r.status === 204,
+      }
+    );
   });
 };
 
@@ -155,7 +201,7 @@ export const createDiscordMessage = () => {
 };
 
 export const deleteDiscordMessage = () => {
-  group("DiscordMessage - Should delete disocrd message", () => {
+  group("Discord - Should delete disocrd message", () => {
     const messageId = `${Math.floor(Math.random() * 100000000)}`;
 
     const createDiscordMessagePayload = {
@@ -202,7 +248,7 @@ export const deleteDiscordMessage = () => {
 };
 
 export const getDiscordMessage = () => {
-  group("DiscordMessage - Should get discord message", () => {
+  group("Discord - Should get discord message", () => {
     // Should return not found when try to get not exist discord message
     const notExistMessageId = `${Math.floor(Math.random() * 100000000)}`;
 
@@ -318,7 +364,7 @@ export const getDiscordMessage = () => {
 };
 
 export const listDiscordMessage = () => {
-  group("Should list discord messages", () => {
+  group("Discord - Should list discord messages", () => {
     const testSize = 10;
     const newDiscordMessages = [];
 
@@ -472,7 +518,7 @@ export const createDiscordThread = () => {
 };
 
 export const deleteDiscordThread = () => {
-  group("DiscordMessage - Should delete disocrd message", () => {
+  group("Discord - Should delete disocrd message", () => {
     const discordThreadId = `${Math.floor(Math.random() * 100000000)}`;
 
     const createDiscordThreadPayload = {
@@ -517,7 +563,7 @@ export const deleteDiscordThread = () => {
 };
 
 export const getDiscordThread = () => {
-  group("DiscordThread - Should get discord thread", () => {
+  group("Discord - Should get discord thread", () => {
     // Should return not found when try to get not exist discord message
     const notExistThreadId = `${Math.floor(Math.random() * 100000000)}`;
 
@@ -622,7 +668,7 @@ export const getDiscordThread = () => {
 };
 
 export const listDiscordThread = () => {
-  group("Should list discord threads", () => {
+  group("Discord - Should list discord threads", () => {
     const testSize = 10;
     const newDiscordThreads = [];
 

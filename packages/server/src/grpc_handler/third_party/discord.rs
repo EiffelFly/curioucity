@@ -64,6 +64,38 @@ impl pb_third_party::discord_service_server::DiscordService for GrpcDiscordServi
         Ok(Response::new(resp))
     }
 
+    async fn delete_discord_guild(
+        &self,
+        req: Request<pb_third_party::DeleteDiscordGuildRequest>,
+    ) -> Result<Response<pb_third_party::DeleteDiscordGuildResponse>, Status> {
+        let client = match edgedb_tokio::create_client().await {
+            Ok(client) => client,
+            Err(error) => {
+                return Err(Status::internal(format!(
+                    "Something went wrong when access database: {}",
+                    error
+                )))
+            }
+        };
+
+        let payload = db_third_party::discord::DeleteDiscordGuildPayload {
+            guild_id: req.get_ref().guild_id.clone(),
+        };
+
+        match db_third_party::discord::DiscordGuild::delete(client, &payload).await {
+            Ok(_) => {
+                let resp = pb_third_party::DeleteDiscordGuildResponse {};
+                return Ok(Response::new(resp));
+            }
+            Err(error) => {
+                return Err(Status::internal(format!(
+                    "Something went wrong when delete discord guild: {}",
+                    error
+                )))
+            }
+        }
+    }
+
     async fn create_discord_thread(
         &self,
         req: Request<pb_third_party::CreateDiscordThreadRequest>,
