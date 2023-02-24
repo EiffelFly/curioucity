@@ -119,6 +119,109 @@ export const deleteDiscordGuild = () => {
   });
 };
 
+export const getDiscordGuild = () => {
+  group("Discord - Should get discord guild", () => {
+    const notExistGuildId = `${Math.floor(Math.random() * 100000000)}`;
+
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    check(
+      http.request(
+        "GET",
+        `${API_HOST}/discord/guilds/${notExistGuildId}`,
+        undefined,
+        {
+          headers,
+        }
+      ),
+      {
+        "getDiscordGuild - GET /discord/guilds/:guild_id - not exist discord guild, response status should be 404":
+          (r) => r.status === 404,
+      }
+    );
+
+    const newGuildId = `${Math.floor(Math.random() * 100000000)}`;
+
+    const createDiscordGuildPayload = {
+      guild_id: newGuildId,
+      icon: "icon",
+      name: "Curioucity",
+      url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,
+      created_timestamp_at_discord: 1675220675,
+    };
+
+    check(
+      http.request(
+        "POST",
+        `${API_HOST}/discord/guilds/create`,
+        JSON.stringify(createDiscordGuildPayload),
+        {
+          headers,
+        }
+      ),
+      {
+        "getDiscordGuild - POST /discord/guilds/create - response status should be 201":
+          (r) => r.status === 201,
+      }
+    );
+
+    check(
+      http.request(
+        "GET",
+        `${API_HOST}/discord/guilds/${newGuildId}`,
+        undefined,
+        {
+          headers,
+        }
+      ),
+      {
+        "getDiscordGuild - GET /discord/guilds/:guild_id - response status should be 200":
+          (r) => r.status === 200,
+        "getDiscordGuild - GET /discord/guilds/:guild_id - response body should have id":
+          (r) =>
+            typeof r.json().discord_guild.id !== undefined &&
+            r.json().discord_guild.id !== null,
+        "getDiscordGuild - GET /discord/guilds/:guild_id - response body should have correct guild_id":
+          (r) =>
+            r.json().discord_guild.guild_id ===
+            createDiscordGuildPayload.guild_id.toString(),
+        "getDiscordGuild - GET /discord/guilds/:guild_id - response body should have correct icon":
+          (r) => r.json().discord_guild.icon === createDiscordGuildPayload.icon,
+        "getDiscordGuild - GET /discord/guilds/:guild_id - response body should have correct name":
+          (r) => r.json().discord_guild.name === createDiscordGuildPayload.name,
+        "getDiscordGuild - GET /discord/guilds/:guild_id - response body should have correct url":
+          (r) =>
+            r.json().discord_guild.url.url === createDiscordGuildPayload.url,
+        "getDiscordGuild - GET /discord/guilds/:guild_id - response body should have correct created_timestamp_at_discord":
+          (r) =>
+            Date.parse(r.json().discord_guild.created_timestamp_at_discord) /
+              1000 ===
+            createDiscordGuildPayload.created_timestamp_at_discord,
+        "getDiscordGuild - GET /discord/guilds/:guild_id - response body should have created_timestamp_at_curioucity":
+          (r) =>
+            typeof r.json().discord_guild.created_timestamp_at_curioucity !==
+              "undefined" &&
+            r.json().discord_guild.created_timestamp_at_curioucity !== null,
+      }
+    );
+
+    check(
+      http.request(
+        "DELETE",
+        `${API_HOST}/discord/guilds/${newGuildId}`,
+        undefined,
+        { headers }
+      ),
+      {
+        "getDiscordGuild - DELETE /discord/guilds/:guild_id - response status should be 204":
+          (r) => r.status === 204,
+      }
+    );
+  });
+};
+
 export const createDiscordMessage = () => {
   group("Disocrd - Should create discord message", () => {
     const discordMessageId = `${Math.floor(Math.random() * 100000000)}`;

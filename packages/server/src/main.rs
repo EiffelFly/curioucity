@@ -21,8 +21,8 @@ use rest_handler::curioucity::{
 };
 use rest_handler::third_party::discord::{
     create_discord_guild, create_discord_message, create_discord_thread, delete_discord_guild,
-    delete_discord_message, delete_discord_thread, get_discord_message, get_discord_thread,
-    list_discord_message, list_discord_threads,
+    delete_discord_message, delete_discord_thread, get_discord_guild, get_discord_message,
+    get_discord_thread, list_discord_message, list_discord_threads,
 };
 
 use tonic::transport::Server;
@@ -52,6 +52,10 @@ async fn main() {
         .route(
             "/discord/guilds/:guild_id",
             axum::routing::delete(delete_discord_guild),
+        )
+        .route(
+            "/discord/guilds/:guild_id",
+            axum::routing::get(get_discord_guild),
         )
         .route(
             "/discord/threads/create",
@@ -139,9 +143,4 @@ async fn fallback(uri: axum::http::Uri) -> impl axum::response::IntoResponse {
         axum::http::StatusCode::NOT_FOUND,
         format!("Not found {}", uri),
     )
-}
-
-#[derive(serde::Serialize)]
-struct TestS {
-    time: i64,
 }

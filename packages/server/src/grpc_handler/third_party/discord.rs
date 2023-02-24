@@ -96,6 +96,45 @@ impl pb_third_party::discord_service_server::DiscordService for GrpcDiscordServi
         }
     }
 
+    async fn get_discord_guild(
+        &self,
+        req: Request<pb_third_party::GetDiscordGuildRequest>,
+    ) -> Result<Response<pb_third_party::GetDiscordGuildResponse>, Status> {
+        let client = match edgedb_tokio::create_client().await {
+            Ok(client) => client,
+            Err(error) => {
+                return Err(Status::internal(format!(
+                    "Something went wrong when access database: {}",
+                    error
+                )))
+            }
+        };
+
+        let payload = db_third_party::discord::GetDiscordGuildPayload {
+            guild_id: req.get_ref().guild_id.clone(),
+        };
+
+        let discord_guild = match db_third_party::discord::DiscordGuild::get(client, &payload).await
+        {
+            Ok(result) => match result {
+                Some(result) => result,
+                None => return Err(Status::not_found("".to_string())),
+            },
+            Err(error) => {
+                return Err(Status::internal(format!(
+                    "Something went wrong when get discord guild: {}",
+                    error
+                )))
+            }
+        };
+
+        let resp = pb_third_party::GetDiscordGuildResponse {
+            discord_guild: Some(discord_guild.as_pb_type()),
+        };
+
+        Ok(Response::new(resp))
+    }
+
     async fn create_discord_thread(
         &self,
         req: Request<pb_third_party::CreateDiscordThreadRequest>,

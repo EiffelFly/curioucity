@@ -15,6 +15,7 @@ service DiscordService {
   rpc ListDiscordThread(ListDiscordThreadRequest) returns (ListDiscordThreadResponse);
   rpc CreateDiscordGuild(CreateDiscordGuildRequest) returns (CreateDiscordGuildResponse);
   rpc DeleteDiscordGuild(DeleteDiscordGuildRequest) returns (DeleteDiscordGuildResponse);
+  rpc GetDiscordGuild(GetDiscordGuildRequest) returns (GetDiscordGuildResponse);
 }
 
 message CreateDiscordMessageRequest {
@@ -105,3 +106,11 @@ message DeleteDiscordGuildRequest {
 }
 
 message DeleteDiscordGuildResponse {}
+
+message GetDiscordGuildRequest {
+  string guild_id = 1;
+}
+
+message GetDiscordGuildResponse {
+  third_party.v1alpha.DiscordGuild discord_guild = 1;
+}
