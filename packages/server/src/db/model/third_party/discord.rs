@@ -73,6 +73,11 @@ pub struct DeleteDiscordGuildPayload {
     pub guild_id: String,
 }
 
+#[derive(Debug)]
+pub struct GetDiscordGuildPayload {
+    pub guild_id: String,
+}
+
 impl DiscordGuild {
     pub async fn create(
         client: Client,
@@ -190,6 +195,66 @@ impl DiscordGuild {
                 bail!("{}", error)
             }
         }
+    }
+
+    pub async fn get(
+        client: Client,
+        payload: &GetDiscordGuildPayload,
+    ) -> Result<Option<Self>, anyhow::Error> {
+        let query = "select DiscordGuild {
+            id,
+            guild_id,
+            kind,
+            created_timestamp_at_discord,
+            created_timestamp_at_curioucity,
+            icon,
+            name,
+            url: {
+                id,
+                url,
+                references,
+                resource_type,
+                created_timestamp_at_curioucity,
+            },
+            tags: {
+                id,
+                name
+            },
+            threads: {
+                id
+            }
+        } filter .guild_id = <str>$0";
+
+        let response_json = match client.query_json(&query, &(&payload.guild_id,)).await {
+            Ok(result) => result,
+            Err(error) => {
+                println!("Error occured when query database: {:?}", error);
+                bail!("{}", error)
+            }
+        };
+
+        let discord_guilds = match serde_json::from_str::<Vec<DiscordGuild>>(response_json.as_ref())
+        {
+            Ok(result) => result,
+            Err(error) => {
+                println!("Deserialize Error: {}", error);
+                bail!("Deserialize Error: {}", error)
+            }
+        };
+
+        if discord_guilds.is_empty() {
+            return Ok(None);
+        }
+
+        let discord_guild = match discord_guilds.into_iter().nth(0) {
+            Some(result) => result,
+            None => {
+                println!("Deserialize Error, deserialized element not found");
+                bail!("Deserialize Error, deserialized element not found")
+            }
+        };
+
+        Ok(Some(discord_guild))
     }
 
     pub fn as_pb_type(&self) -> pb_third_party::DiscordGuild {
