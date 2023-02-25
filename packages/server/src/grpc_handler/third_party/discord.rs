@@ -135,6 +135,54 @@ impl pb_third_party::discord_service_server::DiscordService for GrpcDiscordServi
         Ok(Response::new(resp))
     }
 
+    async fn list_discord_guild(
+        &self,
+        req: Request<pb_third_party::ListDiscordGuildRequest>,
+    ) -> Result<Response<pb_third_party::ListDiscordGuildResponse>, Status> {
+        let client = match edgedb_tokio::create_client().await {
+            Ok(client) => client,
+            Err(error) => {
+                return Err(Status::internal(format!(
+                    "Something went wrong when access database: {}",
+                    error
+                )))
+            }
+        };
+
+        let page_size = match req.get_ref().page_size {
+            Some(page_size) => page_size,
+            None => 10,
+        };
+
+        let payload = db_third_party::discord::ListDiscordGuildPayload { page_size };
+
+        let db_discord_guilds =
+            match db_third_party::discord::DiscordGuild::list(client, &payload).await {
+                Ok(result) => result,
+                Err(error) => {
+                    return Err(Status::internal(format!(
+                        "Something went wrong when list discord guilds: {}",
+                        error
+                    )))
+                }
+            };
+
+        let mut pb_discord_guilds: Vec<pb_third_party::DiscordGuild> = Vec::new();
+
+        for i in db_discord_guilds {
+            pb_discord_guilds.push(i.as_pb_type());
+        }
+
+        let size = pb_discord_guilds.len() as i32;
+
+        let resp = pb_third_party::ListDiscordGuildResponse {
+            discord_guilds: pb_discord_guilds,
+            size,
+        };
+
+        Ok(Response::new(resp))
+    }
+
     async fn create_discord_thread(
         &self,
         req: Request<pb_third_party::CreateDiscordThreadRequest>,

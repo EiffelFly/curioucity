@@ -22,7 +22,7 @@ use rest_handler::curioucity::{
 use rest_handler::third_party::discord::{
     create_discord_guild, create_discord_message, create_discord_thread, delete_discord_guild,
     delete_discord_message, delete_discord_thread, get_discord_guild, get_discord_message,
-    get_discord_thread, list_discord_message, list_discord_threads,
+    get_discord_thread, list_discord_guild, list_discord_message, list_discord_thread,
 };
 
 use tonic::transport::Server;
@@ -57,6 +57,7 @@ async fn main() {
             "/discord/guilds/:guild_id",
             axum::routing::get(get_discord_guild),
         )
+        .route("/discord/guilds", axum::routing::get(list_discord_guild))
         .route(
             "/discord/threads/create",
             axum::routing::post(create_discord_thread),
@@ -69,7 +70,7 @@ async fn main() {
             "/discord/threads/:thread_id",
             axum::routing::get(get_discord_thread),
         )
-        .route("/discord/threads", axum::routing::get(list_discord_threads))
+        .route("/discord/threads", axum::routing::get(list_discord_thread))
         .route(
             "/discord/messages/create",
             axum::routing::post(create_discord_message),

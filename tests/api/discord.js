@@ -222,6 +222,88 @@ export const getDiscordGuild = () => {
   });
 };
 
+export const listDiscordGuild = () => {
+  group("Discord - Should list discord guilds", () => {
+    const testSize = 10;
+    const newDiscordGuilds = [];
+
+    for (let i = 0; i < testSize; i++) {
+      const createDiscordGuildPayload = {
+        guild_id: `${Math.floor(Math.random() * 100000000)}`,
+        icon: "icon",
+        name: "Curioucity",
+        url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,
+        created_timestamp_at_discord: 1675220675,
+      };
+      newDiscordGuilds.push(createDiscordGuildPayload);
+    }
+
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    check(
+      http.request("GET", `${API_HOST}/discord/guilds`, undefined, {
+        headers,
+      }),
+      {
+        "listDiscordGuild - GET /discord/guilds - should response 200": (r) =>
+          r.status === 200,
+        // In the future, we have to stop protobuf from emit default value
+        "listDiscordGuild - GET /discord/guilds - no discord guild exist": (
+          r
+        ) => r.json().discord_guilds === undefined,
+      }
+    );
+
+    for (const discordGuild of newDiscordGuilds) {
+      check(
+        http.request(
+          "POST",
+          `${API_HOST}/discord/guilds/create`,
+          JSON.stringify(discordGuild),
+          {
+            headers,
+          }
+        ),
+        {
+          "listDiscordGuild - POST /discord/guilds/create - response status should be 201":
+            (r) => r.status === 201,
+        }
+      );
+    }
+
+    check(
+      http.request("GET", `${API_HOST}/discord/guilds`, undefined, {
+        headers,
+      }),
+      {
+        "listDiscordGuild - GET /discord/guilds - should response 200": (r) =>
+          r.status === 200,
+        "listDiscordGuild - GET /discord/guilds - should have 10 discord guild":
+          (r) => r.json().discord_guilds.length === 10,
+      }
+    );
+
+    for (const discordGuild of newDiscordGuilds) {
+      check(
+        http.request(
+          "DELETE",
+          `${API_HOST}/discord/guilds/${discordGuild.guild_id}`,
+          undefined,
+          {
+            headers,
+          }
+        ),
+        {
+          "listDiscordGuild - DELETE /discord/guilds/:guild_id - response status should be 204":
+            (r) => r.status === 204,
+        }
+      );
+    }
+  });
+};
+
 export const createDiscordMessage = () => {
   group("Disocrd - Should create discord message", () => {
     const discordMessageId = `${Math.floor(Math.random() * 100000000)}`;
@@ -758,12 +840,12 @@ export const getDiscordThread = () => {
     check(
       http.request(
         "DELETE",
-        `${API_HOST}/discord/messages/${newMessageId}`,
+        `${API_HOST}/discord/threads/${newThreadId}`,
         undefined,
         { headers }
       ),
       {
-        "deleteDiscordMessage - DELETE /discord/messages/:message_id - response status should be 204":
+        "getDiscordThread - DELETE /discord/threads/:thread_id - response status should be 204":
           (r) => r.status === 204,
       }
     );

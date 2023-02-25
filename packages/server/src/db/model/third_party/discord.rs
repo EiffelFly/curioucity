@@ -74,6 +74,11 @@ pub struct DeleteDiscordGuildPayload {
 }
 
 #[derive(Debug)]
+pub struct ListDiscordGuildPayload {
+    pub page_size: i32,
+}
+
+#[derive(Debug)]
 pub struct GetDiscordGuildPayload {
     pub guild_id: String,
 }
@@ -257,6 +262,54 @@ impl DiscordGuild {
         Ok(Some(discord_guild))
     }
 
+    pub async fn list(
+        client: Client,
+        payload: &ListDiscordGuildPayload,
+    ) -> Result<Vec<Self>, anyhow::Error> {
+        let query = "select DiscordGuild {
+            id,
+            guild_id,
+            kind,
+            created_timestamp_at_discord,
+            created_timestamp_at_curioucity,
+            icon,
+            name,
+            url: {
+                id,
+                url,
+                references,
+                resource_type,
+                created_timestamp_at_curioucity,
+            },
+            tags: {
+                id,
+                name
+            },
+            threads: {
+                id
+            }
+        } order by .id limit <int32>$0";
+
+        let response_json = match client.query_json(&query, &(&payload.page_size,)).await {
+            Ok(result) => result,
+            Err(error) => {
+                println!("Error occured when query database: {:?}", error);
+                bail!("{}", error)
+            }
+        };
+
+        let discord_guilds = match serde_json::from_str::<Vec<DiscordGuild>>(response_json.as_ref())
+        {
+            Ok(result) => result,
+            Err(error) => {
+                println!("Deserialize Error: {}", error);
+                bail!("Deserialize Error: {}", error)
+            }
+        };
+
+        Ok(discord_guilds)
+    }
+
     pub fn as_pb_type(&self) -> pb_third_party::DiscordGuild {
         transform_discord_guild_to_pb(self)
     }
@@ -296,6 +349,7 @@ pub struct GetDiscordThreadPayload {
     pub thread_id: String,
 }
 
+#[derive(Debug)]
 pub struct ListDiscordThreadPayload {
     pub page_size: i32,
 }
