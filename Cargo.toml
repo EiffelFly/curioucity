@@ -1,6 +1,6 @@
 [workspace]
 
 members = [
-  "packages/server",
+  "packages/curioucity",
   "packages/discord-bot"
 ]

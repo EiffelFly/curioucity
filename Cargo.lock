@@ -330,6 +330,38 @@ dependencies = [
 ]
 
 [[package]]
+name = "curioucity"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "axum 0.6.0",
+ "chrono",
+ "edgedb-derive",
+ "edgedb-protocol",
+ "edgedb-tokio",
+ "form_urlencoded",
+ "futures",
+ "http",
+ "hyper",
+ "pbjson",
+ "pbjson-types",
+ "prost",
+ "protoc-gen-prost",
+ "protoc-gen-prost-crate",
+ "protoc-gen-prost-serde",
+ "protoc-gen-tonic",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tonic",
+ "tower",
+ "tracing",
+ "tracing-subscriber",
+ "uuid",
+]
+
+[[package]]
 name = "digest"
 version = "0.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1769,38 +1801,6 @@ dependencies = [
  "tracing",
  "typemap_rev",
  "url",
-]
-
-[[package]]
-name = "server"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "axum 0.6.0",
- "chrono",
- "edgedb-derive",
- "edgedb-protocol",
- "edgedb-tokio",
- "form_urlencoded",
- "futures",
- "http",
- "hyper",
- "pbjson",
- "pbjson-types",
- "prost",
- "protoc-gen-prost",
- "protoc-gen-prost-crate",
- "protoc-gen-prost-serde",
- "protoc-gen-tonic",
- "serde",
- "serde_json",
- "tokio",
- "tonic",
- "tower",
- "tracing",
- "tracing-subscriber",
- "uuid",
 ]
 
 [[package]]
