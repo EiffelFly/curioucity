@@ -2,18 +2,31 @@
 
 ## About the protobuf
 
-- We not only use protobuf to generate the type for gRPC API but also use it to unify the type or rest API. This act enforce our API to follow the single source of truth. 
+- We not only use protobuf to generate the type for gRPC API but also use it to unify the type or rest API. This act enforces our API to follow the single source of truth. 
 
 ## About the data field: kind
 
 - Every third_party resource should have this field with one_of constraint.
 
-## About how we handle timestamp
+## Parse String back to Datetime
 
-- We use chrono, accuracy to micros
-- Internally every timestamp will be converted into i64, and converted to edgedb_protocol::model::Datetime when we need to insert it into database.
-- external source 
-  - source -> chrono to i64 -> edgedb_protocol::model::Datetime
-- internal source
-  - chrono generated i64 -> edgedb_protocol::model::Datetime
-- All our exposed API will return i64 timestamp
+```rust
+use chrono::{DateTime, Utc};
+
+let utc_timestamp = match full_tag_with_string_timestamp
+  .created_timestamp_at_curioucity
+  .parse::<DateTime<Utc>>()
+{
+  Ok(time) => time.timestamp(),
+  Err(error) => {
+      println!("Parse Timestamp Error: {}", error);
+      bail!("Parse Timestamp Error: {}", error)
+  }
+};
+```
+
+## About the release 
+
+We are currently using the changeset to control our versioning but not publishing. Every PR will be followed by a set of changests which only target the curioucity folder. And once the versioning PR is merged the changeset bot will change the version number of `package.json`. 
+
+But the version of `Cargo.toml` will remain the same. Currently, we don't want to bother with the version of this cargo because we don't publish cargo on the Rust registry but only plan to publish the docker image on the docker hub.
