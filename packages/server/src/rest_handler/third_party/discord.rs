@@ -134,6 +134,63 @@ pub async fn get_discord_guild(
     Ok((StatusCode::OK, Json(resp)))
 }
 
+pub async fn list_discord_guild(
+    payload: Option<Json<pb_third_party::ListDiscordGuildRequest>>,
+) -> Result<impl IntoResponse, Response> {
+    let client = match edgedb_tokio::create_client().await {
+        Ok(client) => client,
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when access database: {}", error),
+            )
+                .into_response())
+        }
+    };
+
+    let mut page_size: i32 = 10;
+
+    if let Some(payload) = payload {
+        page_size = match payload.page_size {
+            Some(page_size) => page_size,
+            None => 10,
+        };
+    }
+
+    let list_discord_guild_payload = db_third_party::discord::ListDiscordGuildPayload { page_size };
+
+    let db_discord_guilds = match db_third_party::discord::DiscordGuild::list(
+        client,
+        &list_discord_guild_payload,
+    )
+    .await
+    {
+        Ok(result) => result,
+        Err(error) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Something went wrong when list discord guilds: {}", error),
+            )
+                .into_response())
+        }
+    };
+
+    let mut pb_discord_guilds: Vec<pb_third_party::DiscordGuild> = Vec::new();
+
+    for i in db_discord_guilds {
+        pb_discord_guilds.push(i.as_pb_type());
+    }
+
+    let size = pb_discord_guilds.len() as i32;
+
+    let resp = pb_third_party::ListDiscordGuildResponse {
+        discord_guilds: pb_discord_guilds,
+        size,
+    };
+
+    Ok((StatusCode::OK, Json(resp)))
+}
+
 pub async fn create_discord_thread(
     payload: Json<pb_third_party::CreateDiscordThreadRequest>,
 ) -> Result<impl IntoResponse, Response> {
@@ -428,11 +485,11 @@ pub async fn list_discord_message(
         };
     }
 
-    let list_discord_message_payload =
+    let list_discord_messages_payload =
         db_third_party::discord::ListDiscordMessagePayload { page_size };
 
     let db_discord_messages =
-        match db_third_party::discord::DiscordMessage::list(client, &list_discord_message_payload)
+        match db_third_party::discord::DiscordMessage::list(client, &list_discord_messages_payload)
             .await
         {
             Ok(discord_messages) => discord_messages,
@@ -461,7 +518,7 @@ pub async fn list_discord_message(
     Ok((StatusCode::OK, Json(resp)))
 }
 
-pub async fn list_discord_threads(
+pub async fn list_discord_thread(
     payload: Option<Json<pb_third_party::ListDiscordThreadRequest>>,
 ) -> Result<impl IntoResponse, Response> {
     let client = match edgedb_tokio::create_client().await {
