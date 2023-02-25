@@ -44,6 +44,8 @@ jobs:
       - name: Create Release Pull Request 
         id: changesets
         uses: changesets/action@v1
+        with:
+          title: Update the version of Curioucity
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
