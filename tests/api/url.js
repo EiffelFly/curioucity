@@ -172,10 +172,6 @@ export const getUrl = () => {
       }
     );
 
-    const deleteUrlPayload = {
-      url: newUrl,
-    };
-
     check(
       http.request(
         "DELETE",
