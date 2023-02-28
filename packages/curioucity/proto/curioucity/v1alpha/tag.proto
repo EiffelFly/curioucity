@@ -1,6 +1,5 @@
 syntax = "proto3";
 package curioucity.v1alpha;
-import "google/protobuf/struct.proto";
 
 message Tag {
   string id = 1;
