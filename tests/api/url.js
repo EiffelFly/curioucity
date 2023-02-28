@@ -5,10 +5,10 @@ import { makeRandStr } from "./helper.js";
 
 export const createUrl = () => {
   group("Url - Should create url", () => {
-    const url = makeRandStr(6);
+    const urlFrag = makeRandStr(6);
 
     const createUrlPayload = {
-      url: url,
+      url: `https://www.curioucity.org/${urlFrag}`,
       resource_type: "RESOURCE_TYPE_WEBSITE",
     };
 
@@ -44,7 +44,7 @@ export const createUrl = () => {
     check(
       http.request(
         "DELETE",
-        `${API_HOST}/urls/${encodeURIComponent(url)}`,
+        `${API_HOST}/urls/${encodeURIComponent(createUrlPayload.url)}`,
         undefined,
         { headers }
       ),

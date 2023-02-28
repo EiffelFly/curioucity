@@ -122,7 +122,7 @@ async fn main() {
     let port = std::env::var("BACKEND_PORT")
         .ok()
         .and_then(|s| s.parse().ok())
-        .unwrap_or(8010);
+        .unwrap_or(8080);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     tracing::debug!("listening on {}", addr);

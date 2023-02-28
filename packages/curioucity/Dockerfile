@@ -19,8 +19,8 @@ RUN  curl -OL https://github.com/google/protobuf/releases/download/v$PROTOC_VERS
 # Create a dummy project and build the app's dependencies.
 # If the Cargo.toml or Cargo.lock files have not changed,
 # we can use the docker build cache and skip these (typically slow) steps.
-RUN USER=root cargo new --bin server
-WORKDIR /server
+RUN USER=root cargo new --bin curioucity
+WORKDIR /curioucity
 
 # Copy the manifests
 COPY ./Cargo.toml ./Cargo.toml
@@ -33,10 +33,10 @@ RUN rm src/*.rs
 COPY ./src ./src
 
 # Build for release
-RUN rm ./target/release/deps/server*
+RUN rm ./target/release/deps/curioucity*
 RUN cargo build --release
 
 # Serve
 FROM debian:buster-slim
-COPY --from=builder /server/target/release/server .
-CMD ["./server"]
+COPY --from=builder /curioucity/target/release/curioucity .
+CMD ["./curioucity"]
