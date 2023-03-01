@@ -9,6 +9,7 @@ const grpc = () => {
   // urlServices.getUrl();
   // urlServices.listUrl();
   tagServices.createTag();
+  tagServices.deleteTag();
 };
 
 export default grpc;

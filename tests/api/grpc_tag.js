@@ -50,3 +50,35 @@ export const createTag = () => {
     });
   });
 };
+
+export const deleteTag = () => {
+  group("gRPC TagService - Should delete tag", () => {
+    client.connect(GRPC_API_HOST, { timeout: 2000, plaintext: true });
+
+    const createTagPayload = {
+      name: makeRandStr(6),
+    };
+
+    const createTagResponse = client.invoke(
+      "curioucity.v1alpha.TagService/CreateTag",
+      createTagPayload
+    );
+
+    check(createTagResponse, {
+      "DeleteTag - create test tag - response status should be StatusOK": (r) =>
+        r.status === grpc.StatusOK,
+    });
+
+    const deleteTagResponse = client.invoke(
+      "curioucity.v1alpha.TagService/DeleteTag",
+      {
+        name: createTagPayload.name,
+      }
+    );
+
+    check(deleteTagResponse, {
+      "DeleteTag - response status should be StatusOK": (r) =>
+        r.status === grpc.StatusOK,
+    });
+  });
+};
