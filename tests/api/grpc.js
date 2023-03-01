@@ -8,8 +8,9 @@ const grpc = () => {
   // urlServices.deleteUrl();
   // urlServices.getUrl();
   // urlServices.listUrl();
-  tagServices.createTag();
-  tagServices.deleteTag();
+  // tagServices.createTag();
+  // tagServices.deleteTag();
+  tagServices.getTag();
 };
 
 export default grpc;
