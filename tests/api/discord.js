@@ -4,10 +4,8 @@ import { API_HOST } from "./rest.js";
 
 export const createDiscordGuild = () => {
   group("Disocrd - Should create discord guild", () => {
-    const guildId = `${Math.floor(Math.random() * 100000000)}`;
-
     const createDiscordGuildPayload = {
-      guild_id: guildId,
+      guild_id: `${Math.floor(Math.random() * 100000000)}`,
       icon: "icon",
       name: "Curioucity",
       url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,
@@ -38,9 +36,9 @@ export const createDiscordGuild = () => {
           (r) =>
             r.json().discord_guild.guild_id ===
             createDiscordGuildPayload.guild_id.toString(),
-        "createDiscordGuild - POST /discord/guilds/create - response body should have correct content":
+        "createDiscordGuild - POST /discord/guilds/create - response body should have correct icon":
           (r) => r.json().discord_guild.icon === createDiscordGuildPayload.icon,
-        "createDiscordGuild - POST /discord/guilds/create - response body should have correct markdown content":
+        "createDiscordGuild - POST /discord/guilds/create - response body should have correct name":
           (r) => r.json().discord_guild.name === createDiscordGuildPayload.name,
         "createDiscordGuild - POST /discord/guilds/create - response body should have correct url":
           (r) =>
@@ -61,7 +59,7 @@ export const createDiscordGuild = () => {
     check(
       http.request(
         "DELETE",
-        `${API_HOST}/discord/guilds/${guildId}`,
+        `${API_HOST}/discord/guilds/${createDiscordGuildPayload.guild_id}`,
         undefined,
         { headers }
       ),

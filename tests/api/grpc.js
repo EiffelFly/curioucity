@@ -1,5 +1,6 @@
 import * as urlServices from "./grpc_url.js";
 import * as tagServices from "./grpc_tag.js";
+import * as discordServices from "./grpc_discord.js";
 
 export const GRPC_API_HOST = "localhost:8080";
 
@@ -10,7 +11,7 @@ const grpc = () => {
   // urlServices.listUrl();
   // tagServices.createTag();
   // tagServices.deleteTag();
-  tagServices.getTag();
+  discordServices.createDiscordGuild();
 };
 
 export default grpc;
