@@ -12,6 +12,7 @@ const grpc = () => {
   // tagServices.createTag();
   // tagServices.deleteTag();
   discordServices.createDiscordGuild();
+  discordServices.deleteDiscordGuild();
 };
 
 export default grpc;

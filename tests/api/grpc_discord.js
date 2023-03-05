@@ -54,14 +54,50 @@ export const createDiscordGuild = () => {
     });
 
     const deleteDiscordGuildResponse = client.invoke(
-      "curioucity.v1alpha.DiscordService/DeleteDiscordGuild",
+      "third_party.v1alpha.DiscordService/DeleteDiscordGuild",
       {
-        name: createDiscordGuildPayload.guild_id,
+        guild_id: createDiscordGuildPayload.guild_id,
       }
     );
 
     check(deleteDiscordGuildResponse, {
       "CreateDiscordGuild - delete test discord guild - response status should be StatusOK":
+        (r) => r.status === grpc.StatusOK,
+    });
+  });
+};
+
+export const deleteDiscordGuild = () => {
+  group("gRPC DiscordService - Should delete disocrd guild", () => {
+    client.connect(GRPC_API_HOST, { timeout: 2000, plaintext: true });
+
+    const createDiscordGuildPayload = {
+      guild_id: `${Math.floor(Math.random() * 100000000)}`,
+      icon: "icon",
+      name: "Curioucity",
+      url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,
+      created_timestamp_at_discord: 1675220675,
+    };
+
+    const createDiscordGuildResponse = client.invoke(
+      "third_party.v1alpha.DiscordService/CreateDiscordGuild",
+      createDiscordGuildPayload
+    );
+
+    check(createDiscordGuildResponse, {
+      "DeleteDiscordGuild - create test discord guild - response status should be StatusOK":
+        (r) => r.status === grpc.StatusOK,
+    });
+
+    const deleteDiscordGuildResponse = client.invoke(
+      "third_party.v1alpha.DiscordService/DeleteDiscordGuild",
+      {
+        guild_id: createDiscordGuildPayload.guild_id,
+      }
+    );
+
+    check(deleteDiscordGuildResponse, {
+      "DeleteDiscordGuild - delete discord guild - response status should be StatusOK":
         (r) => r.status === grpc.StatusOK,
     });
   });

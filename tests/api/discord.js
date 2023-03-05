@@ -72,7 +72,7 @@ export const createDiscordGuild = () => {
 };
 
 export const deleteDiscordGuild = () => {
-  group("Discord - Should delete disocrd message", () => {
+  group("Discord - Should delete disocrd guild", () => {
     const guildId = `${Math.floor(Math.random() * 100000000)}`;
 
     const createDiscordGuildPayload = {
@@ -221,7 +221,7 @@ export const getDiscordGuild = () => {
 };
 
 export const listDiscordGuild = () => {
-  group("Discord - Should list discord guilds", () => {
+  group("Discord - Should list discord guild", () => {
     const testSize = 10;
     const newDiscordGuilds = [];
 
