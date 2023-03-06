@@ -105,6 +105,8 @@ export const deleteDiscordGuild = () => {
 
 export const getDiscordGuild = () => {
   group("gRPC DiscordService - Should get discord guild", () => {
+    client.connect(GRPC_API_HOST, { timeout: 2000, plaintext: true });
+
     const getNotExistDiscordGuildResponse = client.invoke(
       "third_party.v1alpha.DiscordService/GetDiscordGuild",
       {
@@ -180,5 +182,76 @@ export const getDiscordGuild = () => {
       "DeleteDiscordGuild - delete discord guild - response status should be StatusOK":
         (r) => r.status === grpc.StatusOK,
     });
+  });
+};
+
+export const listDiscordGuild = () => {
+  group("gRPC DiscordService - Should list discord guild", () => {
+    client.connect(GRPC_API_HOST, { timeout: 2000, plaintext: true });
+    const testSize = 10;
+    const newDiscordGuilds = [];
+
+    for (let i = 0; i < testSize; i++) {
+      const createDiscordGuildPayload = {
+        guild_id: `${Math.floor(Math.random() * 100000000)}`,
+        icon: "icon",
+        name: "Curioucity",
+        url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,
+        created_timestamp_at_discord: 1675220675,
+      };
+      newDiscordGuilds.push(createDiscordGuildPayload);
+    }
+
+    const ListNotExistDiscordGuildsResponse = client.invoke(
+      "third_party.v1alpha.DiscordService/ListDiscordGuild",
+      {}
+    );
+
+    check(ListNotExistDiscordGuildsResponse, {
+      "ListDiscordGuild - no discord guild exist, should response StatusOK": (
+        r
+      ) => r.status === grpc.StatusOK,
+      "ListDiscordGuild - no discord guild exist, should response urls is empty":
+        (r) => r.message.discordGuilds.length === 0,
+    });
+
+    for (const discordGuild of newDiscordGuilds) {
+      const createDiscordGuildResponse = client.invoke(
+        "third_party.v1alpha.DiscordService/CreateDiscordGuild",
+        discordGuild
+      );
+
+      check(createDiscordGuildResponse, {
+        "ListDiscordGuild - create test discord guild - response status should be StatusOK":
+          (r) => r.status === grpc.StatusOK,
+      });
+    }
+
+    const ListExistDiscordGuildsResponse = client.invoke(
+      "third_party.v1alpha.DiscordService/ListDiscordGuild",
+      {}
+    );
+
+    check(ListExistDiscordGuildsResponse, {
+      "ListDiscordGuild - no discord guild exist, should response StatusOK": (
+        r
+      ) => r.status === grpc.StatusOK,
+      "ListDiscordGuild - no discord guild exist, should response urls is empty":
+        (r) => r.message.discordGuilds.length === testSize,
+    });
+
+    for (const discordGuild of newDiscordGuilds) {
+      const deleteDiscordGuildResponse = client.invoke(
+        "third_party.v1alpha.DiscordService/DeleteDiscordGuild",
+        {
+          guild_id: discordGuild.guild_id,
+        }
+      );
+
+      check(deleteDiscordGuildResponse, {
+        "DeleteDiscordGuild - delete discord guild - response status should be StatusOK":
+          (r) => r.status === grpc.StatusOK,
+      });
+    }
   });
 };

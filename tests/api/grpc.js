@@ -14,6 +14,7 @@ const grpc = () => {
   discordServices.createDiscordGuild();
   discordServices.deleteDiscordGuild();
   discordServices.getDiscordGuild();
+  discordServices.listDiscordGuild();
 };
 
 export default grpc;
