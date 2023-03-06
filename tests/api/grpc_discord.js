@@ -255,3 +255,62 @@ export const listDiscordGuild = () => {
     }
   });
 };
+
+export const createDiscordThread = () => {
+  group("gRPC DiscordService - Should create discord thread", () => {
+    client.connect(GRPC_API_HOST, { timeout: 2000, plaintext: true });
+
+    const createDiscordThreadPayload = {
+      thread_id: `${Math.floor(Math.random() * 100000000)}`,
+      markdown_content: "Hi i am here",
+      url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,
+      created_timestamp_at_discord: 1675220675,
+    };
+
+    const createDiscordThreadResponse = client.invoke(
+      "third_party.v1alpha.DiscordService/CreateDiscordThread",
+      createDiscordThreadPayload
+    );
+
+    check(createDiscordThreadResponse, {
+      "CreateDiscordThread - response status should be StatusOK": (r) =>
+        r.status === grpc.StatusOK,
+      "CreateDiscordThread - response body should have id": (r) =>
+        typeof r.message.discordThread.id !== undefined &&
+        r.message.discordThread.id !== null,
+      "CreateDiscordThread - response body should have correct thread_id": (
+        r
+      ) =>
+        r.message.discordThread.threadId ===
+        createDiscordThreadPayload.thread_id.toString(),
+      "CreateDiscordThread - response body should have correct markdown content":
+        (r) =>
+          r.message.discordThread.markdownContent ===
+          createDiscordThreadPayload.markdown_content,
+      "CreateDiscordThread - response body should have correct url": (r) =>
+        r.message.discordThread.url.url === createDiscordThreadPayload.url,
+      "CreateDiscordThread - response body should have correct created_timestamp_at_discord":
+        (r) =>
+          Date.parse(r.message.discordThread.createdTimestampAtDiscord) /
+            1000 ===
+          createDiscordThreadPayload.created_timestamp_at_discord,
+      "CreateDiscordThread - response body should have created_timestamp_at_curioucity":
+        (r) =>
+          typeof r.message.discordThread.createdTimestampAtCurioucity !==
+            "undefined" &&
+          r.message.discordThread.created_timestamp_at_curioucity !== null,
+    });
+
+    const deleteDiscordGuildResponse = client.invoke(
+      "third_party.v1alpha.DiscordService/DeleteDiscordThread",
+      {
+        thread_id: createDiscordThreadPayload.thread_id,
+      }
+    );
+
+    check(deleteDiscordGuildResponse, {
+      "CreateDiscordThread - delete test discord thread - response status should be StatusOK":
+        (r) => r.status === grpc.StatusOK,
+    });
+  });
+};
