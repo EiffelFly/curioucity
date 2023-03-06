@@ -301,16 +301,51 @@ export const createDiscordThread = () => {
           r.message.discordThread.created_timestamp_at_curioucity !== null,
     });
 
-    const deleteDiscordGuildResponse = client.invoke(
+    const deleteDiscordThreadResponse = client.invoke(
       "third_party.v1alpha.DiscordService/DeleteDiscordThread",
       {
         thread_id: createDiscordThreadPayload.thread_id,
       }
     );
 
-    check(deleteDiscordGuildResponse, {
+    check(deleteDiscordThreadResponse, {
       "CreateDiscordThread - delete test discord thread - response status should be StatusOK":
         (r) => r.status === grpc.StatusOK,
+    });
+  });
+};
+
+export const deleteDiscordThread = () => {
+  group("gRPC DiscordService - Should delete disocrd guild", () => {
+    client.connect(GRPC_API_HOST, { timeout: 2000, plaintext: true });
+
+    const createDiscordThreadPayload = {
+      thread_id: `${Math.floor(Math.random() * 100000000)}`,
+      markdown_content: "Hi i am here",
+      url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,
+      created_timestamp_at_discord: 1675220675,
+    };
+
+    const createDiscordThreadResponse = client.invoke(
+      "third_party.v1alpha.DiscordService/CreateDiscordThread",
+      createDiscordThreadPayload
+    );
+
+    check(createDiscordThreadResponse, {
+      "DeleteDiscordThread - create test discord thread - response status should be StatusOK":
+        (r) => r.status === grpc.StatusOK,
+    });
+
+    const deleteDiscordThreadResponse = client.invoke(
+      "third_party.v1alpha.DiscordService/DeleteDiscordThread",
+      {
+        thread_id: createDiscordThreadPayload.thread_id,
+      }
+    );
+
+    check(deleteDiscordThreadResponse, {
+      "DeleteDiscordThread - response status should be StatusOK": (r) =>
+        r.status === grpc.StatusOK,
     });
   });
 };
