@@ -18,6 +18,7 @@ const grpc = () => {
   discordServices.createDiscordThread();
   discordServices.deleteDiscordThread();
   discordServices.getDiscordThread();
+  discordServices.listDiscordThread();
 };
 
 export default grpc;

@@ -233,10 +233,9 @@ export const listDiscordGuild = () => {
     );
 
     check(ListExistDiscordGuildsResponse, {
-      "ListDiscordGuild - no discord guild exist, should response StatusOK": (
-        r
-      ) => r.status === grpc.StatusOK,
-      "ListDiscordGuild - no discord guild exist, should response urls is empty":
+      "ListDiscordGuild - test discord guilds exist, should response StatusOK":
+        (r) => r.status === grpc.StatusOK,
+      "ListDiscordGuild - test discord guilds exis, should response the correct data":
         (r) => r.message.discordGuilds.length === testSize,
     });
 
@@ -316,7 +315,7 @@ export const createDiscordThread = () => {
 };
 
 export const deleteDiscordThread = () => {
-  group("gRPC DiscordService - Should delete disocrd guild", () => {
+  group("gRPC DiscordService - Should delete disocrd thread", () => {
     client.connect(GRPC_API_HOST, { timeout: 2000, plaintext: true });
 
     const createDiscordThreadPayload = {
@@ -351,7 +350,7 @@ export const deleteDiscordThread = () => {
 };
 
 export const getDiscordThread = () => {
-  group("gRPC DiscordService - Should get discord guild", () => {
+  group("gRPC DiscordService - Should get discord thread", () => {
     client.connect(GRPC_API_HOST, { timeout: 2000, plaintext: true });
 
     const getNotExistDiscordThreadResponse = client.invoke(
@@ -430,5 +429,74 @@ export const getDiscordThread = () => {
       "GetDiscordThread - response status should be StatusOK": (r) =>
         r.status === grpc.StatusOK,
     });
+  });
+};
+
+export const listDiscordThread = () => {
+  group("gRPC DiscordService - Should list discord thread", () => {
+    client.connect(GRPC_API_HOST, { timeout: 2000, plaintext: true });
+    const testSize = 10;
+    const newDiscordThreads = [];
+
+    for (let i = 0; i < testSize; i++) {
+      const createDiscordThreadPayload = {
+        thread_id: `${Math.floor(Math.random() * 100000000)}`,
+        markdown_content: "Hi i am here",
+        url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,
+        created_timestamp_at_discord: 1675220675,
+      };
+      newDiscordThreads.push(createDiscordThreadPayload);
+    }
+
+    const ListNotExistDiscordThreadsResponse = client.invoke(
+      "third_party.v1alpha.DiscordService/ListDiscordThread",
+      {}
+    );
+
+    check(ListNotExistDiscordThreadsResponse, {
+      "ListDiscordThread - no discord thread exist, should response StatusOK": (
+        r
+      ) => r.status === grpc.StatusOK,
+      "ListDiscordThread - no discord thread exist, should response empty data":
+        (r) => r.message.discordThreads.length === 0,
+    });
+
+    for (const discordThread of newDiscordThreads) {
+      const createDiscordThreadResponse = client.invoke(
+        "third_party.v1alpha.DiscordService/CreateDiscordThread",
+        discordThread
+      );
+
+      check(createDiscordThreadResponse, {
+        "ListDiscordThread - create test discord thread - response status should be StatusOK":
+          (r) => r.status === grpc.StatusOK,
+      });
+    }
+
+    const ListExistDiscordThreadsResponse = client.invoke(
+      "third_party.v1alpha.DiscordService/ListDiscordThread",
+      {}
+    );
+
+    check(ListExistDiscordThreadsResponse, {
+      "ListDiscordThread - test discord guilds exist, should response StatusOK":
+        (r) => r.status === grpc.StatusOK,
+      "ListDiscordThread - test discord guilds exist, should have correct data":
+        (r) => r.message.discordThreads.length === testSize,
+    });
+
+    for (const discordThread of newDiscordThreads) {
+      const deleteDiscordThreadResponse = client.invoke(
+        "third_party.v1alpha.DiscordService/DeleteDiscordThread",
+        {
+          thread_id: discordThread.thread_id,
+        }
+      );
+
+      check(deleteDiscordThreadResponse, {
+        "ListDiscordThread - delete discord thread - response status should be StatusOK":
+          (r) => r.status === grpc.StatusOK,
+      });
+    }
   });
 };
