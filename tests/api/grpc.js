@@ -11,10 +11,11 @@ const grpc = () => {
   // urlServices.listUrl();
   // tagServices.createTag();
   // tagServices.deleteTag();
-  discordServices.createDiscordGuild();
-  discordServices.deleteDiscordGuild();
-  discordServices.getDiscordGuild();
-  discordServices.listDiscordGuild();
+  // discordServices.createDiscordGuild();
+  // discordServices.deleteDiscordGuild();
+  // discordServices.getDiscordGuild();
+  // discordServices.listDiscordGuild();
+  discordServices.createDiscordThread();
 };
 
 export default grpc;
