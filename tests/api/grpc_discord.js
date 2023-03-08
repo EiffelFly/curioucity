@@ -568,3 +568,40 @@ export const createDiscordMessage = () => {
     });
   });
 };
+
+export const deleteDiscordMessage = () => {
+  group("gRPC DiscordService - Should delete disocrd message", () => {
+    client.connect(GRPC_API_HOST, { timeout: 2000, plaintext: true });
+
+    const createDiscordMessagePayload = {
+      message_id: `${Math.floor(Math.random() * 100000000)}`,
+      content: "Hi i am here",
+      markdown_content: "Hi i am here",
+      url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,
+      created_timestamp_at_discord: 1675220675,
+      order_in_thread: 20,
+    };
+
+    const createDiscordMessageResponse = client.invoke(
+      "third_party.v1alpha.DiscordService/CreateDiscordMessage",
+      createDiscordMessagePayload
+    );
+
+    check(createDiscordMessageResponse, {
+      "DeleteDiscordMessage - create test discord message - response status should be StatusOK":
+        (r) => r.status === grpc.StatusOK,
+    });
+
+    const deleteDiscordMessageResponse = client.invoke(
+      "third_party.v1alpha.DiscordService/DeleteDiscordMessage",
+      {
+        message_id: createDiscordMessagePayload.message_id,
+      }
+    );
+
+    check(deleteDiscordMessageResponse, {
+      "DeleteDiscordMessage - response status should be StatusOK": (r) =>
+        r.status === grpc.StatusOK,
+    });
+  });
+};
