@@ -605,3 +605,94 @@ export const deleteDiscordMessage = () => {
     });
   });
 };
+
+export const getDiscordMessage = () => {
+  group("gRPC DiscordService - Should get discord thread", () => {
+    client.connect(GRPC_API_HOST, { timeout: 2000, plaintext: true });
+
+    const getNotExistDiscordMessageResponse = client.invoke(
+      "third_party.v1alpha.DiscordService/GetDiscordMessage",
+      {
+        message_id: `${Math.floor(Math.random() * 100000000)}`,
+      }
+    );
+
+    check(getNotExistDiscordMessageResponse, {
+      "GetDiscordMessage - get not exist discord message, response status should be StatusNotFound":
+        (r) => r.status === grpc.StatusNotFound,
+    });
+
+    const createDiscordMessagePayload = {
+      message_id: `${Math.floor(Math.random() * 100000000)}`,
+      content: "Hi i am here",
+      markdown_content: "Hi i am here",
+      url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,
+      created_timestamp_at_discord: 1675220675,
+      order_in_thread: 20,
+    };
+
+    const createDiscordMessageResponse = client.invoke(
+      "third_party.v1alpha.DiscordService/CreateDiscordMessage",
+      createDiscordMessagePayload
+    );
+
+    check(createDiscordMessageResponse, {
+      "GetDiscordMessage - create test discord message - response status should be StatusOK":
+        (r) => r.status === grpc.StatusOK,
+    });
+
+    const getExistDiscordMessageResponse = client.invoke(
+      "third_party.v1alpha.DiscordService/GetDiscordMessage",
+      {
+        message_id: createDiscordMessagePayload.message_id,
+      }
+    );
+
+    check(getExistDiscordMessageResponse, {
+      "GetDiscordMessage - response status should be StatusOK": (r) =>
+        r.status === grpc.StatusOK,
+      "GetDiscordMessage - response body should have id": (r) =>
+        typeof r.message.discordMessage.id !== undefined &&
+        r.message.discordMessage.id !== null,
+      "GetDiscordMessage - response body should have correct message_id": (r) =>
+        r.message.discordMessage.messageId ===
+        createDiscordMessagePayload.message_id.toString(),
+      "GetDiscordMessage - response body should have correct content": (r) =>
+        r.message.discordMessage.content ===
+        createDiscordMessagePayload.content,
+      "GetDiscordMessage - response body should have correct markdown content":
+        (r) =>
+          r.message.discordMessage.markdownContent ===
+          createDiscordMessagePayload.markdown_content,
+      "GetDiscordMessage - response body should have correct url": (r) =>
+        r.message.discordMessage.url.url === createDiscordMessagePayload.url,
+      "GetDiscordMessage - response body should have correct created_timestamp_at_discord":
+        (r) =>
+          Date.parse(r.message.discordMessage.createdTimestampAtDiscord) /
+            1000 ===
+          createDiscordMessagePayload.created_timestamp_at_discord,
+      "GetDiscordMessage - response body should have created_timestamp_at_curioucity":
+        (r) =>
+          typeof r.message.discordMessage.createdTimestampAtCurioucity !==
+            "undefined" &&
+          r.message.discordMessage.created_timestamp_at_curioucity !== null,
+      "GetDiscordMessage - response body should have correct order_in_thread": (
+        r
+      ) =>
+        r.message.discordMessage.orderInThread ===
+        createDiscordMessagePayload.order_in_thread,
+    });
+
+    const deleteDiscordMessageResponse = client.invoke(
+      "third_party.v1alpha.DiscordService/DeleteDiscordMessage",
+      {
+        message_id: createDiscordMessagePayload.message_id,
+      }
+    );
+
+    check(deleteDiscordMessageResponse, {
+      "GetDiscordMessage - response status should be StatusOK": (r) =>
+        r.status === grpc.StatusOK,
+    });
+  });
+};
