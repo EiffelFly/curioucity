@@ -15,10 +15,11 @@ const grpc = () => {
   // discordServices.deleteDiscordGuild();
   // discordServices.getDiscordGuild();
   // discordServices.listDiscordGuild();
-  discordServices.createDiscordThread();
-  discordServices.deleteDiscordThread();
-  discordServices.getDiscordThread();
-  discordServices.listDiscordThread();
+  // discordServices.createDiscordThread();
+  // discordServices.deleteDiscordThread();
+  // discordServices.getDiscordThread();
+  // discordServices.listDiscordThread();
+  discordServices.createDiscordMessage();
 };
 
 export default grpc;
