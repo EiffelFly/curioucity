@@ -696,3 +696,73 @@ export const getDiscordMessage = () => {
     });
   });
 };
+
+export const listDiscordMessage = () => {
+  group("gRPC DiscordService - Should list discord message", () => {
+    client.connect(GRPC_API_HOST, { timeout: 2000, plaintext: true });
+    const testSize = 10;
+    const newDiscordMessages = [];
+
+    for (let i = 0; i < testSize; i++) {
+      const createDiscordMessagePayload = {
+        message_id: `${Math.floor(Math.random() * 100000000)}`,
+        content: "Hi i am here",
+        markdown_content: "Hi i am here",
+        url: `https://discord.com/id/${Math.floor(Math.random() * 100000000)}`,
+        created_timestamp_at_discord: 1675220675,
+        order_in_thread: 20,
+      };
+      newDiscordMessages.push(createDiscordMessagePayload);
+    }
+
+    const ListNotExistDiscordMessagesResponse = client.invoke(
+      "third_party.v1alpha.DiscordService/ListDiscordMessage",
+      {}
+    );
+
+    check(ListNotExistDiscordMessagesResponse, {
+      "ListDiscordMessage - no discord message exist, should response StatusOK":
+        (r) => r.status === grpc.StatusOK,
+      "ListDiscordMessage - no discord message exist, should response empty data":
+        (r) => r.message.discordMessages.length === 0,
+    });
+
+    for (const discordMessage of newDiscordMessages) {
+      const createDiscordMessageResponse = client.invoke(
+        "third_party.v1alpha.DiscordService/CreateDiscordMessage",
+        discordMessage
+      );
+
+      check(createDiscordMessageResponse, {
+        "ListDiscordMessage - create test discord message - response status should be StatusOK":
+          (r) => r.status === grpc.StatusOK,
+      });
+    }
+
+    const ListExistDiscordMessagesResponse = client.invoke(
+      "third_party.v1alpha.DiscordService/ListDiscordMessage",
+      {}
+    );
+
+    check(ListExistDiscordMessagesResponse, {
+      "ListDiscordMessage - test discord messsages exist, should response StatusOK":
+        (r) => r.status === grpc.StatusOK,
+      "ListDiscordMessage - test discord messsages exist, should have correct data":
+        (r) => r.message.discordMessages.length === testSize,
+    });
+
+    for (const discordMessage of newDiscordMessages) {
+      const deleteDiscordMessageResponse = client.invoke(
+        "third_party.v1alpha.DiscordService/DeleteDiscordMessage",
+        {
+          message_id: discordMessage.message_id,
+        }
+      );
+
+      check(deleteDiscordMessageResponse, {
+        "ListDiscordMessage - delete discord message - response status should be StatusOK":
+          (r) => r.status === grpc.StatusOK,
+      });
+    }
+  });
+};
