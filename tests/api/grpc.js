@@ -9,6 +9,8 @@ const grpc = () => {
   urlServices.createUrl();
   urlServices.deleteUrl();
   urlServices.getUrl();
+  tagServices.listTag();
+  tagServices.getTag();
   tagServices.createTag();
   tagServices.deleteTag();
   discordServices.listDiscordGuild();

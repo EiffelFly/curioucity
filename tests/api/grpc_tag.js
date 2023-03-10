@@ -143,3 +143,64 @@ export const getTag = () => {
     });
   });
 };
+
+export const listTag = () => {
+  group("gRPC TagService - Should list tags", () => {
+    client.connect(GRPC_API_HOST, { timeout: 2000, plaintext: true });
+    const newTags = [makeRandStr(6), makeRandStr(6)];
+
+    const ListNotExistTagResponse = client.invoke(
+      "curioucity.v1alpha.TagService/ListTag",
+      {}
+    );
+
+    check(ListNotExistTagResponse, {
+      "ListTag - no tags exist, should response StatusOK": (r) =>
+        r.status === grpc.StatusOK,
+      "ListTag - no tags exist, should response tags is empty": (r) =>
+        r.message.tags.length === 0,
+    });
+
+    for (const tag of newTags) {
+      const createTagResponse = client.invoke(
+        "curioucity.v1alpha.TagService/CreateTag",
+        {
+          name: tag,
+        }
+      );
+
+      check(createTagResponse, {
+        "ListTag - create test tags - response status should be StatusOK": (
+          r
+        ) => r.status === grpc.StatusOK,
+      });
+    }
+
+    const ListExistTagResponse = client.invoke(
+      "curioucity.v1alpha.TagService/ListTag",
+      {}
+    );
+
+    check(ListExistTagResponse, {
+      "ListTag - have two tags, should response StatusOK": (r) =>
+        r.status === grpc.StatusOK,
+      "ListTag - have two tags, should response size=2": (r) =>
+        r.message.tags.length === newTags.length,
+    });
+
+    for (const tag of newTags) {
+      const deleteTagResponse = client.invoke(
+        "curioucity.v1alpha.TagService/DeleteTag",
+        {
+          name: tag,
+        }
+      );
+
+      check(deleteTagResponse, {
+        "ListTag - delete test tags - response status should be StatusOK": (
+          r
+        ) => r.status === grpc.StatusOK,
+      });
+    }
+  });
+};
