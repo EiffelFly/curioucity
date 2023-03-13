@@ -261,8 +261,6 @@ export const cleanupDiscordThread = () => {
     {}
   );
 
-  console.log(ListDiscordThreadResponse);
-
   if (
     ListDiscordThreadResponse.status === grpc.StatusOK &&
     ListDiscordThreadResponse.message.discordThreads &&
@@ -278,7 +276,7 @@ export const cleanupDiscordThread = () => {
       );
 
       check(deleteDiscordThreadResponse, {
-        "CleanUp - clean up all discord thread": (r) =>
+        "CleanUp - clean up all discord threads": (r) =>
           r.status === grpc.StatusOK,
       });
     }

@@ -274,3 +274,31 @@ export const listDiscordMessage = () => {
     }
   });
 };
+
+export const cleanupDiscordMessage = () => {
+  const ListDiscordMessageResponse = client.invoke(
+    "third_party.v1alpha.DiscordService/ListDiscordMessage",
+    {}
+  );
+
+  if (
+    ListDiscordMessageResponse.status === grpc.StatusOK &&
+    ListDiscordMessageResponse.message.discordMessages &&
+    ListDiscordMessageResponse.message.discordMessages.length !== 0
+  ) {
+    for (const discordMessage of ListDiscordMessageResponse.message
+      .discordMessages) {
+      const deleteDiscordMessageResponse = client.invoke(
+        "third_party.v1alpha.DiscordService/DeleteDiscordMessage",
+        {
+          message_id: discordMessage.message_id,
+        }
+      );
+
+      check(deleteDiscordMessageResponse, {
+        "CleanUp - clean up all discord messages": (r) =>
+          r.status === grpc.StatusOK,
+      });
+    }
+  }
+};

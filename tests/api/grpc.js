@@ -22,11 +22,16 @@ const grpc = () => {
   // discordGuildServices.deleteDiscordGuild();
   // discordGuildServices.getDiscordGuild();
   // discordGuildServices.cleanupDiscordGuild();
-  discordThreadServices.listDiscordThread();
-  discordThreadServices.createDiscordThread();
-  discordThreadServices.deleteDiscordThread();
-  discordThreadServices.getDiscordThread();
-  discordThreadServices.cleanupDiscordThread();
+  // discordThreadServices.listDiscordThread();
+  // discordThreadServices.createDiscordThread();
+  // discordThreadServices.deleteDiscordThread();
+  // discordThreadServices.getDiscordThread();
+  // discordThreadServices.cleanupDiscordThread();
+  discordMessageServices.listDiscordMessage();
+  discordMessageServices.createDiscordMessage();
+  discordMessageServices.deleteDiscordMessage();
+  discordMessageServices.getDiscordMessage();
+  discordMessageServices.cleanupDiscordMessage();
 };
 
 export default grpc;
