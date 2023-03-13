@@ -202,12 +202,12 @@ export const listDiscordGuild = () => {
       newDiscordGuilds.push(createDiscordGuildPayload);
     }
 
-    const ListNotExistDiscordGuildsResponse = client.invoke(
+    const listNotExistDiscordGuildsResponse = client.invoke(
       "third_party.v1alpha.DiscordService/ListDiscordGuild",
       {}
     );
 
-    check(ListNotExistDiscordGuildsResponse, {
+    check(listNotExistDiscordGuildsResponse, {
       "ListDiscordGuild - no discord guild exist, should response StatusOK": (
         r
       ) => r.status === grpc.StatusOK,
@@ -227,12 +227,12 @@ export const listDiscordGuild = () => {
       });
     }
 
-    const ListExistDiscordGuildsResponse = client.invoke(
+    const listExistDiscordGuildsResponse = client.invoke(
       "third_party.v1alpha.DiscordService/ListDiscordGuild",
       {}
     );
 
-    check(ListExistDiscordGuildsResponse, {
+    check(listExistDiscordGuildsResponse, {
       "ListDiscordGuild - test discord guilds exist, should response StatusOK":
         (r) => r.status === grpc.StatusOK,
       "ListDiscordGuild - test discord guilds exis, should response the correct data":
@@ -253,6 +253,33 @@ export const listDiscordGuild = () => {
       });
     }
   });
+};
+
+export const cleanupDiscordGuild = () => {
+  const listDiscordGuildResponse = client.invoke(
+    "third_party.v1alpha.DiscordService/ListDiscordGuild",
+    {}
+  );
+
+  if (
+    listDiscordGuildResponse.status === grpc.StatusOK &&
+    listDiscordGuildResponse.message.discordGuilds &&
+    listDiscordGuildResponse.message.discordGuilds.length !== 0
+  ) {
+    for (const discordGuild of listDiscordGuildResponse.message.discordGuilds) {
+      const deleteDiscordGuildResponse = client.invoke(
+        "third_party.v1alpha.DiscordService/DeleteDiscordGuild",
+        {
+          guild_id: discordGuild.guild_id,
+        }
+      );
+
+      check(deleteDiscordGuildResponse, {
+        "CleanUp - clean up all discord guild": (r) =>
+          r.status === grpc.StatusOK,
+      });
+    }
+  }
 };
 
 export const createDiscordThread = () => {
