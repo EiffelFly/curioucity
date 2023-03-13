@@ -9,6 +9,7 @@ const grpc = () => {
   urlServices.createUrl();
   urlServices.deleteUrl();
   urlServices.getUrl();
+  urlServices.cleanUpUrls();
   tagServices.listTag();
   tagServices.getTag();
   tagServices.createTag();

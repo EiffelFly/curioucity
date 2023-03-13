@@ -10,7 +10,7 @@ client.load(
   "curioucity/v1alpha/url_service.proto"
 );
 
-export const createUrl = () => {
+export function createUrl() {
   group("gRPC UrlService - Should create url", () => {
     client.connect(GRPC_API_HOST, { timeout: 2000, plaintext: true });
     const createUrlPayload = {
@@ -52,9 +52,9 @@ export const createUrl = () => {
       ) => r.status === grpc.StatusOK,
     });
   });
-};
+}
 
-export const deleteUrl = () => {
+export function deleteUrl() {
   group("gRPC UrlService - Should delete url", () => {
     client.connect(GRPC_API_HOST, { timeout: 2000, plaintext: true });
     const createUrlPayload = {
@@ -84,9 +84,9 @@ export const deleteUrl = () => {
         r.status === grpc.StatusOK,
     });
   });
-};
+}
 
-export const getUrl = () => {
+export function getUrl() {
   group("gRPC UrlService - Should get url", () => {
     client.connect(GRPC_API_HOST, { timeout: 2000, plaintext: true });
     // Should return not found when try to get not exist url
@@ -155,9 +155,9 @@ export const getUrl = () => {
       ) => r.status === grpc.StatusOK,
     });
   });
-};
+}
 
-export const listUrl = () => {
+export function listUrl() {
   group("Should list urls", () => {
     client.connect(GRPC_API_HOST, { timeout: 2000, plaintext: true });
     const newUrls = [
@@ -165,12 +165,12 @@ export const listUrl = () => {
       `https://www.curioucity.org/${makeRandStr(6)}`,
     ];
 
-    const ListUrlWithoutUrlsResponse = client.invoke(
+    const listUrlWithoutUrlsResponse = client.invoke(
       "curioucity.v1alpha.UrlService/ListUrl",
       {}
     );
 
-    check(ListUrlWithoutUrlsResponse, {
+    check(listUrlWithoutUrlsResponse, {
       "ListUrl - no urls exist, should response StatusOK": (r) =>
         r.status === grpc.StatusOK,
       "ListUrl - no urls exist, should response urls is empty": (r) =>
@@ -222,4 +222,32 @@ export const listUrl = () => {
       });
     }
   });
-};
+}
+
+export function cleanUpUrls() {
+  const listUrlWithoutUrlsResponse = client.invoke(
+    "curioucity.v1alpha.UrlService/ListUrl",
+    {}
+  );
+
+  if (
+    listUrlWithoutUrlsResponse.status === grpc.StatusOK &&
+    listUrlWithoutUrlsResponse.message.urls &&
+    listUrlWithoutUrlsResponse.message.urls.length !== 0
+  ) {
+    for (const url of listUrlWithoutUrlsResponse.message.urls) {
+      console.log(url);
+
+      const deleteNewUrlResponse = client.invoke(
+        "curioucity.v1alpha.UrlService/DeleteUrl",
+        {
+          url: url.url,
+        }
+      );
+
+      check(deleteNewUrlResponse, {
+        "CleanUp - clean up all urls": (r) => r.status === grpc.StatusOK,
+      });
+    }
+  }
+}
