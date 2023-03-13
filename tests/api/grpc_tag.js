@@ -204,3 +204,29 @@ export const listTag = () => {
     }
   });
 };
+
+export function cleanUpTags() {
+  const listTagsResponse = client.invoke(
+    "curioucity.v1alpha.TagService/ListTag",
+    {}
+  );
+
+  if (
+    listTagsResponse.status === grpc.StatusOK &&
+    listTagsResponse.message.tags &&
+    listTagsResponse.message.tags.length !== 0
+  ) {
+    for (const tag of listTagsResponse.message.tags) {
+      const deleteTagResponse = client.invoke(
+        "curioucity.v1alpha.TagService/DeleteTag",
+        {
+          name: tag,
+        }
+      );
+
+      check(deleteTagResponse, {
+        "CleanUp - clean up all tags": (r) => r.status === grpc.StatusOK,
+      });
+    }
+  }
+}

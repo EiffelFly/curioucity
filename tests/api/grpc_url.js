@@ -225,19 +225,17 @@ export function listUrl() {
 }
 
 export function cleanUpUrls() {
-  const listUrlWithoutUrlsResponse = client.invoke(
+  const listUrlsResponse = client.invoke(
     "curioucity.v1alpha.UrlService/ListUrl",
     {}
   );
 
   if (
-    listUrlWithoutUrlsResponse.status === grpc.StatusOK &&
-    listUrlWithoutUrlsResponse.message.urls &&
-    listUrlWithoutUrlsResponse.message.urls.length !== 0
+    listUrlsResponse.status === grpc.StatusOK &&
+    listUrlsResponse.message.urls &&
+    listUrlsResponse.message.urls.length !== 0
   ) {
-    for (const url of listUrlWithoutUrlsResponse.message.urls) {
-      console.log(url);
-
+    for (const url of listUrlsResponse.message.urls) {
       const deleteNewUrlResponse = client.invoke(
         "curioucity.v1alpha.UrlService/DeleteUrl",
         {
