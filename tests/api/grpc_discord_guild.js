@@ -275,7 +275,7 @@ export const cleanupDiscordGuild = () => {
       );
 
       check(deleteDiscordGuildResponse, {
-        "CleanUp - clean up all discord guild": (r) =>
+        "CleanUp - clean up all discord guilds": (r) =>
           r.status === grpc.StatusOK,
       });
     }
