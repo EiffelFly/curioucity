@@ -254,3 +254,33 @@ export const listDiscordThread = () => {
     }
   });
 };
+
+export const cleanupDiscordThread = () => {
+  const ListDiscordThreadResponse = client.invoke(
+    "third_party.v1alpha.DiscordService/ListDiscordThread",
+    {}
+  );
+
+  console.log(ListDiscordThreadResponse);
+
+  if (
+    ListDiscordThreadResponse.status === grpc.StatusOK &&
+    ListDiscordThreadResponse.message.discordThreads &&
+    ListDiscordThreadResponse.message.discordThreads.length !== 0
+  ) {
+    for (const discordThread of ListDiscordThreadResponse.message
+      .discordThreads) {
+      const deleteDiscordThreadResponse = client.invoke(
+        "third_party.v1alpha.DiscordService/DeleteDiscordThread",
+        {
+          thread_id: discordThread.thread_id,
+        }
+      );
+
+      check(deleteDiscordThreadResponse, {
+        "CleanUp - clean up all discord thread": (r) =>
+          r.status === grpc.StatusOK,
+      });
+    }
+  }
+};

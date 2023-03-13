@@ -17,11 +17,16 @@ const grpc = () => {
   // tagServices.createTag();
   // tagServices.deleteTag();
   // tagServices.cleanUpTags();
-  discordGuildServices.listDiscordGuild();
-  discordGuildServices.createDiscordGuild();
-  discordGuildServices.deleteDiscordGuild();
-  discordGuildServices.getDiscordGuild();
-  discordGuildServices.cleanupDiscordGuild();
+  // discordGuildServices.listDiscordGuild();
+  // discordGuildServices.createDiscordGuild();
+  // discordGuildServices.deleteDiscordGuild();
+  // discordGuildServices.getDiscordGuild();
+  // discordGuildServices.cleanupDiscordGuild();
+  discordThreadServices.listDiscordThread();
+  discordThreadServices.createDiscordThread();
+  discordThreadServices.deleteDiscordThread();
+  discordThreadServices.getDiscordThread();
+  discordThreadServices.cleanupDiscordThread();
 };
 
 export default grpc;
