@@ -7,23 +7,24 @@ export const options = {};
 export const API_HOST = "http://localhost:8080";
 
 const main = () => {
-  urlServices.createUrl();
-  urlServices.deleteUrl();
-  urlServices.getUrl();
-  urlServices.listUrl();
+  // urlServices.createUrl();
+  // urlServices.deleteUrl();
+  // urlServices.getUrl();
+  // urlServices.listUrl();
   tagServices.createTag();
   tagServices.deleteTag();
   tagServices.getTag();
   tagServices.listTag();
-  discordServices.createDiscordMessage();
-  discordServices.deleteDiscordMessage();
-  discordServices.getDiscordMessage();
-  discordServices.listDiscordMessage();
-  discordServices.createDiscordThread();
-  discordServices.deleteDiscordThread();
-  discordServices.getDiscordThread();
-  discordServices.deleteDiscordGuild();
-  discordServices.listDiscordGuild();
+  tagServices.cleanUpTag();
+  // discordServices.createDiscordMessage();
+  // discordServices.deleteDiscordMessage();
+  // discordServices.getDiscordMessage();
+  // discordServices.listDiscordMessage();
+  // discordServices.createDiscordThread();
+  // discordServices.deleteDiscordThread();
+  // discordServices.getDiscordThread();
+  // discordServices.deleteDiscordGuild();
+  // discordServices.listDiscordGuild();
 };
 
 export default main;
