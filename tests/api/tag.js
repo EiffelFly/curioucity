@@ -194,7 +194,13 @@ export const listTag = () => {
       );
     }
 
-    check(http.request("GET", `${API_HOST}/tags`, undefined, { headers }), {
+    const listTagResponse = http.request("GET", `${API_HOST}/tags`, undefined, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    check(listTagResponse, {
       "listTag - GET /tags - have two tags, should response 200": (r) =>
         r.status === 200,
     });
@@ -211,4 +217,34 @@ export const listTag = () => {
       );
     }
   });
+};
+
+export const cleanUpTag = () => {
+  const listTagResponse = http.request("GET", `${API_HOST}/tags`, undefined, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (
+    listTagResponse.status === 200 &&
+    listTagResponse.json() &&
+    listTagResponse.json().tags &&
+    listTagResponse.json().tags.length > 0
+  ) {
+    for (const tag of listTagResponse.json().tags) {
+      check(
+        http.request("DELETE", `${API_HOST}/tags/${tag.name}`, undefined, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }),
+        {
+          "cleanUpTag - DELETE /tags/:name - response status should be 204": (
+            r
+          ) => r.status === 204,
+        }
+      );
+    }
+  }
 };
