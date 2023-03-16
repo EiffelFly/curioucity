@@ -1,6 +1,8 @@
-import * as urlServices from "./url.js";
-import * as tagServices from "./tag.js";
-import * as discordServices from "./discord.js";
+import * as urlServices from "./rest_url.js";
+import * as tagServices from "./rest_tag.js";
+import * as discordMessageServices from "./rest_discord_message.js";
+import * as discordThreadServices from "./rest_discord_thread.js";
+import * as discordGuildServices from "./rest_discord_guild.js";
 
 export const options = {};
 
