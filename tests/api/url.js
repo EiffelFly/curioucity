@@ -31,7 +31,7 @@ export const createUrl = () => {
         "createUrl - POST /urls/create - response body should have id": (r) =>
           typeof r.json().url.id !== undefined || r.json().url.id !== null,
         "createUrl - POST /urls/create - response body should have correct url":
-          (r) => r.json().url.url === url,
+          (r) => r.json().url.url === createUrlPayload.url,
         "createUrl - POST /urls/create - response body should have correct resource_type":
           (r) => r.json().url.resource_type === createUrlPayload.resource_type,
         "createUrl - POST /urls/create - response body should have created_timestamp_at_curioucity":
@@ -248,4 +248,39 @@ export const listUrl = () => {
       );
     }
   });
+};
+
+export const cleanUpUrl = () => {
+  const listUrlResponse = http.request("GET", `${API_HOST}/urls`, undefined, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (
+    listUrlResponse.status === 200 &&
+    listUrlResponse.json() &&
+    listUrlResponse.json().urls &&
+    listUrlResponse.json().urls.length > 0
+  ) {
+    for (const url of listUrlResponse.json().urls) {
+      check(
+        http.request(
+          "DELETE",
+          `${API_HOST}/urls/${encodeURIComponent(url.url)}`,
+          undefined,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        ),
+        {
+          "cleanUpUrl - DELETE /urls/:url - response status should be 204": (
+            r
+          ) => r.status === 204,
+        }
+      );
+    }
+  }
 };
