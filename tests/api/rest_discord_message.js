@@ -329,3 +329,43 @@ export const listDiscordMessage = () => {
     }
   });
 };
+
+export const cleanUpDiscordMessage = () => {
+  const listDiscordMessageResponse = http.request(
+    "GET",
+    `${API_HOST}/discord/messages`,
+    undefined,
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (
+    listDiscordMessageResponse.status === 200 &&
+    listDiscordMessageResponse.json() &&
+    listDiscordMessageResponse.json().discord_messages &&
+    listDiscordMessageResponse.json().discord_messages.length > 0
+  ) {
+    for (const discordMessage of listDiscordMessageResponse.json()
+      .discord_messages) {
+      check(
+        http.request(
+          "DELETE",
+          `${API_HOST}/discord/messages/${discordMessage.message_id}`,
+          undefined,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        ),
+        {
+          "cleanUpDiscordMessage - DELETE /discord/messages/:message_id - response status should be 204":
+            (r) => r.status === 204,
+        }
+      );
+    }
+  }
+};
